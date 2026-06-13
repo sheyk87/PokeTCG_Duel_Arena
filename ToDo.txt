@@ -1,0 +1,4 @@
+- Agregar salas privadas con contraseña, los usuarios pueden crear salas privadas, el sistema los une a una sala de espera privada (mostrando tambien el ID) y puede agregar una contraseña, otro usuario puede unirse a esa sala mediante el id de sala y contraseña de la misma, e inician el combate 
+- Agregar Trofeos
+- Mejorar Editor de Deck y con Imagen de Cajas
+- Agregar un sistema de moderación para moderadores y administradores, en el que se pueda banear un usuario (temporal o permanentemente), o eliminarlo del sistema.

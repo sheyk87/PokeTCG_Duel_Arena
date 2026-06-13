@@ -1,0 +1,1486 @@
+Índice
+  - REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON |
+¡Conviértete en Maestro o Maestra Pokémon!
+Conceptos básicos de JCC Pokémon
+Cómo ganar
+Tipos de Energía
+Partes de una carta Pokémon
+3 tipos de cartas
+Zonas de JCC Pokémon
+Cómo jugar
+Cómo ganar una partida
+Preparativos para iniciar la partida
+Partes de un turno
+Acciones en cada turno
+Condiciones Especiales
+Ligas Pokémon y Mazos Megacombate
+Reglas avanzadas
+¿Cómo funciona un mulligan?
+¿Qué se considera un ataque?
+Todos los detalles del ataque
+¿Cuál es la diferencia entre “hasta” y “cualquier cantidad”?
+¿Qué hacer si debes robar más cartas de las que tienes?
+¿Qué ocurre si ambos jugadores ganan al mismo tiempo?
+¿Qué es una partida de desempate?
+¿Qué forma parte del nombre de un Pokémon y qué no?
+Construcción de mazos
+Apéndice 1: Pokémon ex Megaevolución
+Apéndice 2: Pokémon de Entrenadores
+Apéndice 3: Cartas de AS TÁC TICO
+Apéndice 4: Pasado y Futuro
+Apéndice 5: Pokémon ex
+Apéndice 6: Pokémon ex Teracristal
+Apéndice 7: Zona Perdida
+Apéndice 8: Pokémon Radiantes
+- Apéndice 9: Pokémon V-ASTRO
+- Apéndice 10: Pokémon V-UNIÓN
+- Apéndice 11: Estilos de Combate
+- Apéndice 12: Pokémon V
+- Apéndice 13: Pokémon VMAX
+- Apéndice 14: Formas regionales
+- de equipo de RELEVOS Apéndice 15: Cartas de Partidario
+- Apéndice 16: Equipo de RELEVOS
+- Apéndice 17: Cartas de Estrella Prisma
+- Apéndice 18: Fósil Raro y Fósil Desconocido
+- Apéndice 19: Pokémon - GX
+- Reglas especiales para los Pokémon - GX
+- Apéndice 20: Ultraentes
+- Apéndice 21: Pokémon de dos tipos
+- Apéndice 22: Evolución TURBO
+- Reglas especiales para los Pokémon TURBO
+- Apéndice 23: Rasgos Antiguos
+- Apéndice 24: Hiperequipo del Team Flare
+- Apéndice 25: Pokémon - EX
+- Reglas especiales para los Pokémon - EX
+- Apéndice 26: Pokémon - EX Megaevolución
+- Reglas especiales para los Pokémon - EX Megaevolución
+- Apéndice 27: Cartas del Equipo Plasma
+- Apéndice 28: Pokémon Recreados
+- Notas importantes referentes a los Pokémon Recreados
+- Glosario
+- Créditos
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+¡Conviértete en Maestro o Maestra Pokémon!
+En estas reglas, encontrarás todo lo que necesitas saber para jugar al Juego de
+Cartas Coleccionables Pokémon. Tu mazo de cartas contiene Pokémon, así como
+objetos y aliados que pueden ayudarte en tus aventuras.
+
+Los juegos de cartas coleccionables se basan en estrategias y utilizan cartas
+coleccionables para permitir que cada jugador personalice su juego. Una excelente
+manera de aprender a jugar a JCC Pokémon es con un Mazo Megacombate, un mazo
+de 60 cartas listo para jugar que viene con una hoja con estrategias y todo lo que
+necesitas para empezar a combatir.
+
+Cuando tengas todo listo, podrás construir tu propia colección de cartas con sobres
+de refuerzo de JCC Pokémon. ¡Intercambia cartas con tus amigos para conseguir a los
+Pokémon más fuertes y coleccionar a todos tus favoritos! Luego, construye tu propio
+mazo de 60 cartas, juega con amistades ¡y presume tu propio equipo Pokémon!
+
+Conceptos básicos de JCC Pokémon
+Cómo ganar
+En JCC Pokémon, tus Pokémon combaten contra los Pokémon de tu rival. El primer jugador
+que logre obtener todas sus cartas de Premio gana. Además, si tu rival no puede robar ninguna
+carta al comenzar su turno, o si no le queda ningún Pokémon en juego, tú ganas la partida.
+
+¡Eres un Entrenador o Entrenadora Pokémon!
+
+Tu misión es viajar de aquí a allá y enfrentar a otros Entrenadores con tus Pokémon,
+
+criaturas que adoran combatir y que tienen poderes increíbles.
+
+Algunos productos no están disponibles en español latinoamericano.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Tipos de Energía
+Los Pokémon dejan Fuera de Combate a los Pokémon rivales usando ataques o Habilidades. Para poder usar estos ataques, los Pokémon necesitan
+cartas de Energía. JCC Pokémon tiene 11 tipos de Energía, y en el juego encontrarás Pokémon de los 11 tipos. (Ten en cuenta que no hay cartas de
+Pokémon de tipo Hada en la serie Megaevolución , pero sí existen en expansiones anteriores).
+
+Cada tipo de Energía sirve para cargar ataques determinados. ¡Encuentra los que más se adapten a tu estilo! Los tipos de Energía son:
+
+Planta
+
+Los Pokémon de tipo Planta
+suelen tener ataques con
+los que pueden curarse a sí
+mismos o dejar a sus rivales
+Envenenados.
+Fuego
+
+¡Los Pokémon de tipo Fuego
+tienen grandes ataques!
+Pueden dejar a sus rivales
+Quemados, pero sus ataques
+necesitan tiempo para
+recargarse.
+Agua
+
+Los Pokémon de tipo Agua
+pueden manipular la Energía
+y mover los Pokémon del
+otro equipo.
+Pelea
+
+Los Pokémon de tipo Pelea
+pueden correr riesgos mayores
+para hacer más daño, y algunos
+pueden lanzar monedas para
+combinar ataques.
+Oscuridad
+
+Los Pokémon de tipo Oscuridad
+poseen ataques sigilosos que
+suelen hacer que los rivales
+descarten cartas. ¡También
+pueden dejar a los Pokémon
+de tu rival Envenenados!
+Metal
+
+Los Pokémon de tipo Metal
+resisten los ataques durante
+más tiempo que casi todos los
+demás Pokémon.
+Rayo
+
+Los Pokémon de tipo Rayo
+pueden recuperar Energía
+usada de la pila de descartes y
+dejar a sus rivales Paralizados.
+Psíquica
+
+¡Los Pokémon de tipo Psíquico
+dominan los poderes especiales!
+Sus rivales suelen acabar
+Confundidos, Dormidos o
+Envenenados.
+Incolora
+
+Los Pokémon de tipo Incoloro
+poseen muchos movimientos
+diferentes y funcionan con
+cualquier tipo de mazo.
+Dragón
+
+Los Pokémon de tipo Dragón
+tienen ataques muy fuertes,
+pero normalmente requieren
+2 tipos de Energía para poder
+ser usados.
+Hada
+
+Los Pokémon de tipo Hada
+tienen trucos que harán que los
+ataques de los Pokémon del
+rival sean menos efectivos.
+Desde Espada y Escudo , es
+posible que algunos Pokémon
+que solían ser de tipo Hada
+aparezcan como de tipo Psíquico.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Partes de una carta Pokémon
+NOMBRE DE LA CARTA
+
+FASE
+
+NOMBRE DE LA CARTA TIPO DE ENTRENADOR
+NÚMERO DE CARTA
+COLECCIONABLE
+
+CÓDIGO DE
+EXPANSIÓN
+
+POKÉMON DEL
+QUE EVOLUCIONA
+
+TIPO DE CARTA
+REGLA DE
+ENTRENADOR
+TIPO DE POKÉMON
+
+PS
+
+CUADRO DE
+TEXTO
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+3 tipos de cartas
+En JCC Pokémon, encontrarás 3 tipos de cartas diferentes:
+
+Cartas de Pokémon
+
+¡Naturalmente, las cartas de Pokémon son las más importantes! La mayoría de estas cartas son Pokémon Básicos, Pokémon de Fase 1 o Pokémon
+de Fase 2. Los Pokémon de Fase 1 y de Fase 2 se denominan también cartas de Evolución. En la esquina superior izquierda de cada carta,
+verás la Fase del Pokémon y, de haber alguno, el Pokémon del que evoluciona.
+
+Cartas de Energía
+
+En la mayoría de los casos, un Pokémon no puede atacar sin cartas de Energía. El símbolo del costo del ataque debe coincidir con el de la
+carta de Energía, pero, si el símbolo es , se puede usar cualquier tipo de Energía.
+
+Cartas de Entrenador
+
+Las cartas de Entrenador se subdividen en cartas de Objeto, de Partidario, de Estadio y de Herramienta Pokémon, y representan los recursos
+que un Entrenador puede utilizar durante el combate. En la esquina superior izquierda de cada carta, verás el subtipo de carta de Entrenador y,
+en la parte inferior, podrás leer las reglas especiales para ese subtipo.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+MAZO
+BANCA
+
+ACTIVO
+PUESTO
+DE
+PREMIO
+CARTAS
+DESCARTES
+
+PILA DE
+
+PRIZE
+CARDS
+ACTIVE
+SPOT
+BENCH
+
+DECK
+DISCARD
+PILE
+Zonas de JCC Pokémon
+PUESTO ACTIVO
+El Puesto Activo es la parte superior del área
+de juego de cada jugador. Cada jugador empieza
+con 1 Pokémon en su Puesto Activo (y debe tener
+1 siempre): este es el Pokémon Activo. Cada jugador
+solo puede tener 1 Pokémon Activo. Si tu rival no
+tiene más Pokémon en juego, ¡ganas la partida!
+BANCA
+Los Pokémon en Banca se colocan en la parte
+inferior del área de juego de cada jugador. Cada
+jugador puede tener hasta 5 Pokémon en Banca al
+mismo tiempo. Los Pokémon en juego que no sean
+el Pokémon Activo deben colocarse en la Banca.
+MANO
+Cada jugador roba 7 cartas al
+comienzo de la partida y mantiene su
+mano oculta. Las cartas que se roban
+se añaden a la mano. Los jugadores
+no pueden mirar la mano de su rival,
+a menos que una carta lo especifique.
+
+MAZO
+Cada jugador empieza con su propio
+mazo de 60 cartas para jugar la partida.
+Aunque los dos jugadores saben cuántas
+cartas hay en cada mazo, nadie puede
+mirar ni cambiar el orden de las cartas
+del mazo de un jugador, a menos que
+una carta lo especifique.
+CARTAS DE PREMIO
+Cada jugador tiene sus propias cartas de Premio. Las cartas de
+Premio son 6 cartas que cada jugador debe separar de la parte
+superior de su propio mazo y colocar boca abajo durante los
+preparativos para iniciar la partida. Al dejar a un Pokémon de
+tu rival Fuera de Combate, tomas 1 de tus cartas de Premio y la
+pones en tu mano. Si eres el primer jugador en obtener la última
+de sus cartas de Premio, ¡ganas la partida!
+PILA DE DESCARTES
+Cada jugador tiene su propia pila
+de descartes. Las cartas eliminadas
+del juego van a la pila de descartes,
+a menos que una carta diga lo contrario.
+Normalmente, cuando un Pokémon
+queda Fuera de Combate, ese Pokémon
+y cualquier otra carta unida a él
+(como cartas de Energía) se colocan
+en la pila de descartes del dueño.
+ZONA DE JUEGO
+Los jugadores comparten la zona
+de juego. Cada jugador tiene dos
+secciones para sus Pokémon.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Cómo jugar
+Las partidas de JCC Pokémon son rápidas e intensas. ¡Aquí tienes un resumen para empezar
+a jugar enseguida!
+
+Cómo ganar una partida
+Existen tres formas de ganar una partida:
+
+1) Consiguiendo todas tus cartas de Premio.
+2) Dejando Fuera de Combate a todos los Pokémon en juego de tu rival.
+3) Si tu rival no tiene ninguna carta en su mazo al comenzar su turno.
+Preparativos para iniciar la partida
+1) Dale la mano a tu rival.
+2) Lanza 1 moneda. El ganador del lanzamiento de moneda decide quién empieza la partida.
+3) Baraja tu mazo y roba las primeras 7 cartas.
+4) Comprueba si tienes algún Pokémon Básico en tu mano.
+5) Pon 1 de tus Pokémon Básicos boca abajo como tu Pokémon Activo.
+6) Coloca hasta 5 Pokémon Básicos más boca abajo en tu Banca.
+Si no tienes ningún Pokémon Básico, ¿qué debes hacer? Primero, debes mostrar tu mano a tu rival y barajarla en tu mazo.
+Luego, roba 7 cartas de nuevo. Si sigues sin tener ningún Pokémon Básico, repite los mismos pasos.
+Cada vez que tu rival tenga que barajar su mano de nuevo en su mazo por no tener ningún Pokémon Básico, tú podrás
+robar 1 carta extra.
+7) Coloca las primeras 6 cartas de tu mazo a un lado y boca abajo como tus cartas de Premio.
+8) Ambos jugadores dan la vuelta a sus Pokémon Activos y en Banca, ¡y empieza la partida!
+MAZO
+
+BANCA
+
+ACTIVO
+
+PUESTO
+
+DE
+PREMIO
+CARTAS
+
+DESCARTES
+PILA DE
+PRIZE
+
+CARDS
+
+ACTIVE
+
+SPOT
+
+BENCH
+
+DECK
+
+DISCARD
+
+PILE
+
+POKÉMON EN BANCA
+
+POKÉMON ACTIVO
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Partes de un turno
+Cada turno tiene tres partes principales:
+
+1) Roba 1 carta.
+2) Realiza cualquiera de las siguientes acciones en cualquier orden:
+A. Coloca Pokémon Básicos de tu mano en tu Banca (todos los que quieras).
+B. Haz evolucionar a tus Pokémon (todos los que quieras).
+C. Une 1 carta de Energía de tu mano a 1 de tus Pokémon (una vez por turno).
+D. Juega cartas de Entrenador (todas las que quieras, pero solo 1 carta de Partidario y 1 carta de Estadio por turno).
+E. Retira a tu Pokémon Activo (solo una vez por turno).
+F. Utiliza Habilidades (todas las que quieras).
+3) Ataca. Después, termina tu turno.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+MAZO
+BANCA
+ACTIVO
+PUESTO
+DE
+PREMIO
+CARTAS
+DESCARTES
+
+PILA DE
+
+PRIZE
+CARDS
+ACTIVE
+SPOT
+BENCH
+DECK
+DISCARD
+PILE
+TU MANO
+
+Acciones en cada turno
+1) Roba 1 carta
+
+Empieza tu turno robando 1 carta. Si al comienzo de tu turno no hay ninguna carta en tu mazo y no puedes robar ninguna carta, la partida
+habrá terminado, y ganará tu rival.
+2) Haz cualquiera de estas cosas en cualquier orden:
+
+A) Coloca Pokémon Básicos de tu mano en tu Banca (todos los que quieras).
+Elige 1 Pokémon Básico de tu mano y colócalo boca arriba en tu Banca. Tu Banca admite un máximo de 5 Pokémon.
+POKÉMON BÁSICOS EN BANCA
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Notas sobre la Evolución: Ningún jugador puede hacer evolucionar a un Pokémon en el primer turno en que ese
+Pokémon entra en juego. Al hacer evolucionar a un Pokémon, ese Pokémon será nuevo en el juego, por lo que no podrá
+volver a evolucionar una segunda vez en el mismo turno. Puedes hacer evolucionar a cualquier Pokémon que tengas en
+juego, ya sea el Pokémon Activo o los Pokémon en Banca. Por último, ningún jugador puede hacer evolucionar a un
+Pokémon en el primer turno de dicho jugador, a menos que una carta lo especifique.
+B) Haz evolucionar a tus Pokémon (todos los que quieras).
+
+Si tienes en tu mano una carta que dice “Evoluciona de tal”, y “tal” es el nombre de un
+Pokémon que tenías en juego al comienzo de tu turno, puedes colocar esa carta sobre
+el Pokémon en cuestión. Esto se denomina “hacer evolucionar” a un Pokémon.
+Puedes hacer evolucionar un Pokémon Básico a un Pokémon de Fase 1
+o un Pokémon de Fase 1 a un Pokémon de Fase 2. Cuando un Pokémon
+evoluciona, conserva todas las cartas que tenía unidas (cartas de Energía,
+cartas de Evolución, etc.), así como los contadores de daño que ya tuviera.
+Todos aquellos efectos de ataques o Condiciones Especiales que afectaran al
+Pokémon (como Confundido, Dormido o Envenenado) desaparecen cuando
+este evoluciona. Un Pokémon no podrá usar los ataques ni Habilidades de
+su Evolución anterior, a menos que una carta lo permita.
+C) Une 1 carta de Energía a 1 de tus Pokémon (una vez por turno).
+
+Toma 1 carta de Energía de tu mano y colócala bajo tu Pokémon Activo o bajo
+1 de tus Pokémon en Banca para indicar que se puede usar esa Energía.
+¡Solo puedes unir Energía una vez por turno!
+Ejemplo:
+En la carta de Houndstone que tiene Gaby en su mano dice “Evoluciona de Greavard”, y Gaby tiene un Greavard en juego.
+Esto significa que Gaby puede jugar la carta de Houndstone sobre la carta de Greavard, manteniendo los contadores de daño y
+eliminando todos los demás efectos.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+D) Juega cartas de Entrenador.
+
+Cuando juegues cualquier carta de Entrenador, debes hacer lo que dice y cumplir la regla
+de la parte inferior de la carta. La mayoría de las cartas de Entrenador se ponen en la pila de
+descartes después de esto. Puedes jugar tantas cartas de Objeto y de Herramienta Pokémon
+como quieras. Las cartas de Partidario se juegan como las cartas de Objeto, pero solo se
+puede jugar 1 en cada turno.
+El jugador que sale en primer lugar no puede jugar una carta de Partidario en su primer turno.
+Las cartas de Estadio tienen algunas reglas especiales:
+Una carta de Estadio permanece en juego cuando la juegas.
+Solo puede haber 1 carta de Estadio en juego. Si entra una nueva carta en juego,
+descarta la anterior y terminan sus efectos.
+No puedes jugar una carta de Estadio si ya hay en juego una carta con el mismo nombre.
+Solo se puede jugar 1 carta de Estadio por turno.
+E) Retira a tu Pokémon Activo (solo una vez por turno).
+
+Lo más probable es que en la mayoría de los turnos no lo retires, pero, si tu Pokémon Activo
+tiene muchos contadores de daño, tal vez quieras retirarlo y sacar a un Pokémon de tu Banca
+para que combata en su lugar. ¡También puedes hacer esto si tienes un Pokémon fuerte en tu
+Banca listo para combatir!
+Para retirar a un Pokémon, debes descartar 1 Energía de tu Pokémon Activo por cada que
+aparezca en su Costo de Retirada. Si no aparece ningún , significa que su retirada no tiene costo.
+Una vez hecho esto, puedes cambiar a ese Pokémon por un Pokémon de tu Banca. Cuando se
+intercambian dos Pokémon, cada uno de ellos mantiene todos sus contadores de daño y sus
+cartas unidas. Los Pokémon que estén Dormidos o Paralizados no se pueden retirar.
+Cuando tu Pokémon Activo va a tu Banca (tanto si lo retiraste como si llegó de otra forma),
+hay cosas que desaparecen, como las Condiciones Especiales y cualquier efecto de ataques.
+Si retiras a un Pokémon, puedes atacar con tu nuevo Pokémon Activo en ese turno.
+F) Utiliza Habilidades (todas las que quieras).
+
+Algunos Pokémon tienen Habilidades especiales que pueden usar. Muchas se pueden utilizar
+antes de atacar. No obstante, cada Habilidad es diferente, así que deberías leer atentamente
+cómo funciona cada una. Algunas solo funcionan si se cumple una condición, mientras que
+otras funcionan en cualquier momento, incluso cuando no las usas. Asegúrate de decir qué
+Habilidades estás usando para que tu rival sepa lo que estás haciendo.
+Recuerda que las Habilidades no son ataques, así que ¡también puedes atacar si
+utilizas una Habilidad! Puedes usar Habilidades tanto de tu Pokémon Activo
+como de tus Pokémon en Banca.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Este ataque se
+llama Destructor.
+Nuzleaf debe tener unida
+1 Energía para usar este ataque.
+Nuzleaf debe tener
+unidas 2 Energías
+para usar Patada Baja:
+1 Energía y 1 Energía
+de cualquier tipo.
+Este ataque se
+llama Patada Baja.
+Destructor hace 30 puntos
+de daño al Pokémon Activo
+de tu rival.
+Patada Baja hace
+50 puntos de daño al
+Pokémon Activo de tu rival.
+A) Comprueba la Energía unida a tu Pokémon Activo.
+Para que un Pokémon pueda atacar, debe tener
+unida la cantidad de Energía adecuada. Tomemos el
+ejemplo de Nuzleaf. Su ataque Destructor cuesta ,
+así que, para usar este ataque, debes tener al
+menos 1 Energía unida a Nuzleaf. Por otra parte,
+su ataque Patada Baja cuesta , así que debes
+tener al menos 2 Energías unidas a Nuzleaf para
+poder usar Patada Baja. El símbolo significa que
+debes tener 1 Energía unida a él. Sin embargo,
+el símbolo significa que puedes usar cualquier tipo
+de Energía como segunda Energía. funcionará,
+pero también funcionará , , o cualquier otro
+tipo de Energía. Una vez que te asegures de que
+tienes la cantidad de Energía adecuada, anuncia
+qué ataque vas a usar.
+3) Ataca y termina tu turno
+
+Antes de atacar, asegúrate de que hiciste todo lo que querías hacer en el paso 2. Una vez que ataques, tu turno terminará,
+¡y ya no podrás volver atrás!
+
+El ataque se realiza en tres pasos sencillos. En cuanto entiendas el funcionamiento, ¡se vuelve pan comido!
+
+En el primer turno de la partida, el jugador que empieza se salta este paso. Una vez que ese jugador finalice todas sus
+otras acciones, el turno termina. Después de eso, cada jugador realiza su ataque de la manera habitual. Piensa bien si
+quieres ser quien empieza o prefieres ir segundo.
+¿Qué Energía necesitarás
+para usar el ataque
+Poder Ilimitado de Stonjourner?
+¡Exactamente! ¡2 Energías
+y 1 Energía de cualquier tipo!
+Es posible que veas algunos
+ataques con este símbolo
+de costo. Esto significa que
+el ataque tiene un costo de
+0 y que puedes usarlo sin
+necesidad de unir ninguna
+Energía al Pokémon.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+B) Comprueba la Debilidad y la Resistencia del Pokémon Activo de tu rival.
+
+Algunos Pokémon tienen Debilidad o Resistencia ante ciertos tipos de Pokémon, indicados en la esquina
+inferior izquierda de la carta. (Por ejemplo, Sandshrew tiene Debilidad ante los Pokémon ). Si el ataque
+inflige daño, el Pokémon Activo de tu rival recibirá más daño si tiene Debilidad ante el tipo del atacante.
+En cambio, recibirá menos daño de un Pokémon si tiene Resistencia ante ese tipo de Pokémon.
+C) Coloca contadores de daño sobre el Pokémon Activo de tu rival.
+
+¡No apliques Debilidad y Resistencia a los Pokémon en Banca!
+Al atacar, debes colocar 1 contador de daño sobre el Pokémon Activo de tu rival por cada
+10 puntos de daño que haga el ataque de tu Pokémon (indicado a la derecha del nombre del
+ataque). En el ejemplo anterior, el ataque Hojas Navaja de Chikorita hace 20 puntos de daño.
+La Debilidad × 2 de Sandshrew ante los Pokémon de tipo duplica el daño: 20 × 2 = 40 puntos
+de daño. Por lo tanto, debes colocar 4 contadores de daño sobre Sandshrew. Si en un ataque se
+indica que se debe hacer algo más, ¡asegúrate de hacerlo también!
+Ahora que completaste tu ataque, comprueba si el ataque dejó Fuera de Combate a algún
+Pokémon. Algunos ataques pueden hacer daño a más de 1 Pokémon ¡y hay ocasiones en las
+que pueden hacer daño incluso al Pokémon atacante! Así que asegúrate de comprobar todos
+los Pokémon que se vieron afectados por el ataque.
+Un Pokémon quedará Fuera de Combate si su total de puntos de daño es igual o superior a sus PS
+(por ejemplo, 5 o más contadores de daño sobre un Pokémon con 50 PS). Si el Pokémon de un jugador
+queda Fuera de Combate, ese jugador debe colocar dicho Pokémon y todas las cartas unidas a él en
+la pila de descartes. El rival de ese jugador debe tomar 1 de sus propias cartas de Premio y colocarla
+en su mano.
+El jugador cuyo Pokémon Activo haya quedado Fuera de Combate deberá elegir a un nuevo
+Pokémon Activo de su Banca. Si tu rival no puede hacer esto porque tiene la Banca vacía
+(o por cualquier otra razón), ¡tú ganarás la partida! Si tu rival aún tiene Pokémon en juego,
+pero tú acabas de tomar tu última carta de Premio, ¡también ganarás la partida!
+D) Tu turno terminó.
+
+A continuación, hay algunas cosas especiales de las que debes encargarte durante el Chequeo
+Pokémon.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+4) Chequeo Pokémon
+
+El Chequeo Pokémon es un paso especial que ocurre entre turnos. Antes de que la partida continúe con el siguiente jugador, tendrás que
+ocuparte de las Condiciones Especiales en este orden:
+
+1) Envenenado 2) Quemado 3) Dormido 4) Paralizado
+También tendrás que aplicar los efectos de cualquier Habilidad o carta de Entrenador, o de cualquier otra cosa que se diga en una carta que debe
+ocurrir durante el Chequeo Pokémon (o entre turnos). Puedes comprobar las Condiciones Especiales y luego otros efectos, o puedes comprobar otros
+efectos y luego las Condiciones Especiales, pero no puedes mezclar estos pasos. Por ejemplo, no puedes añadir daño por la Condición Especial de
+Envenenado, después aplicar una Habilidad y después lanzar una moneda por la Condición Especial de Dormido.
+
+Después de que ambos jugadores hayan hecho estas comprobaciones, aquellos Pokémon a los que no les queden PS quedarán Fuera de Combate.
+(El jugador mueve 1 nuevo Pokémon al Puesto Activo, y su rival toma 1 carta de Premio). ¡Luego, comenzará el turno del siguiente jugador!
+
+Condiciones Especiales
+Algunos ataques dejarán al Pokémon Activo Confundido, Dormido, Envenenado, Paralizado o Quemado. Estas condiciones se denominan
+“Condiciones Especiales”. Solo pueden afectar al Pokémon Activo, ya que, cuando un Pokémon pasa a la Banca, se recupera de todas las
+Condiciones Especiales. Cuando un Pokémon evoluciona, también se recupera de las Condiciones Especiales.
+
+Dormido
+
+Para indicar que un Pokémon está Dormido, debes girarlo en sentido contrario a las agujas del reloj.
+
+Si un Pokémon está Dormido, no podrá ni atacar ni retirarse. Durante el Chequeo Pokémon, lanza 1 moneda.
+Si sale cara, el Pokémon se recuperará (y tendrás que girar la carta hacia arriba), pero, si sale cruz,
+seguirá Dormido.
+
+Quemado
+
+Cuando un Pokémon está Quemado, pon un marcador de Quemado sobre él. Durante el Chequeo Pokémon,
+pon 2 contadores de daño en tu Pokémon Quemado. Después, lanza 1 moneda. Si sale cara, el Pokémon se
+recuperará (y quitarás el marcador de Quemado).
+
+Un Pokémon no puede tener 2 marcadores de Quemado, por lo que, si un ataque le da otro marcador
+de Quemado, la nueva condición de Quemado simplemente sustituirá a la anterior. Asegúrate de que tus
+marcadores de Quemado son distintos de tus contadores de daño.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Envenenado
+
+Cuando un Pokémon está Envenenado, pon un marcador de Envenenado sobre él. Durante el
+Chequeo Pokémon, pon 1 contador de daño en tu Pokémon Envenenado.
+
+Un Pokémon no puede tener 2 marcadores de Envenenado, por lo que, si un ataque le da otro marcador
+de Envenenado, la nueva condición de Envenenado simplemente sustituirá a la anterior. Asegúrate de
+que tus marcadores de Envenenado son distintos de tus contadores de daño.
+
+Cómo eliminar Condiciones Especiales
+
+Cuando un Pokémon evoluciona o se mueve a la Banca, se recupera de todas las Condiciones Especiales. Las únicas Condiciones Especiales que
+evitan que los Pokémon puedan retirarse son las de Dormido y Paralizado. Dado que es necesario girar la carta cuando un Pokémon está Confundido,
+Dormido o Paralizado, la última de estas condiciones que le afecte al Pokémon será la única que se mantendrá en efecto. En cambio, como para
+las condiciones de Envenenado y Quemado se utilizan marcadores, estas no afectan a otras Condiciones Especiales. Por lo tanto, un Pokémon con
+mala suerte podría estar Envenenado, Paralizado y Quemado al mismo tiempo.
+
+Otros efectos
+
+Si se especifica que un efecto de una Habilidad o de una carta de Entrenador ocurre durante
+el Chequeo Pokémon (o entre turnos), aplícalo como parte de este paso.
+
+Por ejemplo, la Habilidad Comilona Perezosa de Snorlax dice que cura 10 puntos de daño a este
+Pokémon entre turnos. Esto ocurriría durante el Chequeo Pokémon.
+
+Paralizado
+
+Para indicar que un Pokémon está Paralizado, debes girarlo en el sentido de las agujas del reloj.
+
+Si un Pokémon está Paralizado, no podrá ni atacar ni retirarse. Después del siguiente turno de su dueño,
+
+se recuperará durante el Chequeo Pokémon (y tendrás que girar la carta hacia arriba).
+
+Confundido
+
+Para indicar que un Pokémon está Confundido, debes girarlo y colocarlo con la parte superior de la carta
+apuntando hacia ti.
+
+Si tu Pokémon está Confundido, debes lanzar 1 moneda antes de atacar con él. Si sale cara, el ataque
+funcionará sin problema. Si sale cruz, el ataque no se realiza, y pondrás 3 contadores de daño en el
+Pokémon Confundido.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Play! Pokémon Stores y Mazos Combate de Liga
+¡Esto es todo lo que necesitas saber para jugar! Si necesitas más ayuda, pide un Mazo Combate de Liga en tu tienda de juegos más cercana.
+Este mazo viene con todo lo que necesitas para poder jugar, ¡incluyendo un mazo preconstruido y consejos de juego!
+
+¡Aprende a jugar a juegos Pokémon!
+¡Consigue magníficos premios!
+¡Combate contra otros jugadores!
+Pregunta en tu tienda de juegos local si son un Play! Pokémon Store
+o busca alguno cercano en: : Pokemon.com/localizador.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Reglas avanzadas
+¿Cómo funciona un mulligan?
+Si alguno de los jugadores no tiene ningún Pokémon Básico en su mano al comienzo de la partida, ese jugador declara un mulligan ,
+o un intento adicional. Así es como funciona:
+
+Si ninguno de los jugadores tiene algún Pokémon Básico en su mano al comienzo de la partida:
+
+Ambos jugadores muestran su mano y empiezan de nuevo de la manera habitual.
+
+Si solo uno de los jugadores no tiene ningún Pokémon Básico en su mano al comienzo de la partida:
+
+1) Ese jugador declara un mulligan , y luego espera a que el otro jugador haya terminado los preparativos para iniciar la partida.
+2) Después, el jugador que no tiene ningún Pokémon Básico muestra su mano y la baraja en su mazo. Este jugador continuará haciendo
+esto hasta que tenga algún Pokémon Básico en su mano, y después jugará de la manera habitual.
+3) Después, el jugador que no tuvo que empezar de nuevo puede robar 1 carta por cada vez que su rival declaró un mulligan. Por ejemplo,
+si ambos jugadores declararon 2 mulligans y el jugador A declaró 3 mulligans más, el jugador B puede robar hasta 3 cartas. Si cualquiera
+de esas cartas es un Pokémon Básico, se puede poner en la Banca.
+4) Ambos jugadores dan la vuelta a sus Pokémon Activos y en Banca, ¡y empieza la partida!
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+¿Qué se considera un ataque?
+Cada ataque tiene un costo y un nombre. Además, puede incluir un daño base y una descripción del daño. En el texto de un Pokémon,
+se describe principalmente su ataque, aunque no haga ningún daño.
+
+Ataque Arena de Sandslash afecta a Llamar a la Familia,
+pero no a Jugo Fermentado.
+
+Por ejemplo, el ataque Llamar a la Familia de Mantine no causa ningún daño, pero sigue siendo un ataque. Lo demás son Habilidades o algo diferente.
+Por ejemplo, la Habilidad Jugo Fermentado de Shuckle puede permitirte curar daño de 1 de tus Pokémon, pero no se considera un ataque.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Todos los detalles del ataque
+En la mayoría de los ataques, el orden en el que se hagan las cosas no importa realmente. Sin embargo, en el caso de un ataque complicado,
+estos son los pasos que debes seguir:
+
+A) Examina tu Pokémon y decide el ataque que quieres usar. Asegúrate de que tienes unida la Energía correcta. Luego, anuncia que
+vas a usar ese ataque.
+B) Aplica cualquier efecto que pueda modificar o cancelar el ataque. Por ejemplo, si en un ataque que fue usado contra tu Pokémon
+en el último turno dice “Durante el próximo turno de tu rival, si el Pokémon Defensor intenta usar un ataque, tu rival lanza
+1 moneda. Si sale cruz, ese ataque no se realiza”. (Pero recuerda: si un Pokémon Activo se mueve a la Banca, todos los efectos
+de los ataques desaparecen. Por ello, si tu Pokémon Activo cambió desde que tu rival usó el ataque de este ejemplo, no necesitas
+lanzar 1 moneda).
+C) Si tu Pokémon Activo está Confundido, comprueba si su ataque no se realiza.
+D) Realiza todas las selecciones que requiera el ataque. Por ejemplo, si en un ataque dice “Elige 1 de los Pokémon en Banca
+de tu rival”, es ahora cuando debes elegirlo.
+E) Haz todo lo que se indique en el ataque que debes hacer para usarlo. Por ejemplo, debes lanzar 1 moneda si en un ataque dice
+“Lanza 1 moneda. Si sale cruz, este ataque no hace nada”.
+F) Aplica primero cualquier efecto anterior al daño, luego aplica el daño del ataque (poniendo contadores de daño sobre
+el Pokémon) y, finalmente, aplica todos los demás efectos.
+Normalmente es muy sencillo saber la cantidad de daño que hay que aplicar. Sin embargo, si hay muchos factores que modifican el daño,
+puedes seguir estos pasos en este orden:
+
+1) Empieza con el daño base que se indica a la derecha del ataque. Si al lado aparece una ×, un - o un +, en el texto del ataque
+se indicará cuánto daño se debe infligir. Si en un ataque se indica que se deben poner contadores de daño sobre un Pokémon,
+no hace falta hacer más cálculos, porque los contadores de daño no se ven afectados por Debilidad, Resistencia o cualquier
+otro efecto en ese Pokémon. Simplemente coloca esos contadores de daño sobre el Pokémon afectado.
+2) Calcula los efectos de daño en tu Pokémon Activo basándote en las cartas de Entrenador o en cualquier otro efecto relevante.
+Por ejemplo, si en el último turno tu Pokémon usó un ataque en el que decía “Durante tu próximo turno, los ataques usados
+por este Pokémon hacen 40 puntos de daño más (antes de aplicar Debilidad y Resistencia) ”, debes sumar esos puntos.
+Si el daño base es 0 (o si el ataque no hace ningún daño), no hace falta que continúes. Si no, sigue calculando.
+3) Debes aumentar el daño según la cantidad que aparece junto a la Debilidad del Pokémon Activo de tu rival si este tiene
+Debilidad ante el tipo de tu Pokémon Activo.
+4) Debes restar al daño la cantidad que aparece junto a la Resistencia del Pokémon Activo de tu rival si este tiene Resistencia
+ante el tipo de tu Pokémon Activo.
+5) Calcula los efectos de daño de las cartas de Entrenador y Energía, así como cualquier otro efecto en el Pokémon Activo
+de tu rival. Por ejemplo, si el Pokémon Activo de tu rival tiene una Habilidad en la que dice “Este Pokémon recibe 20 puntos
+de daño menos de ataques (después de aplicar Debilidad y Resistencia) ”.
+6) Por cada 10 puntos de daño del ataque final, debes colocar 1 contador de daño sobre el Pokémon afectado. Si el daño es 0
+o menos, no hace falta que pongas ningún contador de daño.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+¿Cuál es la diferencia entre “hasta” y “cualquier cantidad”?
+Para los efectos de los ataques, si una carta contiene la frase “hasta X” o “igual o inferior a X”, puedes elegir cualquier cantidad entre 0 y el valor máximo.
+Para otros efectos (como los efectos de las cartas de Entrenador y las Habilidades), puedes elegir cualquier cantidad entre 1 y el valor máximo.
+
+Existe una excepción: para cualquier efecto que te permita buscar en tu mazo o pila de descartes cualquier carta que quieras y no se especifique su
+tipo, debes elegir al menos 1 carta.
+
+Si una carta contiene la frase “cualquier cantidad” o “cualquier número” —por ejemplo, “descarta cualquier cantidad de Energías de este Pokémon”—,
+eso quiere decir que puedes elegir 0.
+
+¿Qué hacer si debes robar más cartas de las que tienes?
+Si en una carta se indica que debes robar o mirar más cartas de las que te quedan en el mazo, roba o mira las cartas que te queden y sigue jugando
+normalmente.
+
+Por ejemplo, si en una carta dice que robes o mires las primeras 5 cartas de tu mazo, y solo te quedan 3 cartas en el mazo, debes robar o mirar las
+primeras 3. Si no puedes robar 1 carta al comienzo de tu turno, pierdes la partida, pero no ocurrirá lo mismo si no puedes robar 1 carta cuando en
+una carta diga que debes hacerlo.
+
+¿Qué ocurre si ambos jugadores ganan al mismo tiempo?
+Un jugador gana si consigue su última carta de Premio o si su rival no tiene ningún Pokémon en Banca para reemplazar a su Pokémon Activo
+cuando este quedó Fuera de Combate (o fue eliminado del juego de algún otro modo). Esto hace que sea posible que ambos jugadores ganen
+al mismo tiempo.
+
+En este caso, hay que recurrir a una partida de desempate. No obstante, si tú ganas en ambos sentidos, y tu rival solo gana en uno, ¡tú ganas!
+
+¿Qué es una partida de desempate?
+Ambos jugadores se preparan como si fueran a jugar una partida normal, incluyendo las 6 cartas de Premio y el lanzamiento de moneda para determinar
+quién comienza. El primer jugador que tome 1 carta de Premio (o quien tenga menos cartas de Premio restantes que el rival) gana. El resto de formas
+para ganar siguen vigentes, ¡pero es, ante todo, una carrera para ver quién toma la primera carta de Premio!
+
+¿Qué forma parte del nombre de un Pokémon y qué no?
+Algunas cartas de Pokémon incluyen información adicional después del nombre, como un nivel o un símbolo como. El nombre del
+Pokémon cambia el modo en que se pueden hacer evolucionar o jugar ciertas cartas. El nivel no forma parte del nombre de un Pokémon:
+
+Gengar, Gengar Niv. 43, Gengar Niv. 44 y Gengar Niv. X tienen todas el mismo nombre.
+Los símbolos que aparecen al final del nombre de un Pokémon sí forman parte del nombre del Pokémon:
+
+Alakazam, Alakazam y Alakazam h son distintos nombres de Pokémon.
+Sin embargo, δ (especie Delta) no forma parte del nombre de un Pokémon. Los Pokémon Aerodactyl y Aerodactyl δ (especie Delta) tienen
+el mismo nombre.
+El nombre del propietario o de la forma de un Pokémon sí forma parte del nombre del Pokémon:
+
+Meowth, Meowth de Alola y Meowth del Rocket son nombres distintos.
+Al construir un mazo, solo se pueden tener 4 copias de una carta con el mismo nombre, excepto por las cartas de Energía Básica. Si en tu mazo tienes
+1 Gengar, 1 Gengar Niv. 43, 1 Gengar Niv. 44 y 1 Gengar Niv. X , ya no podrás añadir más cartas con el nombre de Gengar. Sin embargo, podrías tener
+4 Meowth, 4 Meowth de Alola y 4 Meowth del Rocket.
+
+A la hora de hacer evolucionar a un Pokémon, el nombre del Pokémon que aparece después de “Evoluciona de” debe coincidir exactamente
+con el nombre del Pokémon que se va a hacer evolucionar. Por lo tanto, Graveler puede evolucionar de Geodude o de Geodude Niv. 12,
+pero no de Geodude de Brock.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Construcción de mazos
+A la hora de construir la mayoría de los mazos, hay que seguir unas cuantas reglas. Una de las más importantes es que el mazo debe tener
+exactamente 60 cartas. No puede tener ni más ni menos, ¡ni 59 ni 61!
+
+Además, a excepción de las cartas de Energía Básica, el mazo solo puede contener 4 cartas con el mismo nombre. Esto significa que el mazo solo puede
+contener 4 cartas llamadas “Pignite”, aunque todas tengan ataques diferentes. Por último, el mazo debe contener al menos 1 carta de Pokémon Básico.
+
+Construir tu propio mazo puede ser complicado, pero también muy divertido. Si necesitas ayuda, recurre al ayudante de una Liga Pokémon.
+También es buena idea buscar un Mazo Combate de Liga que te guste e intentar modificarlo. ¡No olvides que debe tener siempre 60 cartas!
+No obstante, si quieres crear un mazo totalmente nuevo, aquí tienes algunas indicaciones para principiantes:
+
+Elige como máximo 1 o 2 tipos de Energía. Recuerda que la mayoría de los Pokémon pueden usar cualquier Energía para atacar,
+así que se pueden incluir en casi cualquier mazo.
+Para asegurarte de que tienes suficientes cartas de Energía, intenta incluir entre 12 y 15 en tu mazo de 60 cartas.
+Las cartas de Entrenador también son importantes. Algunas cartas, como Nido Ball y Cinio, pueden ayudarte a encontrar exactamente
+las cartas que necesitas. Está bien empezar con entre 20 y 25 cartas de Entrenador.
+¡Y claro, necesitas Pokémon! El resto de tu mazo serán Pokémon. Recuerda que tu mazo debe contener al menos 1 Pokémon Básico.
+Incluye en tu mazo 4 copias de tus Pokémon favoritos para asegurarte de que te salen lo más a menudo posible. Y, si ese Pokémon evoluciona,
+intenta obtener también 4 copias de cada Pokémon de la cadena de Evolución.
+Cada mazo es diferente. Se adaptará a tu propia personalidad y estrategia. Con el tiempo, descubrirás cuáles son tus cartas de Pokémon,
+Entrenador y Energía favoritas.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 1: Pokémon ex Megaevolución
+En Megaevolución de JCC Pokémon, descubrirás Pokémon ex Megaevolución que han
+desafiado sus límites para volverse aún más poderosos. Pero, a cambio de un mayor número de
+PS y ataques más potentes que van más allá que los de los Pokémon ex convencionales, estos
+Pokémon permitirán que tu rival tome 3 cartas de Premio cuando queden Fuera de Combate.
+¡Ese gran poder tiene un costo monumental!
+
+A diferencia de los antiguos Pokémon- EX Megaevolución de la serie XY , no hay reglas especiales a la hora de poner Pokémon ex Megaevolución en
+juego. Estos Pokémon pueden aparecer como Pokémon Básicos, de Fase 1 o de Fase 2, y siguen las reglas generales de la Evolución con una pequeña
+diferencia: Mega-Gardevoir ex evoluciona directamente de Kirlia, Mega-Lucario ex evoluciona directamente de Riolu y ¡Mega-Kangaskhan ex se
+puede poner directamente en juego como un Pokémon Básico! Mega-Lucario ex no evoluciona de Lucario o Lucario ex, solo de Riolu.
+
+Los Pokémon ex Megaevolución se consideran Pokémon ex, por lo que cualquier carta con efectos que afecten a los Pokémon ex también afectará a
+los Pokémon ex Megaevolución. Por ejemplo, si una carta te permite buscar en tu mazo un Pokémon ex, puedes elegir un Pokémon ex Megaevolución.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 2: Pokémon de Entrenadores
+¡Los Pokémon de Entrenadores están de vuelta! Estas cartas nos enseñan el poder de la unión entre un Entrenador y sus Pokémon. Los Pokémon
+de Entrenadores se pueden identificar por el nombre del Entrenador en el nombre de la carta, como en Tadbulb de e-Nigma. Como el nombre de la
+carta es diferente, Bellibolt ex de e-Nigma puede evolucionar de Tadbulb de e-Nigma, pero no de un Tadbulb estándar. ¡Descubre formas de usar
+todo el poder de estas poderosas cartas!
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 3: Cartas de AS TÁC TICO
+Introducidas originalmente en la serie Negro y Blanco , las cartas de AS TÁCTICO son tan poderosas que solo podrás tener una en todo tu mazo.
+Esto quiere decir que solo contarás con una carta de AS TÁCTICO en total, no con una de cada tipo. ¡Analiza bien tus cartas de AS TÁCTICO para
+decidir cuál funcionará mejor en tu mazo!
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 4: Pasado y Futuro
+A partir de la expansión Escarlata y Púrpura-Brecha Paradójica , puede que te encuentres
+con Pokémon u otras cartas que tengan una etiqueta especial que los identifica como del
+“Pasado” o del “Futuro”. Los Pokémon del pasado suelen tener ataques primitivos y contundentes,
+mientras que los Pokémon del futuro poseen ataques más técnicos y precisos.
+
+Apéndice 5: Pokémon ex
+Los Pokémon ex son poderosos Pokémon con más PS y ataques más fuertes que los Pokémon
+normales, ¡pero jugar con estos Pokémon tan poderosos conlleva ciertos riesgos! Si uno de tus
+Pokémon ex queda Fuera de Combate, tu rival toma 2 cartas de Premio.
+
+El término “ex” forma parte del nombre de un Pokémon ex. Por lo tanto, Miraidon y Miraidon ex
+tienen nombres diferentes. Si quieres, puedes tener hasta 4 de cada uno en tu mazo.
+
+Ten en cuenta que los Pokémon ex y los Pokémon- EX no tienen el mismo nombre, por lo que,
+si quisieras, podrías tener 4 Magnezone ex y 4 Magnezone- EX en tu mazo.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 7: Zona Perdida
+La Zona Perdida es un área muy singular que se considera fuera de la zona de juego. Las cartas se pueden enviar a la Zona Perdida de
+muchas maneras, como usando efectos de ataques, Habilidades o cartas de Entrenador. A diferencia de lo que ocurre con la pila de descartes,
+las cartas que se envíen a la Zona Perdida ya no se podrán recuperar y no se podrán volver a jugar en la partida.
+
+Apéndice 6: Pokémon ex Teracristal
+Los Pokémon ex Teracristal tienen un aspecto cristalino y un nuevo efecto que evita todo
+el daño provocado por los ataques recibidos mientras estén en tu Banca. Este efecto se aplica
+tanto para tus ataques como para los de tu rival.
+
+Al igual que con el resto de los Pokémon ex, cuando un Pokémon ex Teracristal queda
+Fuera de Combate, tu rival toma 2 cartas de Premio.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 9: Pokémon V-ASTRO
+Llegó una nueva Evolución a JCC Pokémon: ¡los Pokémon V-ASTRO! Estos increíbles Pokémon tienen
+una Habilidad o ataque llamado Poder V-ASTRO que puede cambiar el rumbo del juego. Solo puedes
+usar 1 Poder V-ASTRO en toda la partida , sin importar el número de Pokémon V-ASTRO que juegues.
+Asegúrate de usar tu Poder V-ASTRO en el momento preciso, ¡porque solo tienes una oportunidad!
+Una vez que hayas usado el Poder V-ASTRO, acuérdate de dar la vuelta al marcador V-ASTRO para
+recordar que ya lo usaste.
+
+Al igual que ocurre con los Pokémon V, si tu Pokémon V-ASTRO queda Fuera de Combate, tu rival
+toma 2 cartas de Premio.
+
+Ten en cuenta que Shaymin V-ASTRO evoluciona de Shaymin V. Esto significa que solo puedes hacer que
+Shaymin V-ASTRO evolucione de Shaymin V, ¡no de un Shaymin regular! Además, los Pokémon V-ASTRO
+son una nueva Fase: V-ASTRO. Estas cartas cuentan como cartas de Evolución, así que todas las
+reglas normales de Evolución se aplican a los Pokémon V-ASTRO. Y, aunque los Pokémon V-ASTRO son
+una Fase diferente, se siguen considerando Pokémon V, así que, si algo afecta a los Pokémon V,
+también afecta a los Pokémon V-ASTRO.
+
+Apéndice 8: Pokémon Radiantes
+Todos los Pokémon Radiantes presentan una tonalidad brillante especial y siguen la regla de los
+Pokémon Radiantes, que establece que no puedes tener más de 1 Pokémon Radiante en tu mazo.
+Los Pokémon Radiantes se consideran Pokémon con un Recuadro de Regla. Ten en cuenta que
+“Radiante” es parte del nombre del Pokémon, por lo que tu mazo podría contener 4 Greninja y
+1 Greninja Radiante. Los Pokémon Radiantes siempre son Pokémon Básicos y no pueden
+evolucionar de o a ninguna otra carta.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 10: Pokémon V-UNIÓN
+Las cuatro “partes” de un Pokémon V-UNIÓN tienen el mismo nombre
+(por ejemplo, “Mewtwo V-UNIÓN”). Por lo tanto, en total solo puedes tener
+cuatro cartas llamadas Mewtwo V-UNIÓN en tu mazo, no cuatro copias
+de cada una de las partes. Las cuatro copias de un Pokémon V-UNIÓN de
+tu mazo deben ser parte del mismo set y el autor de la ilustración debe
+ser el mismo artista.
+
+Para jugar un Pokémon V-UNIÓN, debes colocar sus cuatro partes en tu Banca
+al mismo tiempo, sacándolas de tu pila de descartes. No puedes jugar solo una
+o dos partes. Un Pokémon V-UNIÓN solo ocupa uno de los espacios de la Banca
+y únicamente puede tener una Herramienta Pokémon unida. Solo puedes usar
+a cada Pokémon V-UNIÓN una vez por partida, siguiendo como criterio el
+nombre del Pokémon. Por ejemplo, puedes jugar un Mewtwo V-UNIÓN y
+luego un Greninja V-UNIÓN, pero no a Mewtwo V-UNIÓN una segunda vez.
+
+¡Los Pokémon V-UNIÓN no son Pokémon Básicos! Por eso, no puedes jugarlos como si
+fueran tu Pokémon Activo o tus Pokémon en Banca durante la preparación del juego.
+Además, debes incluir al menos un Pokémon Básico en tu mazo si hasta el momento
+únicamente tienes Pokémon V-UNIÓN en él. Por último, los Pokémon V-UNIÓN no
+son cartas de Evolución; tienen su propia y exclusiva Fase, llamada V-UNIÓN.
+
+Las cartas o efectos que hagan referencia a cartas que incluyan los términos “Básico”,
+“Fase 1”, “Fase 2” o “Evolución” no afectarán a los Pokémon V-UNIÓN. Por ejemplo,
+una Habilidad que diga “El Pokémon Básico de tu rival no puede atacar” no afectará
+a Mewtwo V-UNIÓN. Ahora bien, las cartas que ejerzan algún efecto sobre los
+“Pokémon no evolucionados” sí afectarán a los Pokémon V-UNIÓN.
+
+Cuando un Pokémon V-UNIÓN está en juego, se considera al set de cuatro cartas como
+una única carta. Cuando esas cartas están en cualquier otro sitio (en tu mano, tu mazo,
+tu pila de descartes o entre tus cartas de Premio), cada una de ellas se considera una carta individual. Por ejemplo, si una carta te indica que
+busques en tu mazo un Pokémon y lo pongas en tu mano, y tienes tres partes de Mewtwo V-UNIÓN en tu mazo, solo puedes poner una de esas
+tres partes en tu mano.
+
+Las únicas características que se pueden utilizar como referencia para cada una de las cuatro partes de los Pokémon V-UNIÓN son los “tipos”
+(Agua, Psíquico, etc.), la “categoría” (Pokémon) y el “nombre de la carta”. Si juegas una carta que indica “busca en tu mazo 1 Pokémon ”,
+puedes tomar cualquiera de las cuatro partes de un Pokémon V-UNIÓN de tipo Psíquico, ya que cada una de las partes tiene el tipo impreso.
+Otras características, como los ataques, las Habilidades, los PS, el Costo de Retirada, la Debilidad o la Resistencia, no pueden ser utilizadas
+como referencia en ninguna de las cuatro partes de los Pokémon V-UNIÓN de forma individual. Esto significa que, si juegas una carta que indica
+“busca en tu mazo 1 Pokémon con un Costo de Retirada de 3 o más”, no podrás tomar ninguna de las partes de un Pokémon V-UNIÓN,
+incluso aunque la carta resultante de la unión tenga un Costo de Retirada de 3 o más al estar en juego.
+
+Los Pokémon V-UNIÓN también se consideran “Pokémon V” y entran dentro de la categoría de “Pokémon con un Recuadro de Regla” cuando están
+en juego, ya que tienen la regla V-UNIÓN y conceden 3 cartas de Premio cuando quedan Fuera de Combate. Si un Estadio en juego elimina las
+Habilidades de los Pokémon con Recuadro de Regla, tus Pokémon V-UNIÓN se verán afectados y no podrán utilizar ninguna de sus Habilidades cuando
+estén en juego. Cuando no estén en juego, las partes individuales de los Pokémon V-UNIÓN no se considerarán “Pokémon con un Recuadro de Regla”.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 11: Estilos de Combate
+A partir de la expansión Espada y Escudo-Estilos de Combate , puede que te encuentres
+con Pokémon que tengan una etiqueta especial que los identifica como de estilo
+“Golpe Brusco” o “Golpe Fluido”. Los Pokémon Golpe Brusco suelen tener fuertes
+y contundentes ataques, mientras que los Pokémon Golpe Fluido tienen ataques
+más sigilosos y técnicos.
+
+Los Pokémon “Golpe Fusión”, introducidos con la expansión Espada y Escudo-Golpe Fusión ,
+basan su poder en el trabajo en equipo y combinan las fuerzas de los estilos Golpe Brusco
+y Golpe Fluido.
+
+Las cartas de Entrenador y las cartas de Energía también pueden tener esta etiqueta
+de Golpe Brusco, Golpe Fluido o Golpe Fusión, y suelen servir de apoyo a los Pokémon
+de ese estilo de combate en particular. ¡Busca maneras de combinar varias cartas
+diferentes del mismo estilo de combate para desatar auténticas estrategias magistrales!
+
+Apéndice 13: Pokémon VMAX
+¡Los Pokémon VMAX pueden llevar tus Pokémon V a otro nivel! Estas poderosísimas cartas vienen con monstruosos
+PS y ataques, ¡adecuados para estos Pokémon gigantes! La mayoría de los Pokémon VMAX tienen 300 PS o más,
+por lo que es muy difícil derrotarlos en combate.
+
+Pero ese increíble poder viene con un gran riesgo: si tu Pokémon VMAX queda Fuera de Combate, tu rival toma
+3 cartas de Premio.
+
+Ten en cuenta que Lapras VMAX evoluciona de Lapras V. Esto significa que
+solo puedes hacer que Lapras VMAX evolucione de Lapras V, ¡no de un
+Lapras regular! Además, los Pokémon VMAX son una nueva Fase: VMAX.
+Estas cartas cuentan como cartas de Evolución, así que todas las reglas
+normales de Evolución se aplican a los Pokémon VMAX. Y, aunque los
+Pokémon VMAX son una Fase diferente, se siguen considerando Pokémon V.
+Así que, si algo afecta a los Pokémon V, también afecta a los Pokémon VMAX.
+
+Apéndice 12: Pokémon V
+Los Pokémon V son poderosos Pokémon Básicos con altos PS y fuertes ataques. Estos impresionantes Pokémon
+tienen un gran impacto en el juego, pero conllevan un riesgo: cuando uno de tus Pokémon V queda Fuera de Combate,
+tu rival toma 2 cartas de Premio.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 14: Formas regionales
+Quizás te encuentres con algunos Pokémon que te resultarán familiares, pero que aparecerán con
+un nuevo aspecto. ¡Son Pokémon de Paldea, Hisui, Galar o Alola! ¡Incluso puede que veas algunos
+que evolucionan a Pokémon completamente nuevos!
+
+Ten en cuenta que “de Paldea”, “de Hisui”, “de Galar” o “de Alola” es parte del nombre del Pokémon. Esto significa que Clodsire de Paldea ex
+solo puede evolucionar de Wooper de Paldea, no de Wooper, y que Persian de Alola solo puede evolucionar de Meowth de Alola, no de
+Meowth o de Meowth de Galar. Por ello, puedes tener hasta 4 Wooper y hasta 4 Wooper de Paldea en tu mazo si así lo quieres.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 16: Equipo de RELEVOS
+¡Un equipo de RELEVOS es una clase especial de Pokémon- GX Básico con varios Pokémon que unen sus fuerzas para formar un equipo superpoderoso!
+Los Pokémon- GX de equipo de RELEVOS suelen tener muchos PS y grandes ataques, incluyendo un ataque GX especial que obtiene una bonificación
+si cumple con un requisito, como tener Energía extra unida o jugar cierta carta de Entrenador. Pero ten cuidado: ¡cuando tu equipo de RELEVOS queda
+Fuera de Combate, tu rival toma 3 cartas de Premio!
+
+de equipo de RELEVOS Apéndice 15: Cartas de Partidario
+de equipo de RELEVOS
+¡Los Pokémon no son los únicos que pueden formar un equipo de RELEVOS! Estas poderosas cartas
+de Partidario destacan a dos Entrenadores uniendo fuerzas en una carta. Y, al igual que los
+Pokémon- GX de equipo de RELEVOS, cada carta de Partidario de equipo de RELEVOS ofrece una
+bonificación especial de equipo: si descartas cartas adicionales cuando la juegas, obtienes un
+efecto adicional. Cada carta de Partidario de equipo de RELEVOS tiene un efecto único, ¡así que
+estate pendiente de estas poderosas parejas!
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 17: Cartas de Estrella Prisma
+Las cartas de Estrella Prisma (aquellas con el símbolo ) son cartas poderosas que tienen una
+restricción: solo puedes tener 1 copia de una carta de Estrella Prisma en tu mazo. A diferencia
+de las cartas de AS TÁCTICO , puedes incluir en tu mazo cartas de Estrella Prisma con nombres
+diferentes, así que podrás tener 1 Giratina , 1 Lunala , 1 Helio y 1 Energía Superimpulso
+en el mismo mazo. También tienen una regla única; si una carta de Estrella Prisma va a la
+pila de descartes, esta se coloca en la Zona Perdida. Consulta el glosario para obtener más
+información sobre la Zona Perdida.
+
+Apéndice 18: Fósil Raro y Fósil Desconocido
+Las extrañas cartas de Objeto Fósil Raro y Fósil Desconocido se pueden jugar como
+Pokémon Básicos. Se pueden evolucionar a cualquier Pokémon Fósil que indique
+“Evoluciona de Fósil Raro” o “Evoluciona de Fósil Desconocido”, como Dracozolt o Shieldon.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Ten en cuenta que Primarina- GX evoluciona de Brionne. Esto significa que
+puedes hacer que Brionne evolucione a Primarina o a Primarina- GX , ¡tú decides!
+Además, los Pokémon- GX tienen las mismas Fases de Evolución que la mayoría
+de los otros Pokémon y siguen las mismas reglas, ¡por lo que puedes usar un
+Pokémon- GX Básico como tu primer Pokémon Activo si así lo quieres!
+
+Todo este increíble poder tiene un gran precio: cuando uno de tus Pokémon- GX
+queda Fuera de Combate, tu rival toma 2 cartas de Premio.
+
+Apéndice 19: Pokémon - GX
+Los Pokémon- GX son potentes Pokémon con más PS y ataques más fuertes.
+Cada uno tiene un ataque GX superpoderoso. No puedes usar más de 1 ataque GX
+durante toda la partida , independientemente de cuántos Pokémon- GX tengas en juego.
+Asegúrate de usar ese ataque GX en el momento estratégico adecuado, ¡porque solo
+tendrás una oportunidad! El cartón de contadores de daño incluye un marcador GX
+especial para controlar esto. Ponlo boca abajo una vez que hayas usado un ataque GX
+en tu partida.
+
+Reglas especiales para los Pokémon - GX
+GX es parte del nombre de un Pokémon- GX. Por ello, Incineroar y Incineroar- GX tienen
+nombres diferentes, así que puedes tener hasta 4 de cada uno en tu mazo si quieres.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 20: Ultraentes
+¡Los Ultraentes invadieron JCC Pokémon! Estas misteriosas criaturas pueden aparecer como Pokémon- GX
+que se destacan por su color rojo en vez del típico azul de las cartas GX. Algunas cartas tienen efectos
+que repercuten específicamente en los Ultraentes, los cuales aparecen identificados con un recuadro en
+la parte superior derecha de la carta. Todos los Ultraentes tienen un ataque que tiene algo que ver con
+las cartas de Premio, así que presta atención a las interesantes formas de utilizarlos.
+
+Apéndice 21: Pokémon de dos tipos
+Los Pokémon de dos tipos son iguales a los Pokémon regulares, pero son de dos tipos al mismo tiempo.
+Por ejemplo, Azumarill es un Pokémon de tipo y un Pokémon de tipo , por lo que cualquier carta
+que afecte a uno de esos tipos afectará a Azumarill.
+
+Si un Pokémon de dos tipos ataca a un Pokémon que tiene Debilidad o Resistencia a cualquiera
+de sus tipos, el daño del ataque se verá afectado. Y, si el Pokémon tiene Debilidad a uno de los tipos
+y Resistencia al otro, ¡recuerda aplicar primero la Debilidad y luego la Resistencia!
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 22: Evolución TURBO
+La Evolución TURBO es un tipo de Evolución especial. Un Pokémon TURBO conserva todos los ataques y Habilidades de su Evolución previa (además de
+su Debilidad, Resistencia y Costo de Retirada), pero obtiene ataques o Habilidades adicionales, sus PS cambian ¡e incluso podría cambiar de tipo!
+
+Reglas especiales para los Pokémon TURBO
+Al igual que GX , TURBO es parte del nombre de un Pokémon TURBO.
+Por ello, Raichu y Raichu TURBO tienen nombres diferentes,
+y tú puedes tener hasta 4 de cada uno en tu mazo si quieres.
+
+Los Pokémon TURBO son una nueva Fase: TURBO. Estas cartas
+cuentan como cartas de Evolución, así que todas las reglas normales
+de Evolución se aplican a los Pokémon TURBO.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 23: Rasgos Antiguos
+Los Rasgos Antiguos aparecen en ciertas cartas de Pokémon, justo debajo del nombre
+del Pokémon. Estos Rasgos Antiguos proporcionan poderes especiales a los Pokémon,
+así que asegúrate de leer cada uno de ellos detenidamente. Ten en cuenta que los
+Rasgos Antiguos no son ataques ni Habilidades, por lo que aquellas cartas que
+impidan el uso de los ataques o Habilidades no afectarán
+a los Rasgos Antiguos.
+
+Apéndice 24: Hiperequipo del Team Flare
+La frase “Hiperequipo del Team Flare” aparece en cartas especiales que puedes usar para entorpecer
+los planes de tu rival. Son cartas de Herramienta Pokémon que unes a los Pokémon -EX de tu rival.
+Tienen un efecto negativo en esos Pokémon, ¡haciendo que les sea más difícil derrotarte! Ten en
+cuenta que, si se quita la carta del Pokémon por cualquier razón, se pone en la pila de descartes del
+jugador que la puso en juego al principio.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 25: Pokémon - EX
+Los Pokémon -EX son poderosos Pokémon con más PS y ataques más fuertes que los Pokémon normales, ¡pero hay riesgos cuando se juega con
+estos Pokémon tan poderosos!
+
+Reglas especiales para los Pokémon - EX
+EX es parte del nombre de un Pokémon -EX. Por lo tanto, Yveltal
+e Yveltal -EX tienen nombres diferentes. Si quieres, puedes tener
+hasta 4 de cada uno en tu mazo.
+
+Cuando un Pokémon -EX queda Fuera de Combate, tu rival toma
+2 cartas de Premio.
+Aparte de esto, los Pokémon -EX se juegan de la misma manera
+que cualquier otro Pokémon.
+Y otra cosa: ¡los Pokémon -EX existen tanto en versión normal como
+en versión Rara Ultra con arte completo!
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 26: Pokémon - EX Megaevolución
+Los Pokémon -EX Megaevolución representan un grado máximo de Evolución no descubierto hasta ahora. ¡Estas cartas convierten a un Pokémon -EX
+en un Pokémon aún más poderoso! Saber cuál es el mejor momento para jugar estos Pokémon será la clave de tus nuevas estrategias.
+
+Reglas especiales para los Pokémon - EX Megaevolución
+Al igual que EX , la M (que significa “Mega”) es parte del nombre de un
+Pokémon -EX Megaevolución. Así pues, Mega-Venusaur -EX y Venusaur -EX
+tienen nombres diferentes, y puedes tener hasta 4 de cada uno en tu
+mazo si quieres.
+
+Hay 2 reglas especiales para los Pokémon -EX Megaevolución. Como son
+Pokémon -EX , cuando uno queda Fuera de Combate, tu rival toma 2
+cartas de Premio. Además, cuando uno de tus Pokémon se convierte
+en un Pokémon -EX Megaevolución, tu turno termina. ¡Asegúrate de
+haber hecho todo lo que quieras hacer durante tu turno antes de jugar
+uno de estos poderosos Pokémon!
+Ten en cuenta que los Pokémon -EX Regresión Primigenia funcionan
+igual que los Pokémon -EX Megaevolución, por lo que les afectan
+las mismas reglas.
+Ten en cuenta que Mega-Venusaur -EX evoluciona de Venusaur -EX.
+Esto significa que solo puedes hacer evolucionar a Mega-Venusaur -EX
+de Venusaur -EX , ¡no de Venusaur! También, los Pokémon -EX Megaevolución
+son una nueva Fase: MEGA. Estas cartas cuentan como cartas
+de Evolución, así que todas las reglas normales de Evolución
+se aplican a los Pokémon -EX Megaevolución.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 27: Cartas del Equipo Plasma
+Las cartas del Equipo Plasma (Pokémon, cartas de
+Entrenador y Energía) tienen una apariencia única
+y llamativa. Verás que tienen un borde azul y notarás
+también que tienen un rótulo del Equipo Plasma,
+además de su infame escudo en la zona del texto.
+
+Toda carta con esta apariencia se considera
+una carta del Equipo Plasma.
+
+En las cartas de Pokémon, Equipo Plasma no se
+considera parte del nombre del Pokémon. Por ello,
+si tienes 4 Liepard del Equipo Plasma en tu mazo,
+ya no podrás tener ninguna otra carta de Liepard
+en ese mazo. Por su parte, los Pokémon del
+Equipo Plasma evolucionan de la manera habitual.
+Los Liepard del Equipo Plasma evolucionan de
+Purrloin, igual que los otros Liepard.
+
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Apéndice 28: Pokémon Recreados
+Algunos Pokémon Fósil tienen su propia Fase: la de Pokémon Recreado. Como puedes ver, Omanyte es un Pokémon Recreado que tiene la siguiente regla:
+“Pon esta carta en tu Banca solo bajo las condiciones de Fósil Hélix Omanyte”. Dicho de otra manera: la única forma de jugar a Omanyte para ponerlo
+en tu Banca es jugando la carta de Objeto Fósil Hélix Omanyte antes. Si lees la carta de Fósil Hélix Omanyte, podrás ver exactamente cómo puedes
+poner en juego a Omanyte. Una vez que lo hagas, Omastar funciona como cualquier otro Pokémon de Fase 1. Ponlo sobre Omanyte de la misma manera
+que jugarías normalmente un Pokémon de Fase 1.
+
+Notas importantes referentes a los Pokémon Recreados
+Si tienes un Pokémon Recreado en tu mano, no puedes colocarlo en tu Banca a menos de que juegues una carta de Objeto y sus efectos
+te permitan hacerlo.
+¡Los Pokémon Recreados no son Pokémon Básicos! Por ello, no puedes jugarlos como tu Pokémon Activo o en Banca durante la
+preparación de la partida. Además, asegúrate de que no solo tienes Pokémon Recreados en tu mazo, ya que todavía necesitas tener
+al menos 1 Pokémon Básico en tu mazo. Por último, los Pokémon Recreados no son cartas de Evolución.
+Las cartas o efectos que hacen referencia a cartas “Básicas”, “de Fase 1”, “de Fase 2” o “de Evolución” no afectan a los Pokémon Recreados.
+Por ejemplo, una carta que diga “Busca en tu mazo 1 Pokémon Básico” no te permitirá recuperar a un Omanyte Recreado. Sin embargo,
+una que diga “Busca en tu mazo 1 Pokémon” sí te permitirá recuperar a un Omanyte Recreado. Además, las cartas que afectan a Pokémon
+no evolucionados también afectarán a los Pokémon Recreados.
+Cuando juegues Pokémon Fósil más antiguos, las reglas más importantes a seguir son las que se refieren al texto “Evoluciona de” o al texto
+que indica cómo se puede poner esta carta en juego. Por ejemplo, Kabuto apareció en XY-Destinos Enfrentados como un Pokémon Recreado,
+junto con un Kabutops de Fase 1 que evoluciona de él. Independientemente de qué Kabuto tengas en juego, puedes hacerlo evolucionar a
+cualquier Kabutops que diga “Evoluciona de Kabuto”. Esto quiere decir que puedes hacer evolucionar a un Kabutops de Fase 2 a partir de
+un Kabuto Recreado o a un Kabutops de Fase 1 a partir de un Kabuto de Fase 1.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Glosario
+AS TÁCTICO : Un poderoso tipo de carta de la que solo puede haber
+una unidad por mazo.
+
+ataque: 1) Cuando tu Pokémon Activo combate contra el Pokémon de
+tu rival. 2) El texto que aparece en cada una de las cartas de Pokémon e
+indica qué hace cuando ataca (un Pokémon puede tener varios ataques).
+
+ataque GX : Un tipo de ataque muy poderoso. Solo los Pokémon- GX
+tienen ataques GX. Los jugadores no pueden usar más de 1 ataque GX
+por partida.
+
+Banca: El lugar donde se sitúan aquellos Pokémon que están en
+juego, pero que no están combatiendo activamente. Estos Pokémon
+entrarán a combatir si el Pokémon Activo se retira o queda Fuera de
+Combate. Si tus Pokémon en Banca reciben daño, no apliques Debilidad
+ni Resistencia.
+
+Chequeo Pokémon: Periodo de tiempo en el que el juego pasa
+de un jugador a otro, antes conocido como paso entre turnos. En este
+momento, se debe comprobar si hay algún Pokémon Envenenado,
+Quemado, Dormido o Paralizado, y ver si algún Pokémon quedó Fuera
+de Combate.
+
+Condiciones Especiales: Los estados Confundido, Dormido,
+Envenenado, Paralizado y Quemado se denominan Condiciones Especiales.
+
+contador de daño: Contador que debes colocar sobre tu Pokémon
+para indicar que recibió 10 puntos de daño. Se mantiene en el Pokémon
+aunque este se traslade a la Banca o evolucione. Aunque algunas veces
+se utilizan, por comodidad, los contadores de 50 y 100 puntos de daño,
+si una carta menciona un “contador de daño”, se refiere al contador
+estándar de 10 puntos de daño.
+
+daño: Lo que suele ocurrir cuando un Pokémon ataca a otro. Si un
+Pokémon recibe un daño total superior o igual a sus Puntos de Salud,
+queda Fuera de Combate.
+
+Debilidad: Un Pokémon con Debilidad recibirá más daño cuando sea
+atacado por un tipo de Pokémon determinado. El efecto de la Debilidad
+se indica junto al tipo de Debilidad que tiene un Pokémon, si tiene alguna.
+
+en juego: Se considera que las cartas están en juego cuando están
+sobre la mesa. Las cartas de Pokémon Básico, de Evolución y de Energía
+no se pueden usar si no están en juego. (Tu mazo, tu pila de descartes y
+tus cartas de Premio no están en juego, pero tus Pokémon en Banca sí
+lo están).
+
+Energía, carta de: Cartas que proporcionan a tus Pokémon la
+Energía que necesitan para atacar. Consulta “Energía Básica, carta de”.
+
+Energía Básica, carta de: Una carta de Energía Planta , Fuego ,
+Agua , Rayo , Psíquica , Pelea , Oscuridad , Metal o Hada.
+
+Entrenador, carta de: Cartas especiales que se juegan para
+obtener ventajas en el juego. Consulta “Objeto, carta de”, “Herramienta
+Pokémon”, “Estadio, carta de” y “Partidario, carta de”.
+
+Entrenador Fósil, carta de: Un tipo especial de carta de
+Entrenador que funciona como un Pokémon Básico cuando se pone en
+juego. Las cartas de Entrenador Fósil en tu mano, en tu mazo o en tu
+pila de descartes no se consideran Pokémon Básicos.
+Envenenado, marcador de: Objeto que se coloca sobre un
+Pokémon para recordar que está Envenenado. Quita el marcador si el
+Pokémon se traslada a la Banca o evoluciona.
+Estadio, carta de: Un tipo de carta de Entrenador similar a una carta
+de Objeto, pero que se mantiene en juego después de jugarla. No puede
+haber más de 1 carta de Estadio en juego al mismo tiempo. Si entra en
+juego una nueva, se debe descartar la anterior y terminar sus efectos.
+Solo se puede jugar 1 carta de Estadio por turno.
+Estrella Prisma , carta de: Una poderosa carta con un par
+de reglas especiales. Las cartas de pueden ser Pokémon, cartas de
+Entrenador o cartas de Energía Especial. No podrás tener más de 1 carta
+de con el mismo nombre en tu mazo. Si una carta de tuviera que ir a
+la pila de descartes, se coloca en la Zona Perdida.
+Evolución, carta de: Carta que se juega encima de una carta de
+Pokémon Básico (o encima de otra carta de Evolución) para hacer que el
+Pokémon sea más fuerte.
+Evolución TURBO: Un tipo especial de Evolución. Cuando un
+Pokémon evoluciona a Pokémon TURBO, conserva los ataques,
+Habilidades, Debilidad, Resistencia y Costo de Retirada de su
+Evolución previa.
+Fuera de Combate: Un Pokémon queda Fuera de Combate si recibe
+un daño total superior o igual a sus Puntos de Salud. Ese Pokémon y
+todas las cartas unidas a él deben ir a la pila de descartes. Cuando uno
+de los Pokémon de tu rival quede Fuera de Combate, podrás tomar 1 de
+tus cartas de Premio.
+Habilidad: Una Habilidad es un efecto en un Pokémon que no es
+un ataque. Algunas se mantendrán activas todo el tiempo, mientras
+que otras hay que elegirlas para utilizarlas. Lee la descripción de cada
+Habilidad para asegurarte de que entiendes exactamente cómo y
+cuándo funciona.
+Herramienta Pokémon: Un tipo de carta de Entrenador similar
+a una carta de Objeto pero que se puede unir a tus Pokémon cuando
+se juega. No se puede unir más de 1 Herramienta Pokémon a cada
+Pokémon al mismo tiempo.
+involucionar: Hay ciertas cartas que pueden hacer involucionar
+a un Pokémon evolucionado, que es lo contrario a hacer evolucionar
+a un Pokémon. Cuando un Pokémon involuciona, pierde también sus
+Condiciones Especiales y cualquier otro efecto.
+Máquina Técnica: Un tipo de carta de Entrenador (un Objeto o
+Herramienta Pokémon) que se puede unir a un Pokémon. Una vez unida,
+tu Pokémon podrá usar el ataque de la Máquina Técnica como si
+fuera suyo. Las cartas de Máquina Técnica permanecen unidas salvo
+que el texto de la carta diga lo contrario.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+marcador GX : Objeto que sirve como recordatorio y que a veces
+viene incluido con el cartón de contadores de daño. Cuando uses tu
+ataque GX en tu partida, pon tu marcador GX boca abajo.
+
+marcador V-ASTRO: Objeto que sirve como recordatorio y que a
+veces viene incluido en los sobres de refuerzo de ciertas expansiones y
+otros productos. Cuando uses tu Poder V-ASTRO en tu partida, pon tu
+marcador V-ASTRO boca abajo.
+
+Objeto, carta de: Un tipo de carta de Entrenador. Sigue las
+instrucciones de la carta y luego descártala.
+
+partida de desempate: Hay ocasiones en las que ambos jugadores
+ganan al mismo tiempo. En esos casos, se juega una nueva partida en la
+que gana el primer jugador que tome 1 carta de Premio.
+
+Partidario, carta de: Un tipo de carta de Entrenador similar a una
+carta de Objeto. Solo se puede jugar 1 carta de Partidario por turno.
+
+paso entre turnos: Periodo de tiempo en el que el juego pasa de
+un jugador a otro, ahora conocido como Chequeo Pokémon. En este
+momento, se debe comprobar si hay algún Pokémon Envenenado,
+Quemado, Dormido, Paralizado o Fuera de Combate.
+
+pila de descartes: Las cartas descartadas. Estas cartas están siempre
+boca arriba. Cualquiera puede mirar estas cartas en cualquier momento.
+
+Poder Pokémon: Habilidad especial que tienen algunos Pokémon.
+Los Poderes Pokémon se dividen en dos categorías: Poké-Power y
+Poké-Body. Siempre incluyen las palabras “Poké-Power” o “Poké-Body”
+para diferenciarlos de los ataques.
+
+Poder V-ASTRO: Un poderoso tipo de ataque o Habilidad. Solo los
+Pokémon V-ASTRO tienen Poderes V-ASTRO. Los jugadores no pueden
+usar más de 1 Poder V-ASTRO en una partida.
+
+Poké-Body: Efecto que permanece activo desde que ese Pokémon
+entra en juego hasta que el Pokémon abandona el juego.
+
+Poké-Power: Poder que debes usar una vez por turno sobre el
+Pokémon Activo y los Pokémon en Banca. La mayoría de Poké-Powers
+se desactivan si el Pokémon tiene una Condición Especial.
+
+Pokémon: Los coloridos personajes que combaten por ti en el Juego
+de Cartas Coleccionables Pokémon. En el juego, estos personajes están
+representados mediante cartas de Pokémon Básico y cartas de Evolución.
+
+Pokémon Activo: Tu Pokémon en juego que no está en la Banca.
+El Pokémon Activo es el único que puede atacar.
+
+Pokémon Atacante: El Pokémon Activo al hacer un ataque.
+
+Pokémon Básico, carta de: Una carta que puedes jugar
+directamente de tu mano en tu turno. Consulta “Evolución, carta de”.
+
+Pokémon de dos tipos: Un Pokémon que es de dos tipos al
+mismo tiempo.
+
+Pokémon de Entrenadores: Pokémon cuyos nombres incluyen el
+nombre de un Entrenador, como Sandshrew de Brock. Un Sandshrew
+normal no puede evolucionar a un Sandslash de Brock, y un Sandshrew
+de Brock no puede evolucionar a un Sandslash normal. Esto se debe a
+que “Brock” forma parte del nombre.
+
+Pokémon Defensor: El Pokémon que recibe un ataque.
+
+Pokémon evolucionado: Un Pokémon en juego que tiene otro
+Pokémon debajo.
+Pokémon ex: Un Pokémon ex es un Pokémon muy poderoso, aunque
+tu rival toma 2 cartas de Premio cuando este Pokémon queda Fuera de
+Combate. Los Pokémon ex y los Pokémon -EX no son lo mismo.
+Pokémon ex Megaevolución: Un tipo de Pokémon ex muy
+poderoso con una desventaja: cuando uno de tus Pokémon ex
+Megaevolución queda Fuera de Combate, tu rival toma 3 cartas de Premio.
+Pokémon -EX Megaevolución: Un tipo de Pokémon -EX muy
+poderoso con una desventaja: cuando uno de tus Pokémon se convierte
+en un Pokémon -EX Megaevolución, tu turno termina.
+Pokémon ex Teracristal: Los Pokémon ex Teracristal son similares
+a los Pokémon ex, pero con un efecto adicional que los protege del
+daño de los ataques mientras se encuentren en tu Banca. Tu rival toma
+2 cartas de Premio cuando uno de tus Pokémon ex Teracristal queda
+Fuera de Combate.
+Pokémon -EX : Una forma de Pokémon más fuerte con un
+inconveniente especial. Cuando tu Pokémon -EX queda Fuera de Combate,
+tu rival toma 2 cartas de Premio en lugar de 1. Los Pokémon -EX y los
+Pokémon ex no son lo mismo.
+Pokémon- GX : Una forma de Pokémon más fuerte con un
+inconveniente especial. Cuando tu Pokémon- GX queda Fuera de Combate,
+tu rival toma 2 cartas de Premio en lugar de 1. Los Pokémon- GX tienen un
+poderoso ataque GX.
+Pokémon LEYENDA: Cartas dobles especiales que muestran a
+poderosos Pokémon legendarios. Ambas cartas deben jugarse juntas y
+al mismo tiempo.
+Pokémon Niv. X : Versiones más fuertes de un Pokémon normal que
+pueden colocarse encima de un Pokémon normal con el mismo nombre
+para añadir Habilidades extra al Pokémon original.
+Pokémon Radiante: Un Pokémon único que aparece con una
+tonalidad brillante especial y que siempre es un Pokémon Básico.
+No puedes tener más de 1 Pokémon Radiante en tu mazo.
+Pokémon Recreado, carta de: Una carta que se juega con la carta
+de Objeto Fósil asociada.
+Pokémon SP : Pokémon especial entrenado por un Entrenador
+determinado, con un símbolo en su nombre que indica quién es su
+propietario. La carta Zapdos es distinta de la carta Zapdos, ya que
+Zapdos es un Pokémon del Equipo Galaxia y el símbolo forma parte
+del nombre.
+Pokémon V: Los Pokémon V son poderosos Pokémon Básicos con
+altos PS y fuertes ataques. Estos impresionantes Pokémon tienen un
+gran impacto en el juego, pero conllevan un riesgo: cuando uno de tus
+Pokémon V queda Fuera de Combate, tu rival toma 2 cartas de Premio.
+REGLAS DEL JUEGO DE CARTAS COLECCIONABLES POKÉMON | 2026
+
+Pokémon VMAX: ¡Los Pokémon VMAX pueden llevar tus
+Pokémon V a otro nivel! Estas poderosísimas cartas vienen con
+monstruosos PS y ataques, ¡adecuados para estos Pokémon gigantes!
+La mayoría de los Pokémon VMAX tienen 300 PS o más, por lo que es
+muy difícil derrotarlos en combate. Pero ese increíble poder viene con
+un gran riesgo: si tu Pokémon VMAX queda Fuera de Combate, tu rival
+toma 3 cartas de Premio.
+
+Pokémon V-ASTRO: Los Pokémon V-ASTRO evolucionan de
+Pokémon V y conceden 2 cartas de Premio cuando quedan Fuera de
+Combate. Cada Pokémon V-ASTRO tiene un Poder V-ASTRO especial.
+
+Pokémon V-UNIÓN: Un enorme Pokémon formado por cuatro
+cartas diferentes. Para jugar un Pokémon V-UNIÓN, debes colocar
+sus cuatro partes en tu Banca al mismo tiempo, sacándolas de tu
+pila de descartes.
+
+Premio, cartas de: Las 6 cartas que se colocan boca abajo durante
+los preparativos para iniciar la partida. Cada vez que uno de los
+Pokémon de tu rival quede Fuera de Combate, tomarás 1 de tus cartas
+de Premio y la pondrás en tu mano (o 2 cartas de Premio en el caso
+de ciertos tipos de Pokémon, como los Pokémon ex). ¡Cuando tomes la
+última de tus cartas de Premio, ganarás la partida!
+
+Puntos de Salud (PS): Un número que tienen todos los Pokémon y
+que indica la cantidad de daño que puede recibir ese Pokémon antes de
+que quede Fuera de Combate.
+
+Quemado, marcador de: Objeto que se coloca sobre un Pokémon
+para recordar que está Quemado. Quita el marcador si el Pokémon se
+traslada a la Banca o evoluciona.
+
+Rasgo Antiguo: Los Rasgos Antiguos son poderes especiales (como
+Barrera Ω o Recuperación α) que aparecen en determinadas cartas
+de Pokémon, justo debajo del nombre del Pokémon. No son ataques
+ni Habilidades, por lo que aquellas cartas que impidan el uso de los
+ataques o Habilidades no afectarán a los Rasgos Antiguos.
+RELEVOS, carta de Partidario de equipo de: Un tipo especial
+de carta de Partidario en la que se unen dos Entrenadores en una sola
+carta. Además de su efecto principal, cada carta de Partidario de equipo
+de RELEVOS ofrece un efecto extra si descartas cartas adicionales
+cuando la juegas.
+RELEVOS, equipo de: Un equipo de RELEVOS es una clase especial
+de Pokémon- GX Básico con mucho más poder y una gran desventaja:
+cuando tu equipo de RELEVOS queda Fuera de Combate, tu rival toma
+3 cartas de Premio. Cada equipo de RELEVOS tiene un poderoso ataque
+GX que obtiene una bonificación si se cumple el requisito.
+Resistencia: Un Pokémon con Resistencia recibirá menos daño
+cuando sea atacado por un tipo de Pokémon determinado. La cantidad
+de Resistencia se indica junto al tipo de Resistencia que tiene un
+Pokémon, si tiene alguna.
+Retirada: Acción que consiste en cambiar tu Pokémon Activo por 1 de
+tus Pokémon en Banca. Para retirar a un Pokémon, debes descartar del
+Pokémon que se retira una cantidad de Energía equivalente a su Costo
+de Retirada. El costo aparece en la esquina inferior derecha de la carta.
+Solo se puede retirar 1 Pokémon por turno.
+unir: Acción que consiste en tomar una carta de tu mano y ponerla
+debajo de uno de tus Pokémon en juego.
+Zona Perdida: Las cartas que se mueven a la Zona Perdida dejan de
+poder utilizarse durante esa partida. Colócalas boca arriba fuera de la
+zona de juego.
