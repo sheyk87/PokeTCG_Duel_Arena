@@ -1597,18 +1597,24 @@ export class Duel {
 
       // Opponent draws prize
       if (opponent.prizes.length > 0) {
-        const drawingSide = side === 'player' ? 'opponent' : 'player';
-        const prizeIndex = opponent.prizes.length - 1;
-        this.animatePrizeToHand(drawingSide, prizeIndex);
+        if (side === 'player') {
+          // AI draws automatically
+          const drawingSide = 'opponent';
+          const prizeIndex = opponent.prizes.length - 1;
+          this.animatePrizeToHand(drawingSide, prizeIndex);
 
-        const prize = opponent.prizes.pop();
-        opponent.hand.push(prize);
-        this.addLog('system', `${opponent.name} tomó 1 carta de Premio.`);
+          const prize = opponent.prizes.pop();
+          opponent.hand.push(prize);
+          this.addLog('system', `${opponent.name} tomó 1 carta de Premio.`);
 
-        if (opponent.prizes.length === 0) {
-          const winner = side === 'player' ? 'opponent' : 'player';
-          this.endGame(winner, '¡Tomó todas sus cartas de Premio!');
-          return;
+          if (opponent.prizes.length === 0) {
+            this.endGame('opponent', '¡Tomó todas sus cartas de Premio!');
+            return;
+          }
+        } else {
+          // Local player must click manually, notify them
+          this.addLog('system', `¡Has debilitado a un Pokémon rival! Toma una carta de Premio haciendo clic en ella.`);
+          this.showWarning('¡Toma una carta de Premio!');
         }
       }
     }
@@ -1633,18 +1639,24 @@ export class Duel {
 
         // Opponent draws prize
         if (opponent.prizes.length > 0) {
-          const drawingSide = side === 'player' ? 'opponent' : 'player';
-          const prizeIndex = opponent.prizes.length - 1;
-          this.animatePrizeToHand(drawingSide, prizeIndex);
+          if (side === 'player') {
+            // AI draws automatically
+            const drawingSide = 'opponent';
+            const prizeIndex = opponent.prizes.length - 1;
+            this.animatePrizeToHand(drawingSide, prizeIndex);
 
-          const prize = opponent.prizes.pop();
-          opponent.hand.push(prize);
-          this.addLog('system', `${opponent.name} tomó 1 carta de Premio.`);
+            const prize = opponent.prizes.pop();
+            opponent.hand.push(prize);
+            this.addLog('system', `${opponent.name} tomó 1 carta de Premio.`);
 
-          if (opponent.prizes.length === 0) {
-            const winner = side === 'player' ? 'opponent' : 'player';
-            this.endGame(winner, '¡Tomó todas sus cartas de Premio!');
-            return;
+            if (opponent.prizes.length === 0) {
+              this.endGame('opponent', '¡Tomó todas sus cartas de Premio!');
+              return;
+            }
+          } else {
+            // Local player must click manually, notify them
+            this.addLog('system', `¡Has debilitado a un Pokémon rival! Toma una carta de Premio haciendo clic en ella.`);
+            this.showWarning('¡Toma una carta de Premio!');
           }
         }
       }
@@ -2160,7 +2172,32 @@ export class Duel {
       const slot = document.createElement('div');
       slot.className = `prize-slot ${i < count ? 'card-back' : 'empty'}`;
       slot.setAttribute('data-index', i);
+      
+      if (side === 'player' && i < count) {
+        slot.style.cursor = 'pointer';
+        slot.addEventListener('click', async () => {
+          const confirmDraw = await window.customConfirm('Tomar Premio', '¿Deseas tomar esta carta de Premio para llevarla a tu mano?');
+          if (confirmDraw) {
+            this.takePrizeManually(i);
+          }
+        });
+      }
+      
       el.appendChild(slot);
+    }
+  }
+
+  takePrizeManually(index) {
+    if (index >= 0 && index < this.player.prizes.length) {
+      const prizeCard = this.player.prizes.splice(index, 1)[0];
+      this.player.hand.push(prizeCard);
+      this.addLog('player', `Tomaste manualmente una carta de Premio. Premios restantes: ${this.player.prizes.length}`);
+      
+      // Check win condition in offline mode
+      if (this.player.prizes.length === 0) {
+        this.endGame('player', '¡Tomó todas sus cartas de Premio!');
+      }
+      this.updateBoardUI();
     }
   }
 

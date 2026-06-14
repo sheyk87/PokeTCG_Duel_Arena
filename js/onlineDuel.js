@@ -506,6 +506,10 @@ export class OnlineDuel extends Duel {
     this.sendGameAction('MANUAL_PASS_TURN', {});
   }
 
+  takePrizeManually(index) {
+    this.sendGameAction('MANUAL_TAKE_PRIZE', { prizeIndex: index });
+  }
+
   // Bindeos exclusivos de chat y lanzamiento de monedas en Sandbox
   setupOnlineManualBindings() {
     if (this.onlineManualBindingsDone) return;
@@ -1636,6 +1640,10 @@ export class OnlineDuel extends Duel {
 
         if (pkmn) {
           this.addLog(isLocal ? 'player' : 'opponent', `¡${pkmn.card.name} fue debilitado!`);
+          if (!isLocal) {
+            this.addLog('system', '¡Has debilitado a un Pokémon rival! Elige una de tus cartas de Premio para llevarla a tu mano.');
+            this.showWarning('¡Elige una carta de Premio!');
+          }
           target.discard.push(pkmn.card);
           pkmn.attachedEnergy.forEach(e => target.discard.push(e));
         }
@@ -1644,12 +1652,14 @@ export class OnlineDuel extends Duel {
       }
 
       case 'TAKE_PRIZE_RESOLVED': {
-        const { playerId, cardId, prizesLeft } = event;
+        const { playerId, cardId, prizesLeft, prizeIndex } = event;
         const isLocal = playerId === this.localPlayerId;
+        const idx = (prizeIndex !== undefined) ? prizeIndex : 0;
 
         if (isLocal) {
           if (this.player.prizes.length > 0) {
-            const pObj = this.player.prizes.shift();
+            const targetIdx = (idx >= 0 && idx < this.player.prizes.length) ? idx : 0;
+            const pObj = this.player.prizes.splice(targetIdx, 1)[0];
             const prizeCard = this.db.getCardById(cardId);
             if (prizeCard) pObj.card = prizeCard;
             this.player.hand.push(pObj);
@@ -1657,7 +1667,8 @@ export class OnlineDuel extends Duel {
           }
         } else {
           if (this.opponent.prizes.length > 0) {
-            this.opponent.prizes.pop();
+            const targetIdx = (idx >= 0 && idx < this.opponent.prizes.length) ? idx : 0;
+            this.opponent.prizes.splice(targetIdx, 1);
             this.opponent.hand.push({
               instanceId: `online-o-hand-${Date.now()}`,
               card: null,

@@ -78,16 +78,11 @@
       </div>
       <div class="menu-content menu-dashboard-layout">
 
-        <!-- Left Panel: Profile and Navigation -->
+        <!-- Column 1: Profile and Stats (Left Panel) -->
         <div class="menu-left-panel">
-          <div class="logo-container">
-            <div class="logo-glow"></div>
-            <h1 class="game-title">POKÉMON</h1>
-            <span class="game-subtitle">TCG DUEL ARENA</span>
-          </div>
-
+          <div class="menu-section-title" style="margin-top: 0;">Mi Perfil</div>
           <!-- User Profile widget in Menu -->
-          <div id="menu-user-profile" class="user-profile-widget" style="display: none; margin-bottom: 20px;">
+          <div id="menu-user-profile" class="user-profile-widget" style="display: none; margin-bottom: 15px;">
             <div class="user-profile-info"
               style="display: flex; align-items: center; gap: 15px; background: rgba(255, 255, 255, 0.05); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--color-border); width: 100%;">
               <span class="user-avatar" style="font-size: 1.5rem;">🏆</span>
@@ -101,94 +96,97 @@
             </div>
           </div>
 
-          <nav class="menu-nav">
-            <div class="menu-section-title">Combatir</div>
-            <div class="menu-row-buttons">
-              <button id="btn-play-ia" class="menu-btn primary">
-                <span class="btn-icon">🤖</span> Vs I.A. (Gary)
-              </button>
-              <button id="btn-play-online" class="menu-btn primary"
-                style="background: linear-gradient(135deg, var(--color-accent-green) 0%, #00b359 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 5px 20px rgba(0, 255, 135, 0.25);">
-                <span class="btn-icon">⚔️</span> Modo Online
-              </button>
+          <div class="menu-section-title">Estadísticas de la Arena</div>
+          <div class="news-stats-row">
+            <div class="stat-box">
+              <span class="stat-num" id="news-stat-players">0</span>
+              <span class="stat-label">Jugadores Online</span>
             </div>
-            <div class="menu-row-buttons private-rooms-row" style="margin-top: 10px; display: flex; gap: 10px; width: 100%;">
-              <button id="btn-create-private" class="menu-btn" style="flex: 1; margin: 0; background: rgba(59, 76, 202, 0.15); border: 1px solid rgba(59, 76, 202, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(59, 76, 202, 0.15);">
-                <span class="btn-icon">🏠</span> Crear Sala Privada
-              </button>
-              <button id="btn-join-private" class="menu-btn" style="flex: 1; margin: 0; background: rgba(59, 76, 202, 0.15); border: 1px solid rgba(59, 76, 202, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(59, 76, 202, 0.15);">
-                <span class="btn-icon">🔑</span> Unirse a Sala Privada
-              </button>
-            </div>
-
-
-            <div class="menu-section-title">Colección y Mazos</div>
-            <div class="menu-grid-buttons">
-              <button id="btn-goto-deckbuilder" class="menu-btn">
-                <span class="btn-icon">🎴</span> Editor de Mazos
-              </button>
-              <button id="btn-goto-encyclopedia" class="menu-btn">
-                <span class="btn-icon">📖</span> Enciclopedia
-              </button>
-            </div>
-
-            <div class="menu-section-title">Estadísticas y Personalización</div>
-            <div class="menu-grid-buttons">
-              <button id="btn-goto-leaderboard" class="menu-btn">
-                <span class="btn-icon">🏆</span> Leaderboard
-              </button>
-              <button id="btn-goto-history" class="menu-btn">
-                <span class="btn-icon">📜</span> Historial
-              </button>
-              <button id="btn-goto-battlefields" class="menu-btn menu-btn-full-width">
-                <span class="btn-icon">🖼️</span> Escenarios
-              </button>
-            </div>
-
-            <div class="menu-section-title">Ayuda y Reglas</div>
-            <div class="menu-grid-buttons">
-              <a href="Reglas/cri_rulebook_latam.pdf" target="_blank" class="menu-btn menu-btn-full-width" style="text-decoration: none;">
-                <span class="btn-icon">📕</span> Reglamento de Juego
-              </a>
-            </div>
-
-            <button id="btn-logout" class="menu-btn"
-              style="background: rgba(255, 62, 62, 0.08); border-color: rgba(255, 62, 62, 0.2); color: #ff8b8b; margin-top: 20px;">
-              <span class="btn-icon">🚪</span> Cerrar Sesión
-            </button>
-          </nav>
-        </div>
-
-        <!-- Right Panel: News and Community Stats -->
-        <div class="menu-right-panel">
-          <div class="dashboard-news-card">
-            <h2>Novedades de la Arena</h2>
-
-            <div class="news-stats-row">
-              <div class="stat-box">
-                <span class="stat-num" id="news-stat-players">0</span>
-                <span class="stat-label">Jugadores Online</span>
-              </div>
-              <div class="stat-box">
-                <span class="stat-num" id="news-stat-queue">0</span>
-                <span class="stat-label">Buscando Partida</span>
-              </div>
-            </div>
-
-            <div class="news-section">
-              <h3>Top 3 Entrenadores</h3>
-              <div id="news-top3-list" class="news-list">
-                <div class="news-loading">Cargando...</div>
-              </div>
-            </div>
-
-            <div class="news-section">
-              <h3>Últimos Duelos</h3>
-              <div id="news-duels-list" class="news-list">
-                <div class="news-loading">Cargando...</div>
-              </div>
+            <div class="stat-box">
+              <span class="stat-num" id="news-stat-queue">0</span>
+              <span class="stat-label">Buscando Partida</span>
             </div>
           </div>
+
+          <div class="news-section" style="margin-top: 10px;">
+            <h3>Top 3 Entrenadores</h3>
+            <div id="news-top3-list" class="news-list">
+              <div class="news-loading">Cargando...</div>
+            </div>
+          </div>
+
+          <div class="news-section">
+            <h3>Últimos Duelos</h3>
+            <div id="news-duels-list" class="news-list">
+              <div class="news-loading">Cargando...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Game modes & Logo (Center Panel) -->
+        <div class="menu-center-panel">
+          <div class="logo-container">
+            <div class="logo-glow"></div>
+            <h1 class="game-title">POKÉMON</h1>
+            <span class="game-subtitle">TCG DUEL ARENA</span>
+          </div>
+
+          <div class="menu-section-title" style="align-self: flex-start; width: 100%;">Combatir</div>
+          <div class="menu-row-buttons" style="width: 100%;">
+            <button id="btn-play-ia" class="menu-btn primary" style="height: 60px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <span class="btn-icon">🤖</span> Vs I.A. (Gary)
+            </button>
+            <button id="btn-play-online" class="menu-btn primary"
+              style="height: 60px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--color-accent-green) 0%, #00b359 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 5px 20px rgba(0, 255, 135, 0.25);">
+              <span class="btn-icon">⚔️</span> Modo Online
+            </button>
+          </div>
+          <div class="menu-row-buttons private-rooms-row" style="display: flex; gap: 15px; width: 100%;">
+            <button id="btn-create-private" class="menu-btn" style="flex: 1; margin: 0; background: rgba(59, 76, 202, 0.15); border: 1px solid rgba(59, 76, 202, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(59, 76, 202, 0.15); height: 50px; font-size: 0.95rem;">
+              <span class="btn-icon">🏠</span> Crear Sala Privada
+            </button>
+            <button id="btn-join-private" class="menu-btn" style="flex: 1; margin: 0; background: rgba(59, 76, 202, 0.15); border: 1px solid rgba(59, 76, 202, 0.3); color: #fff; box-shadow: 0 4px 15px rgba(59, 76, 202, 0.15); height: 50px; font-size: 0.95rem;">
+              <span class="btn-icon">🔑</span> Unirse a Sala Privada
+            </button>
+          </div>
+        </div>
+
+        <!-- Column 3: Utilities & Options (Right Panel) -->
+        <div class="menu-right-panel">
+          <div class="menu-section-title" style="margin-top: 0;">Colección y Mazos</div>
+          <div class="menu-grid-buttons">
+            <button id="btn-goto-deckbuilder" class="menu-btn" style="height: 48px; font-size: 0.9rem;">
+              <span class="btn-icon">🎴</span> Editor de Mazos
+            </button>
+            <button id="btn-goto-encyclopedia" class="menu-btn" style="height: 48px; font-size: 0.9rem;">
+              <span class="btn-icon">📖</span> Enciclopedia
+            </button>
+          </div>
+
+          <div class="menu-section-title">Estadísticas y Personalización</div>
+          <div class="menu-grid-buttons">
+            <button id="btn-goto-leaderboard" class="menu-btn" style="height: 48px; font-size: 0.9rem;">
+              <span class="btn-icon">🏆</span> Leaderboard
+            </button>
+            <button id="btn-goto-history" class="menu-btn" style="height: 48px; font-size: 0.9rem;">
+              <span class="btn-icon">📜</span> Historial
+            </button>
+            <button id="btn-goto-battlefields" class="menu-btn menu-btn-full-width" style="height: 48px; font-size: 0.9rem;">
+              <span class="btn-icon">🖼️</span> Escenarios
+            </button>
+          </div>
+
+          <div class="menu-section-title">Ayuda y Reglas</div>
+          <div class="menu-grid-buttons">
+            <a href="Reglas/cri_rulebook_latam.pdf" target="_blank" class="menu-btn menu-btn-full-width" style="text-decoration: none; height: 48px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span class="btn-icon">📕</span> Reglamento de Juego
+            </a>
+          </div>
+
+          <button id="btn-logout" class="menu-btn"
+            style="background: rgba(255, 62, 62, 0.08); border-color: rgba(255, 62, 62, 0.2); color: #ff8b8b; margin-top: auto; height: 48px; font-size: 0.9rem;">
+            <span class="btn-icon">🚪</span> Cerrar Sesión
+          </button>
         </div>
 
       </div>

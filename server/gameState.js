@@ -1013,18 +1013,6 @@ class ServerGameState {
         } else {
           player.bench[index] = null;
         }
-
-        // El oponente toma un premio
-        if (opponent.prizes.length > 0) {
-          const prizeCard = opponent.prizes.shift();
-          opponent.hand.push(prizeCard);
-          events.push({
-            type: 'TAKE_PRIZE_RESOLVED',
-            playerId: opponent.playerId,
-            cardId: prizeCard.card.id,
-            prizesLeft: opponent.prizes.length
-          });
-        }
       }
     };
 
@@ -1464,8 +1452,41 @@ class ServerGameState {
             type: 'TAKE_PRIZE_RESOLVED',
             playerId: player.playerId,
             cardId: prizeCard.card.id,
-            prizesLeft: player.prizes.length
+            prizesLeft: player.prizes.length,
+            prizeIndex: prizeIndex
           });
+
+          // Verificar condiciones de victoria por premios
+          const p1 = this.players[this.p1Id];
+          const p2 = this.players[this.p2Id];
+          if (p1 && p2) {
+            const p1PrizesWon = p1.prizes.length === 0;
+            const p2PrizesWon = p2.prizes.length === 0;
+
+            if (p1PrizesWon && p2PrizesWon) {
+              const winnerId = this.turnOwnerId;
+              this.resolveGameOver(winnerId, 'Ambos jugadores tomaron sus últimos premios. Gana el jugador atacante.');
+              events.push({
+                type: 'GAME_OVER_RESOLVED',
+                winnerId,
+                reason: 'Ambos jugadores tomaron sus últimos premios. Gana el jugador atacante.'
+              });
+            } else if (p1PrizesWon) {
+              this.resolveGameOver(p1.playerId, '¡Tomaste todas tus cartas de Premio!');
+              events.push({
+                type: 'GAME_OVER_RESOLVED',
+                winnerId: p1.playerId,
+                reason: `${p1.name} tomó todas sus cartas de Premio.`
+              });
+            } else if (p2PrizesWon) {
+              this.resolveGameOver(p2.playerId, '¡Tomaste todas tus cartas de Premio!');
+              events.push({
+                type: 'GAME_OVER_RESOLVED',
+                winnerId: p2.playerId,
+                reason: `${p2.name} tomó todas sus cartas de Premio.`
+              });
+            }
+          }
         }
         break;
       }

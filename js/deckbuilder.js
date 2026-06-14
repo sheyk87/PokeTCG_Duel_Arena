@@ -1044,6 +1044,52 @@ export class DeckBuilder {
     }
   }
 
+  async deleteDeck(deckId) {
+    if (this.savedDecks[deckId]?.isStarter) {
+      await window.customAlert('Acción no permitida', 'No puedes eliminar un mazo inicial.');
+      return;
+    }
+
+    const token = localStorage.getItem('pkmn_session_token');
+    if (token) {
+      try {
+        const res = await fetch('/api/decks/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ id: deckId })
+        });
+        if (!res.ok) {
+          throw new Error('Error al eliminar mazo en el servidor');
+        }
+      } catch (err) {
+        console.error('Failed to delete deck on server:', err);
+        await window.customAlert('Error', 'No se pudo eliminar el mazo en el servidor.');
+        return;
+      }
+    }
+
+    // Remove from memory
+    delete this.savedDecks[deckId];
+    
+    // Save locally
+    if (!token) {
+      this.saveDecksToStorage();
+    }
+
+    // Refresh UI
+    this.loadDeckSelectorDropdown();
+    
+    // If the deleted deck was the active one, load first deck or create new one
+    if (this.currentDeck.id === deckId) {
+      this.loadFirstDeck();
+    }
+
+    this.renderDecksList();
+  }
+
   renderDecksList() {
     const grid = document.getElementById('decks-list-grid');
     if (!grid) return;
@@ -1094,7 +1140,13 @@ export class DeckBuilder {
         tagsHtml += `<span class="deck-tag">Personalizado</span>`;
       }
 
+      let deleteHtml = '';
+      if (!deck.isStarter) {
+        deleteHtml = `<button class="deck-delete-btn" title="Eliminar Mazo">×</button>`;
+      }
+
       cardEl.innerHTML = `
+        ${deleteHtml}
         <img class="deck-box-img" src="cards/Decks/${boxImg}" alt="${deck.name}">
         <h3>${deck.name}</h3>
         <div class="deck-meta">${cardsCount} cartas</div>
@@ -1105,6 +1157,17 @@ export class DeckBuilder {
         this.loadDeck(deck.id);
         if (window.appController) window.appController.navigateTo('deckbuilder');
       });
+
+      if (!deck.isStarter) {
+        cardEl.querySelector('.deck-delete-btn').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const confirm = await window.customConfirm('Eliminar Mazo', `¿Estás seguro de que quieres eliminar el mazo "${deck.name}"?`);
+          if (confirm) {
+            this.deleteDeck(deck.id);
+          }
+        });
+      }
+
       grid.appendChild(cardEl);
     }
   }
