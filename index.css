@@ -3633,3 +3633,15 @@ button {
   text-align: left;
   margin-bottom: 2px;
 }
+
+/* Estilos para las salas privadas */
+.private-rooms-row .menu-btn {
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.private-rooms-row .menu-btn:hover {
+  background: rgba(59, 76, 202, 0.3) !important;
+  border-color: rgba(59, 76, 202, 0.6) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 76, 202, 0.3) !important;
+}

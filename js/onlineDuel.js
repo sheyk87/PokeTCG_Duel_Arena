@@ -12,6 +12,9 @@ export class OnlineDuel extends Duel {
     this.isProcessingQueue = false;
     this.messageQueue = [];
     this.isRetreating = false;
+    this.selectedDeckId = null;
+    this.currentPrivateRoomId = null;
+    this.currentPrivatePassword = null;
 
     // Bind UI elements for queue
     this.btnCancelQueue = document.getElementById('btn-cancel-queue');
@@ -20,21 +23,7 @@ export class OnlineDuel extends Duel {
     }
   }
 
-  // Override startMatchFlow to initiate WebSocket queue instead of instant local match
-  async startMatchFlow() {
-    const pDeckId = document.getElementById('player-duel-deck-select').value;
-    const pDeck = this.deckBuilder.savedDecks[pDeckId];
-    if (!pDeck) {
-      await window.customAlert('Mazo Inválido', 'Por favor selecciona un mazo válido.');
-      return;
-    }
-
-    document.getElementById('modal-deck-selector').classList.remove('active');
-
-    // Transition to screen-queue
-    this.appController.navigateTo('queue');
-
-    // Connect to WebSocket
+  setupWebSocket(onOpenCallback) {
     const token = localStorage.getItem('pkmn_session_token');
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws?token=${token}`;
@@ -44,11 +33,7 @@ export class OnlineDuel extends Duel {
 
     this.socket.onopen = () => {
       console.log('WebSocket connection opened.');
-      // Join search queue
-      this.socket.send(JSON.stringify({
-        type: 'JOIN_QUEUE',
-        payload: { deckId: pDeckId }
-      }));
+      if (onOpenCallback) onOpenCallback();
     };
 
     this.socket.onmessage = async (event) => {
@@ -56,12 +41,14 @@ export class OnlineDuel extends Duel {
         const msg = JSON.parse(event.data);
         const { type, payload } = msg;
 
+        // Emparejamiento normal
         if (type === 'QUEUE_STATUS') {
           const countEl = document.getElementById('queue-online-count');
           if (countEl) countEl.textContent = payload.onlineCount;
         }
 
         else if (type === 'MATCH_START') {
+          const pDeck = this.deckBuilder.savedDecks[this.selectedDeckId];
           await this.initOnlineMatch(payload, pDeck);
         }
 
@@ -78,6 +65,26 @@ export class OnlineDuel extends Duel {
           await window.customAlert('Error de Matchmaking', payload.message || 'Error en la partida.');
           this.leaveQueue();
         }
+
+        // Salas privadas
+        else if (type === 'PRIVATE_ROOM_CREATED') {
+          this.currentPrivateRoomId = payload.roomId;
+          const roomIdEl = document.getElementById('private-waiting-room-id');
+          const passEl = document.getElementById('private-waiting-password');
+          if (roomIdEl) roomIdEl.textContent = payload.roomId;
+          if (passEl) passEl.textContent = this.currentPrivatePassword || 'Ninguna';
+          this.appController.navigateTo('privateWaiting');
+        }
+
+        else if (type === 'PRIVATE_ROOM_ERROR') {
+          await window.customAlert('Sala Privada', payload.message || 'Error en la operación.');
+          this.closePrivateSocket();
+        }
+
+        else if (type === 'PRIVATE_ROOM_CANCELLED') {
+          this.closePrivateSocket();
+        }
+
       } catch (err) {
         console.error('Error handling WebSocket message:', err);
       }
@@ -97,6 +104,29 @@ export class OnlineDuel extends Duel {
     };
   }
 
+  // Override startMatchFlow to initiate WebSocket queue instead of instant local match
+  async startMatchFlow() {
+    const pDeckId = document.getElementById('player-duel-deck-select').value;
+    const pDeck = this.deckBuilder.savedDecks[pDeckId];
+    if (!pDeck) {
+      await window.customAlert('Mazo Inválido', 'Por favor selecciona un mazo válido.');
+      return;
+    }
+
+    document.getElementById('modal-deck-selector').classList.remove('active');
+    this.selectedDeckId = pDeckId;
+
+    // Transition to screen-queue
+    this.appController.navigateTo('queue');
+
+    this.setupWebSocket(() => {
+      this.socket.send(JSON.stringify({
+        type: 'JOIN_QUEUE',
+        payload: { deckId: pDeckId }
+      }));
+    });
+  }
+
   leaveQueue() {
     this.stopDuelTimers();
     this.messageQueue = [];
@@ -107,6 +137,50 @@ export class OnlineDuel extends Duel {
     }
     this.isOnlineMatch = false;
     this.appController.navigateTo('menu');
+  }
+
+  closePrivateSocket() {
+    this.stopDuelTimers();
+    this.messageQueue = [];
+    this.isProcessingQueue = false;
+    this.currentPrivateRoomId = null;
+    this.currentPrivatePassword = null;
+    if (this.socket) {
+      this.socket.close();
+    }
+    this.isOnlineMatch = false;
+    this.appController.navigateTo('menu');
+  }
+
+  createPrivateRoom(deckId, password) {
+    this.selectedDeckId = deckId;
+    this.currentPrivatePassword = password;
+    this.setupWebSocket(() => {
+      this.socket.send(JSON.stringify({
+        type: 'CREATE_PRIVATE_ROOM',
+        payload: { deckId, password }
+      }));
+    });
+  }
+
+  joinPrivateRoom(roomId, password, deckId) {
+    this.selectedDeckId = deckId;
+    this.setupWebSocket(() => {
+      this.socket.send(JSON.stringify({
+        type: 'JOIN_PRIVATE_ROOM',
+        payload: { roomId, password, deckId }
+      }));
+    });
+  }
+
+  cancelPrivateRoom() {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN && this.currentPrivateRoomId) {
+      this.socket.send(JSON.stringify({
+        type: 'CANCEL_PRIVATE_ROOM',
+        payload: { roomId: this.currentPrivateRoomId }
+      }));
+    }
+    this.closePrivateSocket();
   }
 
   // Setup initial state from MATCH_START server payload

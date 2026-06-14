@@ -393,6 +393,7 @@ const wss = new WebSocket.Server({ noServer: true });
 
 const QUEUE = []; // Array of { user, deckId, ws }
 const MATCHES = new Map(); // matchId -> Match details
+const PRIVATE_ROOMS = new Map(); // roomId -> { roomId, creator, password, createdBy }
 
 function broadcastQueueCount() {
   const count = QUEUE.length;
@@ -525,14 +526,18 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
   const p1Result = p1.user.id === winnerId ? 'won' : 'lost';
   const p2Result = p2.user.id === winnerId ? 'won' : 'lost';
 
-  // Save in DB
-  try {
-    await Promise.all([
-      db.recordBattle(p1.user.id, p2.user.name, p1Result, duration),
-      db.recordBattle(p2.user.id, p1.user.name, p2Result, duration)
-    ]);
-  } catch (err) {
-    console.error('Failed to record battle in database:', err);
+  // Save in DB (only if it's not a private match)
+  if (!match.isPrivate) {
+    try {
+      await Promise.all([
+        db.recordBattle(p1.user.id, p2.user.name, p1Result, duration),
+        db.recordBattle(p2.user.id, p1.user.name, p2Result, duration)
+      ]);
+    } catch (err) {
+      console.error('Failed to record battle in database:', err);
+    }
+  } else {
+    console.log(`Private match ${matchId} ended, bypassing database stats.`);
   }
 
   // Notify clients
@@ -662,6 +667,133 @@ wss.on('connection', (ws, request, session) => {
           }
         }
       }
+      else if (type === 'CREATE_PRIVATE_ROOM') {
+        const { deckId, password } = payload;
+        db.query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, session.id])
+          .then(rows => {
+            if (rows.length === 0) {
+              return ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'Mazo inválido o inexistente.' } }));
+            }
+            
+            let roomId;
+            do {
+              roomId = Math.floor(100000 + Math.random() * 900000).toString();
+            } while (PRIVATE_ROOMS.has(roomId));
+            
+            PRIVATE_ROOMS.set(roomId, {
+              roomId,
+              creator: { user: session, deckId, ws },
+              password: password || '',
+              createdBy: session.id
+            });
+            
+            ws.currentPrivateRoomId = roomId;
+            console.log(`Private room created: ${roomId} by ${session.name}`);
+            
+            ws.send(JSON.stringify({
+              type: 'PRIVATE_ROOM_CREATED',
+              payload: { roomId }
+            }));
+          })
+          .catch(err => {
+            console.error(err);
+            ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'Error interno de base de datos.' } }));
+          });
+      }
+
+      else if (type === 'JOIN_PRIVATE_ROOM') {
+        const { roomId, password, deckId } = payload;
+        const room = PRIVATE_ROOMS.get(roomId);
+        if (!room) {
+          return ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'La sala privada no existe o ha sido cerrada.' } }));
+        }
+
+        if (room.creator.user.id === session.id) {
+          return ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'No puedes unirte a tu propia sala.' } }));
+        }
+
+        if (room.password && room.password !== password) {
+          return ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'Contraseña incorrecta.' } }));
+        }
+
+        db.query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, session.id])
+          .then(rows => {
+            if (rows.length === 0) {
+              return ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'Mazo inválido o inexistente.' } }));
+            }
+
+            PRIVATE_ROOMS.delete(roomId);
+            room.creator.ws.currentPrivateRoomId = null;
+
+            const matchId = `match-${crypto.randomBytes(8).toString('hex')}`;
+            const p1 = room.creator;
+            const p2 = { user: session, deckId, ws };
+
+            return Promise.all([
+              db.query('SELECT cards FROM decks WHERE id = ?', [p1.deckId]),
+              db.query('SELECT cards FROM decks WHERE id = ?', [p2.deckId])
+            ]).then(([d1, d2]) => {
+              const deck1 = d1[0] ? (typeof d1[0].cards === 'string' ? JSON.parse(d1[0].cards) : d1[0].cards) : [];
+              const deck2 = d2[0] ? (typeof d2[0].cards === 'string' ? JSON.parse(d2[0].cards) : d2[0].cards) : [];
+
+              const shuffledDeck1 = expandAndShuffleDeck(deck1);
+              const shuffledDeck2 = expandAndShuffleDeck(deck2);
+
+              const goesFirstId = Math.random() < 0.5 ? p1.user.id : p2.user.id;
+              const gameState = new ServerGameState(matchId, p1.user.id, p1.user.name, shuffledDeck1, p2.user.id, p2.user.name, shuffledDeck2, goesFirstId);
+
+              const match = {
+                id: matchId,
+                player1: { user: p1.user, ws: p1.ws, deck: deck1 },
+                player2: { user: p2.user, ws: p2.ws, deck: deck2 },
+                goesFirstId,
+                startTime: Date.now(),
+                gameState,
+                isPrivate: true
+              };
+
+              MATCHES.set(matchId, match);
+
+              p1.ws.currentMatchId = matchId;
+              p2.ws.currentMatchId = matchId;
+
+              const startMsg = (player, opponent, goesFirst) => JSON.stringify({
+                type: 'MATCH_START',
+                payload: {
+                  matchId,
+                  opponentName: opponent.user.name,
+                  goesFirst,
+                  hand: gameState.players[player.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+                  prizes: gameState.players[player.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+                  deck: gameState.players[player.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+                  opponentHandSize: gameState.players[opponent.user.id].hand.length,
+                  opponentPrizesSize: gameState.players[opponent.user.id].prizes.length,
+                  opponentDeckSize: gameState.players[opponent.user.id].deck.length
+                }
+              });
+
+              p1.ws.send(startMsg(p1, p2, goesFirstId === p1.user.id));
+              p2.ws.send(startMsg(p2, p1, goesFirstId === p2.user.id));
+
+              console.log(`Matched private game: ${p1.user.name} vs ${p2.user.name}`);
+            });
+          })
+          .catch(err => {
+            console.error('Error starting private match:', err);
+            ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_ERROR', payload: { message: 'Error interno del servidor.' } }));
+          });
+      }
+
+      else if (type === 'CANCEL_PRIVATE_ROOM') {
+        const { roomId } = payload;
+        const room = PRIVATE_ROOMS.get(roomId);
+        if (room && room.creator.user.id === session.id) {
+          PRIVATE_ROOMS.delete(roomId);
+          ws.currentPrivateRoomId = null;
+          console.log(`Private room ${roomId} cancelled by creator.`);
+          ws.send(JSON.stringify({ type: 'PRIVATE_ROOM_CANCELLED' }));
+        }
+      }
     } catch (err) {
       console.error('WS parsing error:', err);
     }
@@ -670,6 +802,17 @@ wss.on('connection', (ws, request, session) => {
   ws.on('close', () => {
     console.log(`WS Connection closed for ${session.name}`);
     ACTIVE_ENTRENADORES.delete(session.id);
+
+    // Cleanup private room if creator disconnected
+    const prId = ws.currentPrivateRoomId;
+    if (prId) {
+      const room = PRIVATE_ROOMS.get(prId);
+      if (room && room.creator.user.id === session.id) {
+        PRIVATE_ROOMS.delete(prId);
+        console.log(`Private room ${prId} cleaned up due to creator disconnect.`);
+      }
+    }
+
     const idx = QUEUE.findIndex(q => q.user.id === session.id);
     if (idx !== -1) {
       QUEUE.splice(idx, 1);

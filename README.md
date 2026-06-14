@@ -22,6 +22,7 @@ El proyecto está construido enteramente sobre tecnologías web estándar (HTML5
 *   **Autenticación Flexible:** Inicio de sesión seguro con Google Sign-In (OAuth2) o mediante un inicio de sesión simulado (Mock Login) que agiliza el desarrollo y pruebas locales.
 *   **Editor de Mazos (Deck Builder):** Interfaz completa para crear y editar mazos de 60 cartas buscando en la base de datos de cartas cargada. Se incluyen cajas de mazos visuales.
 *   **Cola de Emparejamiento (Matchmaking Queue):** Sistema centralizado para emparejar jugadores de forma automática en salas virtuales aisladas.
+*   **Salas Privadas con Contraseña:** Posibilidad de crear salas personalizadas en las que se genera un ID único de 6 dígitos y una contraseña opcional para invitar amigos. Estas partidas están exentas del registro de estadísticas y victorias globales.
 *   **Tablero de Duelo Interactivo:** Tablero dinámico con soporte visual para cartas activas, banca (máximo 5 slots), cartas de premio, baraja, pila de descarte, mano del jugador, contadores de daño y estados especiales (Dormido, Paralizado, Envenenado).
 *   **Modo Sandbox Multijugador:** Acciones manuales libres para mover cartas de una zona a otra, robar, lanzar monedas y cambiar daños, permitiendo a los jugadores autogestionar el duelo y corregir cualquier situación imprevista.
 *   **Estadísticas e Historial:** Tabla de clasificación global (Leaderboard) en tiempo real basada en victorias totales y tasa de juegos, acompañada de un historial detallado de partidas por usuario.
@@ -96,6 +97,13 @@ Las interacciones estáticas (autenticación, estadísticas, guardado de mazos) 
 4.  **Aislamiento en Sala:** Al emparejarlos, se crea una sala virtual en el servidor identificada por un `matchId` aleatorio y se añade al mapa de partidas activas `MATCHES`. Ambas conexiones WebSocket guardan el identificador `ws.currentMatchId`.
 5.  **Carga Segura de Estado:** El servidor carga y mezcla los mazos desde la base de datos aplicando la mezcla de Fisher-Yates, decide quién inicia lanzando una moneda y envía a cada cliente el mensaje `MATCH_START`. Para evitar hacks de memoria en el cliente, el servidor **sólo envía los datos descifrados que el jugador correspondiente tiene derecho a ver** (su mano/premios, pero ocultando la identidad de la mano/premios del rival).
 6.  **Desconexión y Forfeit:** Si un jugador cierra voluntaria o involuntariamente su WebSocket durante la partida, el servidor lo interpreta como un abandono automático y otorga la victoria al oponente.
+
+### Sistema de Salas Privadas:
+
+*   **Creación de Sala (`CREATE_PRIVATE_ROOM`):** Al configurar una sala privada, el cliente envía su mazo y una contraseña opcional. El servidor genera un código numérico aleatorio único de 6 dígitos, registra la sala en memoria (`PRIVATE_ROOMS`) y sitúa al jugador en una pantalla de espera que muestra los datos de la sala. Si el creador cancela la espera o se desconecta de la red, la sala privada es destruida inmediatamente en el servidor.
+*   **Unirse a Sala (`JOIN_PRIVATE_ROOM`):** El contrincante ingresa el ID de sala, la contraseña correspondiente y elige su mazo. Si la sala existe, la contraseña es correcta, los jugadores son distintos y el mazo es válido, el servidor crea la partida virtual aislada con la bandera `isPrivate = true` e inicia el combate de forma instantánea. Si hay errores (contraseña incorrecta, ID inexistente, etc.), el sistema notifica al retador mediante un mensaje modal de alerta y aborta la conexión.
+*   **Exención de Estadísticas**: Cuando finaliza una partida con `isPrivate = true`, el servidor notifica los resultados normales a ambos clientes, pero **no registra el combate en la base de datos ni incrementa el contador de victorias** de los jugadores, garantizando que los duelos amistosos no influyan en el Leaderboard global.
+
 
 ---
 

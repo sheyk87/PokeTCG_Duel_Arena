@@ -111,7 +111,8 @@ class AppController {
       battlefields: document.getElementById('screen-battlefields'),
       queue: document.getElementById('screen-queue'),
       leaderboard: document.getElementById('screen-leaderboard'),
-      history: document.getElementById('screen-history')
+      history: document.getElementById('screen-history'),
+      privateWaiting: document.getElementById('screen-private-waiting')
     };
   }
 
@@ -209,6 +210,20 @@ class AppController {
     }
   }
 
+  populateDeckSelect(selectElementId) {
+    const select = document.getElementById(selectElementId);
+    if (!select) return;
+    select.innerHTML = '';
+    const saved = this.deckBuilder.savedDecks;
+    for (const id in saved) {
+      const deck = saved[id];
+      const opt = document.createElement('option');
+      opt.value = deck.id;
+      opt.textContent = deck.name;
+      select.appendChild(opt);
+    }
+  }
+
   bindNavigation() {
     // General back to menu buttons
     document.querySelectorAll('.btn-back-menu').forEach(btn => {
@@ -279,6 +294,56 @@ class AppController {
 
     // Logout
     document.getElementById('btn-logout')?.addEventListener('click', () => this.logout());
+
+    // Close private modals
+    document.querySelectorAll('#modal-create-private .modal-close-btn, #modal-join-private .modal-close-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.target.closest('.modal-overlay').classList.remove('active');
+      });
+    });
+
+    // Create Private Room modal trigger
+    document.getElementById('btn-create-private')?.addEventListener('click', () => {
+      this.populateDeckSelect('create-private-deck-select');
+      document.getElementById('create-private-password-input').value = '';
+      document.getElementById('modal-create-private').classList.add('active');
+    });
+
+    // Create Private Room submit trigger
+    document.getElementById('btn-submit-create-private')?.addEventListener('click', () => {
+      const deckId = document.getElementById('create-private-deck-select').value;
+      const password = document.getElementById('create-private-password-input').value.trim();
+      document.getElementById('modal-create-private').classList.remove('active');
+      this.onlineDuel.createPrivateRoom(deckId, password);
+    });
+
+    // Join Private Room modal trigger
+    document.getElementById('btn-join-private')?.addEventListener('click', () => {
+      this.populateDeckSelect('join-private-deck-select');
+      document.getElementById('join-private-room-id-input').value = '';
+      document.getElementById('join-private-password-input').value = '';
+      document.getElementById('modal-join-private').classList.add('active');
+    });
+
+    // Join Private Room submit trigger
+    document.getElementById('btn-submit-join-private')?.addEventListener('click', () => {
+      const roomId = document.getElementById('join-private-room-id-input').value.trim();
+      const password = document.getElementById('join-private-password-input').value.trim();
+      const deckId = document.getElementById('join-private-deck-select').value;
+
+      if (!roomId) {
+        window.customAlert('Datos incompletos', 'Por favor ingresa el ID de la sala privada.');
+        return;
+      }
+
+      document.getElementById('modal-join-private').classList.remove('active');
+      this.onlineDuel.joinPrivateRoom(roomId, password, deckId);
+    });
+
+    // Cancel Private Room Waiting
+    document.getElementById('btn-cancel-private-waiting')?.addEventListener('click', () => {
+      this.onlineDuel.cancelPrivateRoom();
+    });
   }
 
   // Session verification on load
