@@ -1,10 +1,11 @@
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 
 const config = {
-  host: 'localhost',
-  user: 'root',
-  password: 'R00tMySQL',
-  database: 'pkmn_cards_db'
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'R00tMySQL',
+  database: process.env.DB_NAME || 'pkmn_cards_db'
 };
 
 let pool;
@@ -214,6 +215,8 @@ async function getUserLeaderboardPosition(userId) {
 }
 
 module.exports = {
+  config,
+  STARTER_DECKS,
   initDB,
   query,
   findUserById,
