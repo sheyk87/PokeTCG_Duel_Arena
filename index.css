@@ -1264,7 +1264,7 @@ button {
   top: 0;
   left: 0;
   border-radius: 6px;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.2s;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
@@ -1274,6 +1274,7 @@ button {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
+  border-radius: 6px;
 }
 
 .active-slot .board-card {
@@ -1310,7 +1311,7 @@ button {
   left: 2px;
   display: flex;
   gap: 2px;
-  z-index: 5;
+  z-index: 20;
   pointer-events: none;
 }
 
@@ -1342,7 +1343,7 @@ button {
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(255, 62, 62, 0.4);
   border: 1.5px solid #fff;
-  z-index: 6;
+  z-index: 25;
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -1368,7 +1369,7 @@ button {
   text-transform: uppercase;
   color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  z-index: 6;
+  z-index: 30;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -1387,6 +1388,10 @@ button {
 .status-badge.paralyzed {
   background: #e1b107;
   color: #000;
+}
+
+.status-badge.burned {
+  background: #f25c05;
 }
 
 /* Sleep rotated card layout */
@@ -3644,4 +3649,202 @@ button {
   border-color: rgba(59, 76, 202, 0.6) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(59, 76, 202, 0.3) !important;
+}
+
+/* --- Decks List Screen Styles --- */
+.decks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.deck-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.deck-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.deck-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  border-color: rgba(59, 76, 202, 0.5);
+  box-shadow: 0 12px 40px 0 rgba(59, 76, 202, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.deck-card:hover::before {
+  opacity: 1;
+}
+
+.deck-card.create-new {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+  justify-content: center;
+  min-height: 280px;
+}
+
+.deck-card.create-new:hover {
+  border-color: var(--color-secondary);
+  background: rgba(59, 76, 202, 0.05);
+}
+
+.deck-card.create-new .create-icon {
+  font-size: 3.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 15px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.deck-card.create-new:hover .create-icon {
+  transform: scale(1.1);
+  color: var(--color-secondary);
+}
+
+.deck-card.create-new h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.deck-card .deck-box-img {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
+  transition: transform 0.3s ease;
+  z-index: 2;
+}
+
+.deck-card:hover .deck-box-img {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.deck-card h3 {
+  margin: 5px 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.deck-card .deck-meta {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  z-index: 2;
+}
+
+.deck-card .deck-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  z-index: 2;
+}
+
+.deck-card .deck-tag {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  color: #ddd;
+}
+
+/* --- Deckbuilder Cover Selector Styles --- */
+.deck-box-selector-container {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.deck-box-selector-container .selector-title {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.deck-box-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.deck-box-selector .box-option {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+}
+
+.deck-box-selector .box-option:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.deck-box-selector .box-option.active {
+  border-color: var(--color-secondary);
+  background: rgba(59, 76, 202, 0.15);
+  box-shadow: 0 0 10px rgba(59, 76, 202, 0.5);
+  transform: scale(1.05);
+}
+
+.deck-box-selector .box-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.deck-box-selector .box-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

@@ -962,6 +962,7 @@ export class OnlineDuel extends Duel {
     const conditions = [
       { label: 'Normal', value: null },
       { label: 'Envenenado', value: 'poisoned' },
+      { label: 'Quemado', value: 'burned' },
       { label: 'Dormido', value: 'asleep' },
       { label: 'Paralizado', value: 'paralyzed' },
       { label: 'Confundido', value: 'confused' }
@@ -1189,9 +1190,12 @@ export class OnlineDuel extends Duel {
         const { type, payload } = msg;
 
         if (type === 'STATE_UPDATE') {
-          const { events } = payload;
+          const { events, stateSnapshot } = payload;
           for (const event of events) {
             await this.handleStateUpdateEvent(event);
+          }
+          if (stateSnapshot) {
+            this.syncStateWithSnapshot(stateSnapshot);
           }
         } else if (type === 'ACTION_REJECTED') {
           const { reason } = payload;
@@ -1608,7 +1612,7 @@ export class OnlineDuel extends Duel {
 
           if (statusApplied) {
             defender.specialCondition = statusApplied;
-            const statusLabels = { confused: 'Confundido', asleep: 'Dormido', paralyzed: 'Paralizado', poisoned: 'Envenenado' };
+            const statusLabels = { confused: 'Confundido', asleep: 'Dormido', paralyzed: 'Paralizado', poisoned: 'Envenenado', burned: 'Quemado' };
             this.addLog(isLocal ? 'opponent' : 'player', `${defender.card.name} ahora está ${statusLabels[statusApplied] || statusApplied}.`);
           }
         }
@@ -1725,6 +1729,30 @@ export class OnlineDuel extends Duel {
         if (target.active) {
           target.active.damage += damage;
           this.addLog(isLocal ? 'player' : 'opponent', `El veneno le causó ${damage} de daño a ${target.active.card.name}.`);
+        }
+        this.updateBoardUI();
+        break;
+      }
+
+      case 'BURN_DAMAGE': {
+        const { playerId, damage } = event;
+        const isLocal = playerId === this.localPlayerId;
+        const target = isLocal ? this.player : this.opponent;
+        if (target.active) {
+          target.active.damage += damage;
+          this.addLog(isLocal ? 'player' : 'opponent', `La quemadura le causó ${damage} de daño a ${target.active.card.name}.`);
+        }
+        this.updateBoardUI();
+        break;
+      }
+
+      case 'BURN_CURED': {
+        const { playerId } = event;
+        const isLocal = playerId === this.localPlayerId;
+        const target = isLocal ? this.player : this.opponent;
+        if (target.active) {
+          target.active.specialCondition = null;
+          this.addLog(isLocal ? 'player' : 'opponent', `${target.active.card.name} se curó de la quemadura.`);
         }
         this.updateBoardUI();
         break;
@@ -1862,7 +1890,7 @@ export class OnlineDuel extends Duel {
         const pkmn = targetZone === 'active' ? target.active : target.bench[targetIndex];
         if (pkmn) {
           pkmn.specialCondition = condition;
-          const condLabels = { poisoned: 'envenenado', asleep: 'dormido', paralyzed: 'paralizado', confused: 'confundido' };
+          const condLabels = { poisoned: 'envenenado', asleep: 'dormido', paralyzed: 'paralizado', confused: 'confundido', burned: 'quemado' };
           const label = condition ? `ahora está ${condLabels[condition] || condition}` : 'está normal';
           this.addLog('system', `${relativeTargetSide === 'player' ? 'Tu' : this.opponentName} ${pkmn.card.name} ${label}.`);
         }
@@ -1905,6 +1933,13 @@ export class OnlineDuel extends Duel {
           const oldActive = targetState.active;
           targetState.active = cardObj;
           if (oldActive) targetState.hand.push(oldActive);
+          
+          // Clear must-promote phase if we are promoting a Pokemon manually
+          if (relativeTargetSide === 'player' && this.phase === 'must-promote') {
+            this.phase = 'active';
+          } else if (relativeTargetSide === 'opponent' && this.phase === 'opponent-must-promote') {
+            this.phase = 'active';
+          }
         } else if (targetZone === 'trainer') {
           if (relativeTargetSide === 'player') {
             this.playerActiveTrainer = cardObj;
@@ -2072,6 +2107,117 @@ export class OnlineDuel extends Duel {
         break;
       }
     }
+  }
+
+  syncStateWithSnapshot(snapshot) {
+    if (!snapshot || !snapshot.players) return;
+
+    console.log('[OnlineDuel] Synchronizing local state with server snapshot:', snapshot);
+
+    // Sync game phase and turn ownership
+    if (snapshot.phase === 'active') {
+      this.phase = 'active';
+    } else if (snapshot.phase === 'setup') {
+      this.phase = 'setup';
+    } else if (snapshot.phase === 'game-over') {
+      this.phase = 'game-over';
+    } else if (snapshot.phase === 'must-promote-p1' || snapshot.phase === 'must-promote-p2') {
+      const p1Id = Object.keys(snapshot.players)[0];
+      const p2Id = Object.keys(snapshot.players)[1];
+      const targetId = snapshot.phase === 'must-promote-p1' ? p1Id : p2Id;
+      this.phase = (targetId === this.localPlayerId) ? 'must-promote' : 'opponent-must-promote';
+    }
+
+    this.turnNumber = snapshot.turnNumber;
+
+    // Helper: Map card snapshot to card object
+    const mapCardFromSnapshot = (cardSnap) => {
+      if (!cardSnap) return null;
+      const originalCard = this.db.getCardById(cardSnap.cardId);
+      if (!originalCard) {
+        console.warn(`Card ID not found in database for snapshot: ${cardSnap.cardId}`);
+        return null;
+      }
+      return {
+        instanceId: cardSnap.instanceId,
+        card: originalCard,
+        damage: cardSnap.damage || 0,
+        specialCondition: cardSnap.specialCondition || null,
+        attachedEnergy: (cardSnap.attachedEnergy || []).map(energyId => {
+          return this.db.getCardById(energyId);
+        }).filter(e => !!e),
+        turnPlaced: 0
+      };
+    };
+
+    // Sync each player
+    for (const id in snapshot.players) {
+      const isLocal = id === this.localPlayerId;
+      const pSnap = snapshot.players[id];
+      const targetState = isLocal ? this.player : this.opponent;
+
+      if (!targetState) continue;
+
+      // Sync active Pokémon
+      targetState.active = mapCardFromSnapshot(pSnap.active);
+
+      // Sync active Trainer card
+      const activeTrainer = mapCardFromSnapshot(pSnap.activeTrainer);
+      if (isLocal) {
+        this.playerActiveTrainer = activeTrainer;
+      } else {
+        this.opponentActiveTrainer = activeTrainer;
+      }
+
+      // Sync bench Pokémon
+      for (let i = 0; i < 5; i++) {
+        targetState.bench[i] = pSnap.bench[i] ? mapCardFromSnapshot(pSnap.bench[i]) : null;
+      }
+
+      // Sync discard pile
+      targetState.discard = (pSnap.discard || []).map(cardId => this.db.getCardById(cardId)).filter(c => !!c);
+
+      // Sync sizes of deck, hand, and prizes
+      if (isLocal) {
+        if (pSnap.handSize !== targetState.hand.length) {
+          console.warn(`Local hand size mismatch. Local: ${targetState.hand.length}, Server: ${pSnap.handSize}`);
+        }
+      } else {
+        const handDiff = pSnap.handSize - targetState.hand.length;
+        if (handDiff > 0) {
+          for (let i = 0; i < handDiff; i++) {
+            targetState.hand.push({ instanceId: `opponent-hand-dummy-${Date.now()}-${i}`, card: { name: 'Card', supertype: 'Unknown' } });
+          }
+        } else if (handDiff < 0) {
+          targetState.hand.splice(pSnap.handSize);
+        }
+      }
+
+      // Adjust prizes length
+      const prizesDiff = pSnap.prizesSize - targetState.prizes.length;
+      if (prizesDiff > 0) {
+        for (let i = 0; i < prizesDiff; i++) {
+          targetState.prizes.push({ instanceId: `opponent-prize-dummy-${Date.now()}-${i}`, card: { name: 'Prize', supertype: 'Unknown' } });
+        }
+      } else if (prizesDiff < 0) {
+        targetState.prizes.splice(pSnap.prizesSize);
+      }
+      
+      // Adjust deck length if needed
+      if (pSnap.deckSize !== targetState.deck.length) {
+        const deckDiff = pSnap.deckSize - targetState.deck.length;
+        if (deckDiff > 0) {
+          for (let i = 0; i < deckDiff; i++) {
+            targetState.deck.push({ instanceId: `deck-dummy-${Date.now()}-${i}`, card: { name: 'Deck Card', supertype: 'Unknown' } });
+          }
+        } else if (deckDiff < 0) {
+          targetState.deck.splice(pSnap.deckSize);
+        }
+      }
+    }
+
+    this.updateBoardUI();
+    this.renderActionPanel();
   }
 }
 

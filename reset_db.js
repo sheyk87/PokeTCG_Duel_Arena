@@ -7,6 +7,9 @@ async function run() {
   console.log('===========================================================');
 
   try {
+    // Inicializar base de datos y correr migraciones
+    await db.initDB();
+
     // 1. Eliminar todos los combates registrados
     console.log('Eliminando el historial de combates (battles)...');
     const deleteBattlesResult = await db.query('DELETE FROM battles');
@@ -39,8 +42,8 @@ async function run() {
           const deckId = `starter-${user.id}-${i + 1}`;
           
           await db.query(
-            'INSERT INTO decks (id, user_id, name, cards, is_starter) VALUES (?, ?, ?, ?, TRUE)',
-            [deckId, user.id, deck.name, JSON.stringify(deck.cards)]
+            'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image) VALUES (?, ?, ?, ?, TRUE, ?)',
+            [deckId, user.id, deck.name, JSON.stringify(deck.cards), 'pokeball.png']
           );
           seededDecksCount++;
         }

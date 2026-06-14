@@ -116,6 +116,32 @@ export class DeckBuilder {
     document.getElementById('btn-export-deck')?.addEventListener('click', () => this.openExportModal());
     this.modalIO?.querySelector('.modal-close-btn')?.addEventListener('click', () => this.closeIOModal());
     document.getElementById('btn-deck-io-submit')?.addEventListener('click', () => this.submitIOAction());
+
+    // Bind box cover option clicks
+    const boxSelector = document.getElementById('deck-box-selector');
+    if (boxSelector) {
+      boxSelector.addEventListener('click', (e) => {
+        const option = e.target.closest('.box-option');
+        if (!option) return;
+        if (this.currentDeck.isStarter) {
+          window.customAlert?.('Info', 'No puedes cambiar el diseño de caja de un mazo inicial.');
+          return;
+        }
+        
+        // Update boxImage in currentDeck
+        const boxName = option.dataset.box;
+        this.currentDeck.boxImage = boxName;
+        
+        // Visual updates
+        boxSelector.querySelectorAll('.box-option').forEach(opt => {
+          if (opt.dataset.box === boxName) {
+            opt.classList.add('active');
+          } else {
+            opt.classList.remove('active');
+          }
+        });
+      });
+    }
   }
 
   onShow() {
@@ -391,6 +417,7 @@ export class DeckBuilder {
         id: 'starter-overgrowth',
         name: 'Overgrowth (Grass/Water Starter)',
         isStarter: true,
+        boxImage: 'pokeball.png',
         cards: [
           { cardId: 'base1-2', count: 2 },   // Blastoise (Stage 2)
           { cardId: 'base1-42', count: 3 },  // Wartortle (Stage 1)
@@ -415,6 +442,7 @@ export class DeckBuilder {
         id: 'starter-zap',
         name: 'Zap! (Lightning/Psychic Starter)',
         isStarter: true,
+        boxImage: 'pokeball.png',
         cards: [
           { cardId: 'base1-1', count: 2 },   // Alakazam (Stage 2)
           { cardId: 'base1-32', count: 3 },  // Kadabra (Stage 1)
@@ -453,7 +481,8 @@ export class DeckBuilder {
               id: d.id,
               name: d.name,
               cards: cardsObj,
-              isStarter: !!d.is_starter
+              isStarter: !!d.is_starter,
+              boxImage: d.box_image || 'pokeball.png'
             };
           });
           this.loadDeckSelectorDropdown();
@@ -469,6 +498,11 @@ export class DeckBuilder {
     try {
       const saved = localStorage.getItem('pkmn_tcg_decks');
       this.savedDecks = saved ? JSON.parse(saved) : {};
+      for (const id in this.savedDecks) {
+        if (!this.savedDecks[id].boxImage) {
+          this.savedDecks[id].boxImage = 'pokeball.png';
+        }
+      }
     } catch (e) {
       console.error('Failed to parse saved decks:', e);
       this.savedDecks = {};
@@ -508,7 +542,8 @@ export class DeckBuilder {
     this.currentDeck = {
       id: 'custom-' + Date.now(),
       name: 'Mazo Personalizado ' + (Object.keys(this.savedDecks).length + 1),
-      cards: []
+      cards: [],
+      boxImage: 'pokeball.png'
     };
     this.renderDeckWorkspace();
   }
@@ -540,7 +575,8 @@ export class DeckBuilder {
           body: JSON.stringify({
             id: this.currentDeck.id,
             name: this.currentDeck.name,
-            cards: this.currentDeck.cards
+            cards: this.currentDeck.cards,
+            boxImage: this.currentDeck.boxImage || 'pokeball.png'
           })
         });
       } catch (err) {
@@ -752,6 +788,25 @@ export class DeckBuilder {
       }
     }
 
+    // Render box cover visual state
+    const boxSelector = document.getElementById('deck-box-selector');
+    if (boxSelector) {
+      const activeBox = this.currentDeck.boxImage || 'pokeball.png';
+      boxSelector.querySelectorAll('.box-option').forEach(opt => {
+        if (opt.dataset.box === activeBox) {
+          opt.classList.add('active');
+        } else {
+          opt.classList.remove('active');
+        }
+        
+        if (this.currentDeck.isStarter) {
+          opt.classList.add('disabled');
+        } else {
+          opt.classList.remove('disabled');
+        }
+      });
+    }
+
     if (!this.deckListTbody) return;
     this.deckListTbody.innerHTML = '';
 
@@ -787,11 +842,14 @@ export class DeckBuilder {
       
       const typeStyle = card.types ? `var(--type-${card.types[0].toLowerCase()})` : `var(--type-${card.supertype.toLowerCase()})`;
 
+      const setObj = this.db.sets.find(s => s.id === card.setId);
+      const setName = setObj ? setObj.name : (card.setId || 'Unknown');
+
       row.innerHTML = `
         <td style="font-weight: 700;">${count}</td>
         <td><strong>${card.name}</strong></td>
         <td><span class="meta-tag type-tag" style="background-color: ${typeStyle}; font-size: 0.75rem; padding: 2px 6px;">${card.types ? card.types[0] : card.supertype}</span></td>
-        <td>${card.number}/${card.printedTotal}</td>
+        <td>${card.number}/${setName}</td>
         <td>
           <button class="deck-remove-btn" data-id="${card.id}">-</button>
         </td>
@@ -970,7 +1028,8 @@ export class DeckBuilder {
         this.currentDeck = {
           id: 'custom-' + Date.now(),
           name: json.name || 'Mazo Importado',
-          cards: cleanedCards
+          cards: cleanedCards,
+          boxImage: json.boxImage || 'pokeball.png'
         };
 
         this.renderCatalog();
@@ -982,6 +1041,71 @@ export class DeckBuilder {
       }
     } else {
       this.closeIOModal();
+    }
+  }
+
+  renderDecksList() {
+    const grid = document.getElementById('decks-list-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    // 1. Render card "Crear Nuevo Mazo"
+    const createCard = document.createElement('div');
+    createCard.className = 'deck-card create-new';
+    createCard.innerHTML = `
+      <div class="create-icon">+</div>
+      <h3>Crear Nuevo Mazo</h3>
+    `;
+    createCard.addEventListener('click', () => {
+      this.createNewDeck();
+      if (window.appController) window.appController.navigateTo('deckbuilder');
+    });
+    grid.appendChild(createCard);
+
+    // 2. Render each saved deck
+    for (const id in this.savedDecks) {
+      const deck = this.savedDecks[id];
+      const cardEl = document.createElement('div');
+      cardEl.className = 'deck-card';
+      
+      const cardsCount = deck.cards.reduce((sum, entry) => sum + entry.count, 0);
+      const boxImg = deck.boxImage || 'pokeball.png';
+      
+      // Categorize deck: check types in cards to build tags
+      const energyTypes = new Set();
+      deck.cards.forEach(entry => {
+        const card = this.db.getCardById(entry.cardId);
+        if (card && card.supertype === 'Energy') {
+          const type = card.name.replace(' Energy', '');
+          if (type && type !== 'Double Colorless') {
+            energyTypes.add(type);
+          }
+        }
+      });
+      
+      let tagsHtml = '';
+      if (deck.isStarter) {
+        tagsHtml += `<span class="deck-tag" style="background: rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.4); color: #ffd700;">Starter</span>`;
+      }
+      energyTypes.forEach(type => {
+        tagsHtml += `<span class="deck-tag">${type}</span>`;
+      });
+      if (energyTypes.size === 0 && !deck.isStarter) {
+        tagsHtml += `<span class="deck-tag">Personalizado</span>`;
+      }
+
+      cardEl.innerHTML = `
+        <img class="deck-box-img" src="cards/Decks/${boxImg}" alt="${deck.name}">
+        <h3>${deck.name}</h3>
+        <div class="deck-meta">${cardsCount} cartas</div>
+        <div class="deck-tags">${tagsHtml}</div>
+      `;
+
+      cardEl.addEventListener('click', () => {
+        this.loadDeck(deck.id);
+        if (window.appController) window.appController.navigateTo('deckbuilder');
+      });
+      grid.appendChild(cardEl);
     }
   }
 }

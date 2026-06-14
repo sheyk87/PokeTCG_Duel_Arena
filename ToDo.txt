@@ -1,5 +1,4 @@
-- Mejorar Editor de Deck y con Imagen de Cajas
+- Dockerizar, analizar si es necesario implementar redis o microservicios o ambos, para las partidas online, estadisticas, editor de mazos, etc, para que el sistema sea robusto, seguro, escalable, y pueda ser utilizado por miles de personas sin perder rendimiento.
 - Agregar efecto de 3 estrellas al ganar, y algo triste al perder
 - Agregar sistema de torneos y Trofeos
 - Agregar un sistema de moderación para moderadores y administradores, en el que se pueda banear un usuario (temporal o permanentemente), o eliminarlo del sistema.
-- Dockerizar

@@ -97,9 +97,21 @@ async function initDB() {
       name VARCHAR(255) NOT NULL,
       cards JSON NOT NULL,
       is_starter BOOLEAN DEFAULT FALSE,
+      box_image VARCHAR(255) DEFAULT 'pokeball.png',
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Migration: Add box_image column if table already exists without it
+  try {
+    const [columns] = await p.query(`SHOW COLUMNS FROM decks LIKE 'box_image'`);
+    if (columns.length === 0) {
+      await p.query(`ALTER TABLE decks ADD COLUMN box_image VARCHAR(255) DEFAULT 'pokeball.png'`);
+      console.log('Added box_image column to decks table.');
+    }
+  } catch (err) {
+    console.error('Error adding box_image column to decks table:', err);
+  }
 
   // 3. Create Battles Table
   await p.query(`
@@ -146,8 +158,8 @@ async function registerOrLoginUser(id, email, name) {
       const deck = STARTER_DECKS[i];
       const deckId = `starter-${id}-${i + 1}`;
       await query(
-        'INSERT INTO decks (id, user_id, name, cards, is_starter) VALUES (?, ?, ?, ?, TRUE)',
-        [deckId, id, deck.name, JSON.stringify(deck.cards)]
+        'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image) VALUES (?, ?, ?, ?, TRUE, ?)',
+        [deckId, id, deck.name, JSON.stringify(deck.cards), 'pokeball.png']
       );
     }
   }
@@ -158,17 +170,18 @@ async function getUserDecks(userId) {
   return await query('SELECT * FROM decks WHERE user_id = ?', [userId]);
 }
 
-async function saveUserDeck(deckId, userId, name, cardsJson) {
+async function saveUserDeck(deckId, userId, name, cardsJson, boxImage) {
+  if (!boxImage) boxImage = 'pokeball.png';
   // Check if exists
   const rows = await query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, userId]);
   if (rows.length > 0) {
     // Update
-    await query('UPDATE decks SET name = ?, cards = ? WHERE id = ? AND user_id = ?', [name, cardsJson, deckId, userId]);
+    await query('UPDATE decks SET name = ?, cards = ?, box_image = ? WHERE id = ? AND user_id = ?', [name, cardsJson, boxImage, deckId, userId]);
   } else {
     // Insert new
-    await query('INSERT INTO decks (id, user_id, name, cards, is_starter) VALUES (?, ?, ?, ?, FALSE)', [deckId, userId, name, cardsJson]);
+    await query('INSERT INTO decks (id, user_id, name, cards, is_starter, box_image) VALUES (?, ?, ?, ?, FALSE, ?)', [deckId, userId, name, cardsJson, boxImage]);
   }
-  return { id: deckId, user_id: userId, name, cards: JSON.parse(cardsJson) };
+  return { id: deckId, user_id: userId, name, cards: JSON.parse(cardsJson), box_image: boxImage };
 }
 
 async function deleteUserDeck(deckId, userId) {

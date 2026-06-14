@@ -205,11 +205,11 @@ const server = http.createServer(async (req, res) => {
     if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
     try {
       const body = await getRequestBody(req);
-      const { id, name, cards } = JSON.parse(body);
+      const { id, name, cards, boxImage } = JSON.parse(body);
       if (!id || !name || !cards) {
         return sendJSON(res, 400, { error: 'Missing deck parameters' });
       }
-      const saved = await db.saveUserDeck(id, currentUser.id, name, JSON.stringify(cards));
+      const saved = await db.saveUserDeck(id, currentUser.id, name, JSON.stringify(cards), boxImage);
       return sendJSON(res, 200, saved);
     } catch (err) {
       console.error(err);
@@ -483,6 +483,8 @@ async function tryMatchmaking() {
       payload: {
         matchId,
         opponentName: p2.user.name,
+        p1Id: gameState.p1Id,
+        p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p1.user.id,
         hand: gameState.players[p1.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         prizes: gameState.players[p1.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
@@ -498,6 +500,8 @@ async function tryMatchmaking() {
       payload: {
         matchId,
         opponentName: p1.user.name,
+        p1Id: gameState.p1Id,
+        p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p2.user.id,
         hand: gameState.players[p2.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         prizes: gameState.players[p2.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
@@ -628,7 +632,10 @@ wss.on('connection', (ws, request, session) => {
               // Send STATE_UPDATE to both players
               const updateMsg = JSON.stringify({
                 type: 'STATE_UPDATE',
-                payload: { events: result.events }
+                payload: {
+                  events: result.events,
+                  stateSnapshot: match.gameState.getSnapshot()
+                }
               });
               if (match.player1.ws.readyState === WebSocket.OPEN) match.player1.ws.send(updateMsg);
               if (match.player2.ws.readyState === WebSocket.OPEN) match.player2.ws.send(updateMsg);
@@ -654,7 +661,10 @@ wss.on('connection', (ws, request, session) => {
             if (result.valid) {
               const updateMsg = JSON.stringify({
                 type: 'STATE_UPDATE',
-                payload: { events: result.events }
+                payload: {
+                  events: result.events,
+                  stateSnapshot: match.gameState.getSnapshot()
+                }
               });
               if (match.player1.ws.readyState === WebSocket.OPEN) match.player1.ws.send(updateMsg);
               if (match.player2.ws.readyState === WebSocket.OPEN) match.player2.ws.send(updateMsg);
@@ -762,6 +772,8 @@ wss.on('connection', (ws, request, session) => {
                 payload: {
                   matchId,
                   opponentName: opponent.user.name,
+                  p1Id: gameState.p1Id,
+                  p2Id: gameState.p2Id,
                   goesFirst,
                   hand: gameState.players[player.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
                   prizes: gameState.players[player.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),

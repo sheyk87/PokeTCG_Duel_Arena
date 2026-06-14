@@ -93,6 +93,7 @@ window.customConfirm = function(title, message) {
 
 class AppController {
   constructor() {
+    window.appController = this;
     this.db = new CardDatabase();
     this.encyclopedia = null;
     this.deckBuilder = null;
@@ -107,6 +108,7 @@ class AppController {
       menu: document.getElementById('screen-menu'),
       encyclopedia: document.getElementById('screen-encyclopedia'),
       deckbuilder: document.getElementById('screen-deckbuilder'),
+      decksList: document.getElementById('screen-decks-list'),
       duel: document.getElementById('screen-duel'),
       battlefields: document.getElementById('screen-battlefields'),
       queue: document.getElementById('screen-queue'),
@@ -203,6 +205,8 @@ class AppController {
       this.encyclopedia.onShow();
     } else if (screenId === 'deckbuilder') {
       this.deckBuilder.onShow();
+    } else if (screenId === 'decksList') {
+      this.deckBuilder.renderDecksList();
     } else if (screenId === 'battlefields') {
       this.battlefieldEditor.onShow();
     } else if (screenId === 'menu') {
@@ -237,7 +241,8 @@ class AppController {
     });
 
     // Menu transitions
-    document.getElementById('btn-goto-deckbuilder')?.addEventListener('click', () => this.navigateTo('deckbuilder'));
+    document.getElementById('btn-goto-deckbuilder')?.addEventListener('click', () => this.navigateTo('decksList'));
+    document.getElementById('btn-back-decks-list')?.addEventListener('click', () => this.navigateTo('decksList'));
     document.getElementById('btn-goto-encyclopedia')?.addEventListener('click', () => {
       if (!this.currentUser) {
         this.navigateTo('login');

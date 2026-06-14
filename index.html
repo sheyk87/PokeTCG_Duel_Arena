@@ -517,10 +517,27 @@
       </div>
     </section>
 
+    <!-- SCREEN 2.5: Decks List -->
+    <section id="screen-decks-list" class="app-screen">
+      <header class="screen-header">
+        <button class="back-btn btn-back-menu" id="btn-back-decks-to-menu">◀ Volver al Menú</button>
+        <h2>Mis Mazos</h2>
+      </header>
+
+      <div class="screen-layout decks-list-layout" style="padding: 20px; display: flex; flex-direction: column; gap: 20px; width: 100%; box-sizing: border-box; overflow-y: auto;">
+        <div class="decks-grid" id="decks-list-grid">
+          <!-- Dynamically populated deck cards and the "Create Deck" card -->
+        </div>
+      </div>
+    </section>
+
     <!-- SCREEN 3: Deck Builder -->
     <section id="screen-deckbuilder" class="app-screen">
       <header class="screen-header">
-        <button class="back-btn btn-back-menu">◀ Volver</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="back-btn" id="btn-back-decks-list">◀ Volver a la Lista</button>
+          <button class="back-btn btn-back-menu">🏠 Menú Principal</button>
+        </div>
         <h2>Creador de Mazos</h2>
         <div class="deck-actions">
           <button id="btn-new-deck" class="action-btn">Nuevo Mazo</button>
@@ -810,6 +827,30 @@
             <div class="stat-pill">Pokémon: <span id="deck-count-pkmn">0</span></div>
             <div class="stat-pill">Trainer: <span id="deck-count-trainer">0</span></div>
             <div class="stat-pill">Energy: <span id="deck-count-energy">0</span></div>
+          </div>
+
+          <div class="deck-box-selector-container">
+            <span class="selector-title">Diseño de Caja</span>
+            <div class="deck-box-selector" id="deck-box-selector">
+              <div class="box-option active" data-box="pokeball.png" title="Poké Ball">
+                <img src="cards/Decks/pokeball.png" alt="Poké Ball">
+              </div>
+              <div class="box-option" data-box="superball.png" title="Super Ball">
+                <img src="cards/Decks/superball.png" alt="Super Ball">
+              </div>
+              <div class="box-option" data-box="ultraball.png" title="Ultra Ball">
+                <img src="cards/Decks/ultraball.png" alt="Ultra Ball">
+              </div>
+              <div class="box-option" data-box="masterball.png" title="Master Ball">
+                <img src="cards/Decks/masterball.png" alt="Master Ball">
+              </div>
+              <div class="box-option" data-box="amorball.png" title="Amor Ball">
+                <img src="cards/Decks/amorball.png" alt="Amor Ball">
+              </div>
+              <div class="box-option" data-box="parkball.png" title="Park Ball">
+                <img src="cards/Decks/parkball.png" alt="Park Ball">
+              </div>
+            </div>
           </div>
 
           <div id="deck-validation-messages" class="validation-panel alert">

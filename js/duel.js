@@ -837,6 +837,34 @@ export class Duel {
       this.checkKnockout('opponent');
     }
 
+    // 1.5. Burned check (20 damage, coin flip to cure)
+    if (this.player.active && this.player.active.specialCondition === 'burned') {
+      this.player.active.damage += 20;
+      this.addLog('opponent', `La quemadura inflige 20 de daño a ${this.player.active.card.name}.`);
+      this.addLog('player', `Lanzando moneda por quemadura de ${this.player.active.card.name}...`);
+      const cures = Math.random() < 0.5;
+      if (cures) {
+        this.player.active.specialCondition = null;
+        this.addLog('player', `${this.player.active.card.name} se ha curado de la quemadura.`);
+      } else {
+        this.addLog('player', `${this.player.active.card.name} sigue quemado.`);
+      }
+      this.checkKnockout('player');
+    }
+    if (this.opponent.active && this.opponent.active.specialCondition === 'burned') {
+      this.opponent.active.damage += 20;
+      this.addLog('player', `La quemadura inflige 20 de daño a ${this.opponent.active.card.name}.`);
+      this.addLog('opponent', `Lanzando moneda por quemadura de ${this.opponent.active.card.name}...`);
+      const cures = Math.random() < 0.5;
+      if (cures) {
+        this.opponent.active.specialCondition = null;
+        this.addLog('opponent', `${this.opponent.active.card.name} se ha curado de la quemadura.`);
+      } else {
+        this.addLog('opponent', `${this.opponent.active.card.name} sigue quemado.`);
+      }
+      this.checkKnockout('opponent');
+    }
+
     // 2. Sleep check (coin flip to wake up)
     if (this.player.active && this.player.active.specialCondition === 'asleep') {
       this.addLog('player', `${this.player.active.card.name} está dormido. Lanzando moneda para despertar...`);
@@ -1529,7 +1557,7 @@ export class Duel {
         defender.specialCondition = statusApplied;
         if (attack.name === 'Toxic') defender.toxicPoison = true;
 
-        const statusLabels = { confused: 'confundido', asleep: 'dormido', paralyzed: 'paralizado', poisoned: 'envenenado' };
+        const statusLabels = { confused: 'confundido', asleep: 'dormido', paralyzed: 'paralizado', poisoned: 'envenenado', burned: 'quemado' };
         const label = statusLabels[statusApplied] || statusApplied;
         this.addLog(defenderSide, `${defender.card.name} está ${label}.`);
       }

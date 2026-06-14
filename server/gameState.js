@@ -895,6 +895,22 @@ class ServerGameState {
             damage: 10
           });
         }
+        if (p.active.specialCondition === 'burned') {
+          p.active.damage += 20;
+          events.push({
+            type: 'BURN_DAMAGE',
+            playerId: p.playerId,
+            damage: 20
+          });
+          const cures = Math.random() < 0.5;
+          if (cures) {
+            p.active.specialCondition = null;
+            events.push({
+              type: 'BURN_CURED',
+              playerId: p.playerId
+            });
+          }
+        }
         if (p.active.specialCondition === 'asleep') {
           const wakesUp = Math.random() < 0.5;
           if (wakesUp) {
@@ -1232,6 +1248,12 @@ class ServerGameState {
             if (oldActive) {
               targetState.hand.push(oldActive);
             }
+            // Transition out of must-promote phase if relevant
+            if (this.phase === 'must-promote-p1' && targetState.playerId === this.p1Id) {
+              this.phase = 'active';
+            } else if (this.phase === 'must-promote-p2' && targetState.playerId === this.p2Id) {
+              this.phase = 'active';
+            }
           } else if (targetZone === 'trainer') {
             const oldTrainer = targetState.activeTrainer;
             targetState.activeTrainer = cardObj;
@@ -1464,6 +1486,42 @@ class ServerGameState {
     }
 
     return { valid: true, events };
+  }
+
+  getSnapshot() {
+    return {
+      phase: this.phase,
+      turnOwnerId: this.turnOwnerId,
+      turnNumber: this.turnNumber,
+      players: {
+        [this.p1Id]: this.getPlayerSnapshot(this.p1Id),
+        [this.p2Id]: this.getPlayerSnapshot(this.p2Id)
+      }
+    };
+  }
+
+  getPlayerSnapshot(playerId) {
+    const p = this.players[playerId];
+    return {
+      playerId: p.playerId,
+      handSize: p.hand.length,
+      deckSize: p.deck.length,
+      prizesSize: p.prizes.length,
+      active: p.active ? this.getCardSnapshot(p.active) : null,
+      activeTrainer: p.activeTrainer ? this.getCardSnapshot(p.activeTrainer) : null,
+      bench: p.bench.map(b => b ? this.getCardSnapshot(b) : null),
+      discard: p.discard.map(c => c.id || c.cardId)
+    };
+  }
+
+  getCardSnapshot(cardObj) {
+    return {
+      instanceId: cardObj.instanceId,
+      cardId: cardObj.card.id || cardObj.card.cardId,
+      damage: cardObj.damage,
+      specialCondition: cardObj.specialCondition,
+      attachedEnergy: cardObj.attachedEnergy.map(e => e.id || e.cardId)
+    };
   }
 }
 
