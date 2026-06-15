@@ -238,7 +238,8 @@ export class OnlineDuel extends Duel {
     const { matchId, opponentName, goesFirst } = data;
     this.matchId = matchId;
     this.opponentName = opponentName;
-    this.localPlayerId = SESSIONS_LOCAL_USER_ID();
+    this.localPlayerId = data.localPlayerId || this.appController.currentUser?.id || SESSIONS_LOCAL_USER_ID();
+    console.log('[OnlineDuel] initOnlineMatch: localPlayerId is', this.localPlayerId);
 
     // Clear elements
     const logBox = document.getElementById('duel-log');
@@ -985,11 +986,18 @@ export class OnlineDuel extends Duel {
       return;
     }
 
-    panel.innerHTML = `
-      <div class="detail-row"><strong>${pkmn.card.name}</strong> <span>HP ${pkmn.card.hp - pkmn.damage}/${pkmn.card.hp}</span></div>
-      <div class="detail-row"><span>Etapa: ${pkmn.card.subtypes[0]}</span> <span>Tipo: ${pkmn.card.types ? pkmn.card.types[0] : 'Incoloro'}</span></div>
-      <div class="detail-row"><span>Condición: ${pkmn.specialCondition || 'Normal'}</span> <span>Daño: ${pkmn.damage}</span></div>
-    `;
+    if (!pkmn.card || !pkmn.card.hp) {
+      panel.innerHTML = `
+        <div class="detail-row"><strong>${pkmn.card ? pkmn.card.name : 'Carta Desconocida'}</strong> <span>HP ?/?</span></div>
+        <div class="detail-row"><span style="font-size:0.8rem; color:var(--color-text-muted);">Los datos de esta carta no se han cargado todavía o no están disponibles o incompletos.</span></div>
+      `;
+    } else {
+      panel.innerHTML = `
+        <div class="detail-row"><strong>${pkmn.card.name}</strong> <span>HP ${pkmn.card.hp - pkmn.damage}/${pkmn.card.hp}</span></div>
+        <div class="detail-row"><span>Etapa: ${pkmn.card.subtypes ? pkmn.card.subtypes[0] : 'Básico'}</span> <span>Tipo: ${pkmn.card.types ? pkmn.card.types[0] : 'Incoloro'}</span></div>
+        <div class="detail-row"><span>Condición: ${pkmn.specialCondition || 'Normal'}</span> <span>Daño: ${pkmn.damage}</span></div>
+      `;
+    }
 
     // 1. Ajustar Daño
     const dmgGroup = document.createElement('div');
@@ -1183,7 +1191,7 @@ export class OnlineDuel extends Duel {
     buttonsContainer.appendChild(moveGroup);
 
     // 5. Declarar Ataques/Poderes (Macros de chat)
-    if (side === 'player') {
+    if (side === 'player' && pkmn.card) {
       const macrosGroup = document.createElement('div');
       macrosGroup.className = 'sandbox-group';
       macrosGroup.innerHTML = '<div class="sandbox-title">Declarar Ataques/Poderes</div>';
@@ -2275,7 +2283,7 @@ export class OnlineDuel extends Duel {
   syncStateWithSnapshot(snapshot) {
     if (!snapshot || !snapshot.players) return;
 
-    console.log('[OnlineDuel] Synchronizing local state with server snapshot:', snapshot);
+    console.log('[OnlineDuel] Synchronizing local state with server snapshot:', snapshot, 'localPlayerId:', this.localPlayerId, 'turnOwnerId:', snapshot.turnOwnerId);
 
     // Sync game phase and turn ownership
     if (snapshot.phase === 'active') {

@@ -88,9 +88,15 @@ export class CardDatabase {
   getCardImage(card) {
     if (!card) return '';
 
+    // Safeguard against dummy or incomplete card objects
+    if (!card.id) {
+      return '';
+    }
+
     // If it belongs to Base Set, resolve to local images folder
     if (card.setId === 'base1' || card.id.startsWith('base1-')) {
-      let cleanName = card.name.toLowerCase()
+      let cleanName = card.name ? card.name.toLowerCase() : '';
+      cleanName = cleanName
         .replace(" ♂", "-male")
         .replace(" ♀", "-female")
         .replace("'", "")
@@ -102,7 +108,7 @@ export class CardDatabase {
         cleanName = cleanName.slice(0, -1);
       }
 
-      return `/Sets/Base/${cleanName}-base-set-bs-${card.number}.jpg`;
+      return `/Sets/Base/${cleanName}-base-set-bs-${card.number || 0}.jpg`;
     }
 
     // Default remote image URL
@@ -111,15 +117,18 @@ export class CardDatabase {
 
   // Generates complete HTML img tag with fallback for error resilience
   getCardImgHtml(card, className = "card-img") {
+    if (!card || !card.id) {
+      return `<div class="card-back ${className}"></div>`;
+    }
     const localSrc = this.getCardImage(card);
     const remoteSrc = card.images?.small || '';
     
     // If it's Base Set, use local as primary and remote as backup
     if (card.setId === 'base1') {
-      return `<img src="${localSrc}" alt="${card.name}" class="${className}" onerror="this.onerror=null; this.src='${remoteSrc}';" loading="lazy">`;
+      return `<img src="${localSrc}" alt="${card.name || 'Card'}" class="${className}" onerror="this.onerror=null; this.src='${remoteSrc}';" loading="lazy">`;
     }
     
     // Otherwise, use remote directly
-    return `<img src="${remoteSrc}" alt="${card.name}" class="${className}" loading="lazy">`;
+    return `<img src="${remoteSrc}" alt="${card.name || 'Card'}" class="${className}" loading="lazy">`;
   }
 }

@@ -1256,15 +1256,23 @@ export class Duel {
       return;
     }
 
+    if (!pkmn.card || !pkmn.card.hp) {
+      panel.innerHTML = `
+        <div class="detail-row"><strong>${pkmn.card ? pkmn.card.name : 'Carta Desconocida'}</strong> <span>HP ?/?</span></div>
+        <div class="detail-row"><span style="font-size:0.8rem; color:var(--color-text-muted);">Los datos de esta carta no se han cargado todavía o no están disponibles o incompletos.</span></div>
+      `;
+      return;
+    }
+
     // Draw detail rows
     panel.innerHTML = `
       <div class="detail-row"><strong>${pkmn.card.name}</strong> <span>HP ${pkmn.card.hp - pkmn.damage}/${pkmn.card.hp}</span></div>
-      <div class="detail-row"><span>Etapa: ${pkmn.card.subtypes[0]}</span> <span>Tipo: ${pkmn.card.types ? pkmn.card.types[0] : 'Incoloro'}</span></div>
+      <div class="detail-row"><span>Etapa: ${pkmn.card.subtypes ? pkmn.card.subtypes[0] : 'Básico'}</span> <span>Tipo: ${pkmn.card.types ? pkmn.card.types[0] : 'Incoloro'}</span></div>
       <div class="detail-row"><span>Condición: ${pkmn.specialCondition || 'Normal'}</span> <span>Energía: ${pkmn.attachedEnergy.length}</span></div>
     `;
 
     // Add buttons for actions if it's the player's side and the player's turn
-    if (this.turnOwner === 'player' && side === 'player') {
+    if (this.turnOwner === 'player' && side === 'player' && pkmn.card) {
 
       // I. If it's Active, render Attacks, Abilities, and Retreat
       if (zone === 'active') {

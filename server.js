@@ -553,6 +553,7 @@ async function tryMatchmaking() {
       payload: {
         matchId,
         opponentName: p2.user.name,
+        localPlayerId: p1.user.id,
         p1Id: gameState.p1Id,
         p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p1.user.id,
@@ -570,6 +571,7 @@ async function tryMatchmaking() {
       payload: {
         matchId,
         opponentName: p1.user.name,
+        localPlayerId: p2.user.id,
         p1Id: gameState.p1Id,
         p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p2.user.id,
@@ -652,6 +654,7 @@ async function tryRankedMatchmaking() {
           payload: {
             matchId,
             opponentName: p2.user.name,
+            localPlayerId: p1.user.id,
             p1Id: gameState.p1Id,
             p2Id: gameState.p2Id,
             goesFirst: goesFirstId === p1.user.id,
@@ -673,6 +676,7 @@ async function tryRankedMatchmaking() {
           payload: {
             matchId,
             opponentName: p1.user.name,
+            localPlayerId: p2.user.id,
             p1Id: gameState.p1Id,
             p2Id: gameState.p2Id,
             goesFirst: goesFirstId === p2.user.id,
@@ -1024,6 +1028,7 @@ wss.on('connection', (ws, request, session) => {
                 payload: {
                   matchId,
                   opponentName: opponent.user.name,
+                  localPlayerId: player.user.id,
                   p1Id: gameState.p1Id,
                   p2Id: gameState.p2Id,
                   goesFirst,
