@@ -1871,14 +1871,12 @@ button {
   -webkit-text-fill-color: transparent;
 }
 
-.pokeball-victory-deco {
-  width: 120px;
-  height: 120px;
-  background-image: url('https://images.pokemontcg.io/base1/symbol.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0.15;
-  margin: 10px 0;
+.game-over-image-deco {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  margin: 15px 0;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.15));
   animation: floatDeco 4s infinite alternate ease-in-out;
 }
 

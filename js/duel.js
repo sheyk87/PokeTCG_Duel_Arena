@@ -1738,11 +1738,15 @@ export class Duel {
     const modal = document.getElementById('modal-game-over');
     const title = document.getElementById('game-over-title');
     const reasonText = document.getElementById('game-over-reason');
+    const gameOverImg = document.getElementById('game-over-img');
 
     if (title && reasonText && modal) {
       title.textContent = isWin ? '¡VICTORIA!' : '¡DERROTA!';
       title.style.color = isWin ? 'var(--color-accent-green)' : 'var(--color-accent-red)';
       reasonText.textContent = reason;
+      if (gameOverImg) {
+        gameOverImg.src = isWin ? 'cards/Win-Stars.png' : 'cards/Pikachu-Triste.gif';
+      }
       modal.classList.add('active');
     }
   }

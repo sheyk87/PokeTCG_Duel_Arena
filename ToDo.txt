@@ -1,3 +1,2 @@
-- Agregar efecto de 3 estrellas al ganar
 - Agregar sistema de torneos y Trofeos
 - Agregar un sistema de moderación para moderadores y administradores, en el que se pueda banear un usuario (temporal o permanentemente), o eliminarlo del sistema.
