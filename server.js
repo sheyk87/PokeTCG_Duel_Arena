@@ -246,6 +246,56 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // 5b. Ranked Leaderboard API
+  if (req.method === 'GET' && safePath === '/api/ranked/leaderboard') {
+    try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const category = urlObj.searchParams.get('category') || 'all';
+      const level = urlObj.searchParams.get('level') || 'all';
+      
+      const leaderboard = await db.getRankedLeaderboard(category, level);
+      const summary = await db.getRankedStatsSummary();
+      
+      let personal = null;
+      if (currentUser) {
+        // Obtenemos todo el leaderboard para calcular la posición global
+        const fullLeaderboard = await db.getRankedLeaderboard('all', 'all');
+        const posIndex = fullLeaderboard.findIndex(p => p.id === currentUser.id);
+        const userStats = await db.findUserById(currentUser.id);
+        
+        // Contamos las victorias ranked del usuario
+        const rWins = await db.query(
+          "SELECT COUNT(*) as count FROM battles WHERE user_id = ? AND result = 'won' AND is_ranked = 1",
+          [currentUser.id]
+        );
+        
+        personal = {
+          position: posIndex !== -1 ? posIndex + 1 : 0,
+          victories: rWins[0] ? rWins[0].count : 0,
+          ranked_category: userStats ? userStats.ranked_category : 'Principiante',
+          ranked_level: userStats ? userStats.ranked_level : 1
+        };
+      }
+      
+      return sendJSON(res, 200, { leaderboard, summary, personal });
+    } catch (err) {
+      console.error(err);
+      return sendJSON(res, 500, { error: 'Failed to load ranked leaderboard' });
+    }
+  }
+
+  // 5c. Ranked Stats API
+  if (req.method === 'GET' && safePath === '/api/ranked/stats') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const stats = await db.findUserById(currentUser.id);
+      return sendJSON(res, 200, stats);
+    } catch (err) {
+      console.error(err);
+      return sendJSON(res, 500, { error: 'Failed to load ranked stats' });
+    }
+  }
+
   // 6. History API
   if (req.method === 'GET' && safePath === '/api/history') {
     if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
@@ -268,21 +318,28 @@ const server = http.createServer(async (req, res) => {
     }
     return sendJSON(res, 200, {
       onlinePlayers: ACTIVE_ENTRENADORES.size,
-      inQueue: QUEUE.length
+      inQueue: QUEUE.length,
+      inRankedQueue: RANKED_QUEUE.length
     });
   }
 
   // 6c. Recent Battles API (no auth required)
   if (req.method === 'GET' && safePath === '/api/recent-battles') {
     try {
+      const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const type = urlObj.searchParams.get('type') || 'normal';
+      const isRankedVal = type === 'ranked' ? 1 : 0;
+      
       const rows = await db.query(`
-        SELECT u.name as winner_name, b.opponent_name as loser_name, b.created_at 
+        SELECT u.name as winner_name, b.opponent_name as loser_name, b.created_at,
+          b.is_ranked, b.user_category as winner_category, b.user_level as winner_level,
+          b.opponent_category as loser_category, b.opponent_level as loser_level
         FROM battles b 
         JOIN users u ON b.user_id = u.id 
-        WHERE b.result = 'won' 
+        WHERE b.result = 'won' AND b.is_ranked = ?
         ORDER BY b.created_at DESC 
         LIMIT 5
-      `);
+      `, [isRankedVal]);
       return sendJSON(res, 200, rows);
     } catch (err) {
       console.error(err);
@@ -392,6 +449,7 @@ const server = http.createServer(async (req, res) => {
 const wss = new WebSocket.Server({ noServer: true });
 
 const QUEUE = []; // Array of { user, deckId, ws }
+const RANKED_QUEUE = []; // Array of { user, deckId, ws, category }
 const MATCHES = new Map(); // matchId -> Match details
 const PRIVATE_ROOMS = new Map(); // roomId -> { roomId, creator, password, createdBy }
 
@@ -401,6 +459,18 @@ function broadcastQueueCount() {
     if (player.ws.readyState === WebSocket.OPEN) {
       player.ws.send(JSON.stringify({
         type: 'QUEUE_STATUS',
+        payload: { onlineCount: count }
+      }));
+    }
+  });
+}
+
+function broadcastRankedQueueCount() {
+  const count = RANKED_QUEUE.length;
+  RANKED_QUEUE.forEach(player => {
+    if (player.ws.readyState === WebSocket.OPEN) {
+      player.ws.send(JSON.stringify({
+        type: 'RANKED_QUEUE_STATUS',
         payload: { onlineCount: count }
       }));
     }
@@ -520,6 +590,116 @@ async function tryMatchmaking() {
   }
 }
 
+async function tryRankedMatchmaking() {
+  if (RANKED_QUEUE.length < 2) return;
+
+  for (let i = 0; i < RANKED_QUEUE.length; i++) {
+    const p1 = RANKED_QUEUE[i];
+    
+    const p2Idx = RANKED_QUEUE.findIndex((p, idx) => 
+      idx !== i && 
+      p.user.id !== p1.user.id && 
+      p.category === p1.category
+    );
+
+    if (p2Idx !== -1) {
+      const p2 = RANKED_QUEUE.splice(p2Idx, 1)[0];
+      const p1Idx = RANKED_QUEUE.findIndex(p => p.user.id === p1.user.id);
+      RANKED_QUEUE.splice(p1Idx, 1);
+
+      broadcastRankedQueueCount();
+
+      const matchId = `match-${crypto.randomBytes(8).toString('hex')}`;
+
+      try {
+        const [d1, d2] = await Promise.all([
+          db.query('SELECT cards FROM decks WHERE id = ?', [p1.deckId]),
+          db.query('SELECT cards FROM decks WHERE id = ?', [p2.deckId])
+        ]);
+
+        const deck1 = d1[0] ? (typeof d1[0].cards === 'string' ? JSON.parse(d1[0].cards) : d1[0].cards) : [];
+        const deck2 = d2[0] ? (typeof d2[0].cards === 'string' ? JSON.parse(d2[0].cards) : d2[0].cards) : [];
+
+        const shuffledDeck1 = expandAndShuffleDeck(deck1);
+        const shuffledDeck2 = expandAndShuffleDeck(deck2);
+
+        const goesFirstId = Math.random() < 0.5 ? p1.user.id : p2.user.id;
+
+        const gameState = new ServerGameState(matchId, p1.user.id, p1.user.name, shuffledDeck1, p2.user.id, p2.user.name, shuffledDeck2, goesFirstId);
+
+        const match = {
+          id: matchId,
+          player1: { user: p1.user, ws: p1.ws, deck: deck1 },
+          player2: { user: p2.user, ws: p2.ws, deck: deck2 },
+          goesFirstId,
+          startTime: Date.now(),
+          gameState,
+          isRanked: true
+        };
+
+        MATCHES.set(matchId, match);
+
+        p1.ws.currentMatchId = matchId;
+        p2.ws.currentMatchId = matchId;
+
+        const [user1Data, user2Data] = await Promise.all([
+          db.findUserById(p1.user.id),
+          db.findUserById(p2.user.id)
+        ]);
+
+        p1.ws.send(JSON.stringify({
+          type: 'MATCH_START',
+          payload: {
+            matchId,
+            opponentName: p2.user.name,
+            p1Id: gameState.p1Id,
+            p2Id: gameState.p2Id,
+            goesFirst: goesFirstId === p1.user.id,
+            isRanked: true,
+            opponentRankedCategory: user2Data ? user2Data.ranked_category : 'Principiante',
+            opponentRankedLevel: user2Data ? user2Data.ranked_level : 1,
+            opponentConsecutiveWins: user2Data ? user2Data.consecutive_wins : 0,
+            hand: gameState.players[p1.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            prizes: gameState.players[p1.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            deck: gameState.players[p1.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            opponentHandSize: gameState.players[p2.user.id].hand.length,
+            opponentPrizesSize: gameState.players[p2.user.id].prizes.length,
+            opponentDeckSize: gameState.players[p2.user.id].deck.length
+          }
+        }));
+
+        p2.ws.send(JSON.stringify({
+          type: 'MATCH_START',
+          payload: {
+            matchId,
+            opponentName: p1.user.name,
+            p1Id: gameState.p1Id,
+            p2Id: gameState.p2Id,
+            goesFirst: goesFirstId === p2.user.id,
+            isRanked: true,
+            opponentRankedCategory: user1Data ? user1Data.ranked_category : 'Principiante',
+            opponentRankedLevel: user1Data ? user1Data.ranked_level : 1,
+            opponentConsecutiveWins: user1Data ? user1Data.consecutive_wins : 0,
+            hand: gameState.players[p2.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            prizes: gameState.players[p2.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            deck: gameState.players[p2.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
+            opponentHandSize: gameState.players[p1.user.id].hand.length,
+            opponentPrizesSize: gameState.players[p1.user.id].prizes.length,
+            opponentDeckSize: gameState.players[p1.user.id].deck.length
+          }
+        }));
+
+        console.log(`Matched ranked game: ${p1.user.name} vs ${p2.user.name} (${p1.category})`);
+        return;
+      } catch (err) {
+        console.error('Failed to start ranked match:', err);
+        p1.ws.send(JSON.stringify({ type: 'MATCH_ERROR', payload: { message: 'Error al iniciar la partida competitiva.' } }));
+        p2.ws.send(JSON.stringify({ type: 'MATCH_ERROR', payload: { message: 'Error al iniciar la partida competitiva.' } }));
+      }
+    }
+  }
+}
+
 async function resolveMatchEnd(matchId, winnerId, reason, duration) {
   const match = MATCHES.get(matchId);
   if (!match) return;
@@ -527,11 +707,48 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
   const p1 = match.player1;
   const p2 = match.player2;
 
+  // Sync cleanup to prevent re-entry / double resolution
+  MATCHES.delete(matchId);
+  if (p1.ws) p1.ws.currentMatchId = null;
+  if (p2.ws) p2.ws.currentMatchId = null;
+
   const p1Result = p1.user.id === winnerId ? 'won' : 'lost';
   const p2Result = p2.user.id === winnerId ? 'won' : 'lost';
 
-  // Save in DB (only if it's not a private match)
-  if (!match.isPrivate) {
+  let p1RankedData = null;
+  let p2RankedData = null;
+
+  if (match.isRanked) {
+    try {
+      const [u1Data, u2Data] = await Promise.all([
+        db.findUserById(p1.user.id),
+        db.findUserById(p2.user.id)
+      ]);
+
+      await Promise.all([
+        db.recordBattle(
+          p1.user.id, p2.user.name, p1Result, duration, true,
+          u1Data ? u1Data.ranked_category : 'Principiante', u1Data ? u1Data.ranked_level : 1,
+          p2.user.id, u2Data ? u2Data.ranked_category : 'Principiante', u2Data ? u2Data.ranked_level : 1
+        ),
+        db.recordBattle(
+          p2.user.id, p1.user.name, p2Result, duration, true,
+          u2Data ? u2Data.ranked_category : 'Principiante', u2Data ? u2Data.ranked_level : 1,
+          p1.user.id, u1Data ? u1Data.ranked_category : 'Principiante', u1Data ? u1Data.ranked_level : 1
+        )
+      ]);
+
+      const [newP1Rank, newP2Rank] = await Promise.all([
+        db.updateRankedStats(p1.user.id, p1Result),
+        db.updateRankedStats(p2.user.id, p2Result)
+      ]);
+
+      p1RankedData = newP1Rank;
+      p2RankedData = newP2Rank;
+    } catch (err) {
+      console.error('Failed to process ranked stats at match end:', err);
+    }
+  } else if (!match.isPrivate) {
     try {
       await Promise.all([
         db.recordBattle(p1.user.id, p2.user.name, p1Result, duration),
@@ -540,23 +757,26 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
     } catch (err) {
       console.error('Failed to record battle in database:', err);
     }
-  } else {
-    console.log(`Private match ${matchId} ended, bypassing database stats.`);
   }
 
-  // Notify clients
-  const overMsg = (winnerId) => JSON.stringify({
+  const overMsg = (winnerId, newRankData) => JSON.stringify({
     type: 'MATCH_OVER',
-    payload: { winnerId, reason }
+    payload: { 
+      winnerId, 
+      reason,
+      isRanked: !!match.isRanked,
+      rankedStats: newRankData ? {
+        category: newRankData.ranked_category,
+        level: newRankData.ranked_level,
+        consecutiveWins: newRankData.consecutive_wins,
+        consecutiveLosses: newRankData.consecutive_losses,
+        masterRankedWins: newRankData.master_ranked_wins
+      } : null
+    }
   });
 
-  if (p1.ws.readyState === WebSocket.OPEN) p1.ws.send(overMsg(winnerId));
-  if (p2.ws.readyState === WebSocket.OPEN) p2.ws.send(overMsg(winnerId));
-
-  // Clean up references
-  p1.ws.currentMatchId = null;
-  p2.ws.currentMatchId = null;
-  MATCHES.delete(matchId);
+  if (p1.ws.readyState === WebSocket.OPEN) p1.ws.send(overMsg(winnerId, p1RankedData));
+  if (p2.ws.readyState === WebSocket.OPEN) p2.ws.send(overMsg(winnerId, p2RankedData));
 
   console.log(`Match ${matchId} ended. Winner: ${winnerId === p1.user.id ? p1.user.name : p2.user.name}`);
 }
@@ -591,10 +811,42 @@ wss.on('connection', (ws, request, session) => {
           });
       }
 
+      else if (type === 'JOIN_RANKED_QUEUE') {
+        const { deckId } = payload;
+        db.query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, session.id])
+          .then(rows => {
+            if (rows.length === 0) {
+              return ws.send(JSON.stringify({ type: 'MATCH_ERROR', payload: { message: 'Mazo inválido o inexistente.' } }));
+            }
+            return db.findUserById(session.id).then(user => {
+              const category = user ? user.ranked_category : 'Principiante';
+              
+              const existingIdx = RANKED_QUEUE.findIndex(q => q.user.id === session.id);
+              if (existingIdx !== -1) {
+                RANKED_QUEUE[existingIdx] = { user: session, deckId, ws, category };
+              } else {
+                RANKED_QUEUE.push({ user: session, deckId, ws, category });
+              }
+              broadcastRankedQueueCount();
+              tryRankedMatchmaking();
+            });
+          })
+          .catch(err => {
+            console.error('Error in JOIN_RANKED_QUEUE:', err);
+            ws.send(JSON.stringify({ type: 'MATCH_ERROR', payload: { message: 'Error de base de datos en emparejamiento.' } }));
+          });
+      }
+
       else if (type === 'LEAVE_QUEUE') {
         const idx = QUEUE.findIndex(q => q.user.id === session.id);
         if (idx !== -1) QUEUE.splice(idx, 1);
         broadcastQueueCount();
+      }
+
+      else if (type === 'LEAVE_RANKED_QUEUE') {
+        const idx = RANKED_QUEUE.findIndex(q => q.user.id === session.id);
+        if (idx !== -1) RANKED_QUEUE.splice(idx, 1);
+        broadcastRankedQueueCount();
       }
 
       else if (type === 'SEND_CHAT') {
@@ -829,6 +1081,12 @@ wss.on('connection', (ws, request, session) => {
     if (idx !== -1) {
       QUEUE.splice(idx, 1);
       broadcastQueueCount();
+    }
+
+    const rIdx = RANKED_QUEUE.findIndex(q => q.user.id === session.id);
+    if (rIdx !== -1) {
+      RANKED_QUEUE.splice(rIdx, 1);
+      broadcastRankedQueueCount();
     }
 
     const matchId = ws.currentMatchId;

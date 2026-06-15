@@ -101,6 +101,10 @@ class AppController {
     this.onlineDuel = null;
     this.battlefieldEditor = null;
     this.currentUser = null;
+    this.currentLeaderboardTab = 'general';
+    this.currentTop3Tab = 'normal';
+    this.currentDuelsTab = 'normal';
+    this.currentHistoryTab = 'normal';
     
     // Screens DOM map
     this.screens = {
@@ -112,6 +116,7 @@ class AppController {
       duel: document.getElementById('screen-duel'),
       battlefields: document.getElementById('screen-battlefields'),
       queue: document.getElementById('screen-queue'),
+      queueRanked: document.getElementById('screen-queue-ranked'),
       leaderboard: document.getElementById('screen-leaderboard'),
       history: document.getElementById('screen-history'),
       privateWaiting: document.getElementById('screen-private-waiting')
@@ -290,12 +295,146 @@ class AppController {
       this.onlineDuel.openDeckSelector();
     });
 
+    // Duel Ranked flow
+    document.getElementById('btn-play-ranked')?.addEventListener('click', () => {
+      document.getElementById('modal-deck-selector-title').textContent = 'Elige tu Mazo para el Competitivo Ranked';
+      document.getElementById('modal-deck-selector-desc').textContent = 'Selecciona cuál de tus mazos usarás para entrar en la cola de emparejamiento competitivo.';
+      document.getElementById('opponent-deck-select-container').style.display = 'none';
+
+      const startBtn = document.getElementById('btn-start-duel-match');
+      const newStartBtn = startBtn.cloneNode(true);
+      startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+
+      newStartBtn.addEventListener('click', () => {
+        this.onlineDuel.startRankedMatchFlow();
+      });
+
+      this.onlineDuel.openDeckSelector();
+    });
+
+    // Cancel Ranked Queue
+    document.getElementById('btn-cancel-queue-ranked')?.addEventListener('click', () => {
+      this.onlineDuel.leaveRankedQueue();
+    });
+
     // Public login buttons to browse without login
     document.getElementById('btn-login-leaderboard')?.addEventListener('click', () => this.showLeaderboard());
 
     // Menu options for Leaderboard and History
-    document.getElementById('btn-goto-leaderboard')?.addEventListener('click', () => this.showLeaderboard());
-    document.getElementById('btn-goto-history')?.addEventListener('click', () => this.showHistory());
+    document.getElementById('btn-goto-leaderboard')?.addEventListener('click', () => {
+      // Reset to general leaderboard on fresh menu click
+      this.currentLeaderboardTab = 'general';
+      const tabGen = document.getElementById('btn-leaderboard-tab-general');
+      const tabRanked = document.getElementById('btn-leaderboard-tab-ranked');
+      const rankedHeader = document.getElementById('ranked-leaderboard-header');
+      const tableTitle = document.getElementById('leaderboard-table-title');
+      
+      if (tabGen) tabGen.classList.add('active');
+      if (tabRanked) tabRanked.classList.remove('active');
+      if (rankedHeader) rankedHeader.style.display = 'none';
+      if (tableTitle) tableTitle.textContent = 'Top 250 General';
+      
+      this.showLeaderboard();
+    });
+    document.getElementById('btn-goto-history')?.addEventListener('click', () => {
+      this.currentHistoryTab = 'normal';
+      const tabNorm = document.getElementById('btn-history-tab-normal');
+      const tabRanked = document.getElementById('btn-history-tab-ranked');
+      if (tabNorm) tabNorm.classList.add('active');
+      if (tabRanked) tabRanked.classList.remove('active');
+      this.showHistory();
+    });
+
+    // Dashboard Top 3 mini-tabs
+    document.querySelectorAll('#top3-tabs .mini-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#top3-tabs .mini-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.currentTop3Tab = tab.getAttribute('data-tab');
+        this.updateDashboardTop3();
+      });
+    });
+
+    // Dashboard Recent Duels mini-tabs
+    document.querySelectorAll('#duels-tabs .mini-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#duels-tabs .mini-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.currentDuelsTab = tab.getAttribute('data-tab');
+        this.updateDashboardRecentDuels();
+      });
+    });
+
+    // History tabs
+    document.getElementById('btn-history-tab-normal')?.addEventListener('click', () => {
+      document.getElementById('btn-history-tab-normal').classList.add('active');
+      document.getElementById('btn-history-tab-ranked').classList.remove('active');
+      this.currentHistoryTab = 'normal';
+      this.showHistory();
+    });
+
+    document.getElementById('btn-history-tab-ranked')?.addEventListener('click', () => {
+      document.getElementById('btn-history-tab-normal').classList.remove('active');
+      document.getElementById('btn-history-tab-ranked').classList.add('active');
+      this.currentHistoryTab = 'ranked';
+      this.showHistory();
+    });
+
+    // Leaderboard Tabs conmuter
+    document.getElementById('btn-leaderboard-tab-general')?.addEventListener('click', () => {
+      document.getElementById('btn-leaderboard-tab-general').classList.add('active');
+      document.getElementById('btn-leaderboard-tab-ranked').classList.remove('active');
+      document.getElementById('ranked-leaderboard-header').style.display = 'none';
+      document.getElementById('leaderboard-table-title').textContent = 'Top 250 General';
+      this.currentLeaderboardTab = 'general';
+      this.showLeaderboard();
+    });
+
+    document.getElementById('btn-leaderboard-tab-ranked')?.addEventListener('click', () => {
+      document.getElementById('btn-leaderboard-tab-general').classList.remove('active');
+      document.getElementById('btn-leaderboard-tab-ranked').classList.add('active');
+      document.getElementById('ranked-leaderboard-header').style.display = 'flex';
+      document.getElementById('leaderboard-table-title').textContent = 'Liga Competitiva';
+      this.currentLeaderboardTab = 'ranked';
+      this.showLeaderboard();
+    });
+
+    // Ranked filters events
+    document.getElementById('select-ranked-filter-category')?.addEventListener('change', () => {
+      // Sincronizar clases activas en las tarjetas superiores
+      const category = document.getElementById('select-ranked-filter-category').value;
+      document.querySelectorAll('.ranked-category-card').forEach(card => {
+        if (card.getAttribute('data-category') === category) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+      this.showLeaderboard();
+    });
+    document.getElementById('select-ranked-filter-level')?.addEventListener('change', () => this.showLeaderboard());
+    
+    document.getElementById('btn-clear-ranked-filters')?.addEventListener('click', () => {
+      const selectCat = document.getElementById('select-ranked-filter-category');
+      const selectLvl = document.getElementById('select-ranked-filter-level');
+      if (selectCat) selectCat.value = 'all';
+      if (selectLvl) selectLvl.value = 'all';
+      document.querySelectorAll('.ranked-category-card').forEach(c => c.classList.remove('active'));
+      this.showLeaderboard();
+    });
+
+    document.querySelectorAll('.ranked-category-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const category = card.getAttribute('data-category');
+        const selectCat = document.getElementById('select-ranked-filter-category');
+        if (selectCat) selectCat.value = category;
+        
+        document.querySelectorAll('.ranked-category-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        
+        this.showLeaderboard();
+      });
+    });
 
     // Logout
     document.getElementById('btn-logout')?.addEventListener('click', () => this.logout());
@@ -476,34 +615,141 @@ class AppController {
     // Refresh decks in builder
     this.deckBuilder.loadSavedDecks();
 
+    this.updateRankedProfileUI();
     this.updateDashboard();
     this.navigateTo('menu');
   }
 
-  async updateDashboard() {
+  async updateRankedProfileUI() {
+    if (!this.currentUser) return;
     try {
-      // 1. Fetch server status (players online / queue count)
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch('/api/ranked/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const stats = await res.json();
+        this.currentUser = stats;
+
+        const kpiTitle = document.getElementById('menu-ranked-title');
+        const kpiStreak = document.getElementById('menu-ranked-streak');
+        const kpiProgress = document.getElementById('menu-ranked-progress');
+        const kpiTrophy = document.getElementById('menu-ranked-trophy');
+
+        if (kpiTitle && kpiStreak && kpiProgress && kpiTrophy) {
+          const category = stats.ranked_category || 'Principiante';
+          const level = stats.ranked_level === 0 || category === 'Maestro' ? '' : ` ${stats.ranked_level}`;
+          kpiTitle.textContent = `${category}${level}`;
+
+          const TROPHY_IMAGES = {
+            'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
+            'Great': 'Sets/Trofeos/2-Great-1-4.png',
+            'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
+            'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
+            'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
+            'Maestro': 'Sets/Trofeos/6-Maestro.png'
+          };
+          kpiTrophy.src = TROPHY_IMAGES[category] || 'Sets/Trofeos/1-Principiante-1-3.png';
+
+          const RANK_LIMITS = { 'Principiante': 3, 'Great': 4, 'Experto': 5, 'Veterano': 5, 'Ultra': 5, 'Maestro': 0 };
+          const limit = RANK_LIMITS[category] || 0;
+          if (category === 'Maestro') {
+            kpiStreak.textContent = `V: ${stats.master_ranked_wins || 0}`;
+            kpiProgress.style.width = '100%';
+          } else {
+            const wins = stats.consecutive_wins || 0;
+            kpiStreak.textContent = `Racha: ${wins}/${limit}`;
+            const pct = (wins / limit) * 100;
+            kpiProgress.style.width = `${pct}%`;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to update ranked profile UI:', err);
+    }
+  }
+
+  async updateDashboard() {
+    await this.updateDashboardStatus();
+    await this.updateDashboardTop3();
+    await this.updateDashboardRecentDuels();
+    this.updateRankedProfileUI();
+  }
+
+  async updateDashboardStatus() {
+    try {
       const resStatus = await fetch('/api/server-status');
       if (resStatus.ok) {
         const dataStatus = await resStatus.json();
         const playersEl = document.getElementById('news-stat-players');
-        const queueEl = document.getElementById('news-stat-queue');
-        if (playersEl) playersEl.textContent = dataStatus.onlinePlayers;
-        if (queueEl) queueEl.textContent = dataStatus.inQueue;
+        const queueNormalEl = document.getElementById('news-stat-queue-normal');
+        const queueRankedEl = document.getElementById('news-stat-queue-ranked');
         
-        // También actualizar el contador de cola si el usuario está en screen-queue
+        if (playersEl) playersEl.textContent = dataStatus.onlinePlayers;
+        if (queueNormalEl) queueNormalEl.textContent = dataStatus.inQueue;
+        if (queueRankedEl) queueRankedEl.textContent = dataStatus.inRankedQueue;
+        
         const queueCountEl = document.getElementById('queue-online-count');
         if (queueCountEl) queueCountEl.textContent = dataStatus.inQueue;
-      }
 
-      // 2. Fetch Top 3 from Leaderboard
-      const resLeaderboard = await fetch('/api/leaderboard');
-      if (resLeaderboard.ok) {
-        const dataLeader = await resLeaderboard.json();
-        const top3ListEl = document.getElementById('news-top3-list');
-        if (top3ListEl) {
+        const queueRankedCountEl = document.getElementById('queue-ranked-online-count');
+        if (queueRankedCountEl) queueRankedCountEl.textContent = dataStatus.inRankedQueue;
+      }
+    } catch (err) {
+      console.warn('Failed to update dashboard status:', err);
+    }
+  }
+
+  async updateDashboardTop3() {
+    try {
+      const top3ListEl = document.getElementById('news-top3-list');
+      if (!top3ListEl) return;
+
+      top3ListEl.innerHTML = '<div class="news-loading">Cargando...</div>';
+
+      if (this.currentTop3Tab === 'ranked') {
+        const res = await fetch('/api/ranked/leaderboard?category=all&level=all');
+        if (res.ok) {
+          const data = await res.json();
           top3ListEl.innerHTML = '';
-          const top3 = dataLeader.leaderboard.slice(0, 3);
+          const top3 = data.leaderboard.slice(0, 3);
+          if (top3.length === 0) {
+            top3ListEl.innerHTML = '<div class="news-loading">No hay datos aún</div>';
+          } else {
+            const TROPHY_IMAGES = {
+              'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
+              'Great': 'Sets/Trofeos/2-Great-1-4.png',
+              'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
+              'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
+              'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
+              'Maestro': 'Sets/Trofeos/6-Maestro.png'
+            };
+            top3.forEach((player, idx) => {
+              const div = document.createElement('div');
+              div.className = `news-item top-${idx + 1}`;
+              
+              const trophyImg = TROPHY_IMAGES[player.ranked_category] || TROPHY_IMAGES['Principiante'];
+              const badgeHtml = `<img class="ranked-trophy-cell-img" src="${trophyImg}" alt="Rango" style="width: 20px; height: 20px; margin-right: 4px; vertical-align: middle;">`;
+              
+              const lvlText = player.ranked_category === 'Maestro' ? '' : ` ${player.ranked_level}`;
+              const valText = player.ranked_category === 'Maestro' 
+                ? `V: ${player.master_ranked_wins}` 
+                : `${player.ranked_category}${lvlText}`;
+
+              div.innerHTML = `
+                <span><strong>#${idx + 1}</strong> ${player.name}</span>
+                <span class="news-item-win" style="display: flex; align-items: center; color: #ffcb05; font-weight: bold;">${badgeHtml} ${valText}</span>
+              `;
+              top3ListEl.appendChild(div);
+            });
+          }
+        }
+      } else {
+        const res = await fetch('/api/leaderboard');
+        if (res.ok) {
+          const data = await res.json();
+          top3ListEl.innerHTML = '';
+          const top3 = data.leaderboard.slice(0, 3);
           if (top3.length === 0) {
             top3ListEl.innerHTML = '<div class="news-loading">No hay datos aún</div>';
           } else {
@@ -524,31 +770,53 @@ class AppController {
           }
         }
       }
+    } catch (err) {
+      console.warn('Failed to update Top 3 dashboard:', err);
+    }
+  }
 
-      // 3. Fetch Recent Battles
-      const resRecent = await fetch('/api/recent-battles');
+  async updateDashboardRecentDuels() {
+    try {
+      const duelsListEl = document.getElementById('news-duels-list');
+      if (!duelsListEl) return;
+
+      duelsListEl.innerHTML = '<div class="news-loading">Cargando...</div>';
+
+      const resRecent = await fetch(`/api/recent-battles?type=${this.currentDuelsTab}`);
       if (resRecent.ok) {
         const dataRecent = await resRecent.json();
-        const duelsListEl = document.getElementById('news-duels-list');
-        if (duelsListEl) {
-          duelsListEl.innerHTML = '';
-          if (dataRecent.length === 0) {
-            duelsListEl.innerHTML = '<div class="news-loading">No hay combates recientes</div>';
-          } else {
-            dataRecent.forEach(battle => {
-              const div = document.createElement('div');
-              div.className = 'news-item';
-              div.innerHTML = `
-                <span class="news-item-vs"><strong>${battle.winner_name}</strong> vs ${battle.loser_name}</span>
-                <span class="news-item-win">Ganó ${battle.winner_name}</span>
-              `;
-              duelsListEl.appendChild(div);
-            });
-          }
+        duelsListEl.innerHTML = '';
+        if (dataRecent.length === 0) {
+          duelsListEl.innerHTML = '<div class="news-loading">No hay combates recientes</div>';
+        } else {
+          dataRecent.forEach(battle => {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+            
+            let p1Subtext = '';
+            let p2Subtext = '';
+            if (battle.is_ranked) {
+              const p1Lvl = battle.winner_category === 'Maestro' ? '' : ` ${battle.winner_level}`;
+              const p2Lvl = battle.loser_category === 'Maestro' ? '' : ` ${battle.loser_level}`;
+              p1Subtext = `<div style="font-size:0.7rem; color:var(--color-text-muted); margin-top:2px;">${battle.winner_category}${p1Lvl}</div>`;
+              p2Subtext = `<div style="font-size:0.7rem; color:var(--color-text-muted); margin-top:2px;">${battle.loser_category}${p2Lvl}</div>`;
+            }
+            
+            div.innerHTML = `
+              <div style="text-align:left; flex: 1;">
+                <span class="news-item-vs"><strong class="winner-highlight">${battle.winner_name}</strong> vs ${battle.loser_name}</span>
+                <div style="display: flex; gap: 15px;">
+                  ${p1Subtext}
+                  ${p2Subtext}
+                </div>
+              </div>
+            `;
+            duelsListEl.appendChild(div);
+          });
         }
       }
     } catch (err) {
-      console.warn('Failed to update menu dashboard metrics:', err);
+      console.warn('Failed to update recent duels dashboard:', err);
     }
   }
 
@@ -570,79 +838,196 @@ class AppController {
       const headers = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/leaderboard', { headers });
-      if (!res.ok) throw new Error('Failed to fetch leaderboard list');
-
-      const data = await res.json();
-      const { leaderboard, personal } = data;
-
-      // Update sidebar stats
-      const rankPosEl = document.getElementById('leaderboard-user-pos');
-      const rankVicEl = document.getElementById('leaderboard-user-victories');
-      const rankNameEl = document.getElementById('leaderboard-user-name');
-      const rankEmailEl = document.getElementById('leaderboard-user-email');
-
-      if (this.currentUser) {
-        rankNameEl.textContent = this.currentUser.name;
-        rankEmailEl.textContent = this.currentUser.email;
-        if (personal) {
-          rankPosEl.textContent = personal.position > 0 ? `#${personal.position}` : '#--';
-          rankVicEl.textContent = personal.victories;
-        }
-      } else {
-        rankNameEl.textContent = 'Invitado';
-        rankEmailEl.textContent = 'Inicia sesión para ver tu rango';
-        rankPosEl.textContent = '#--';
-        rankVicEl.textContent = '0';
-      }
-
-      // Render table items
       const tbody = document.getElementById('leaderboard-tbody');
       tbody.innerHTML = '';
 
-      if (leaderboard.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 30px;">Ningún entrenador ha conseguido victorias aún.</td>`;
-        tbody.appendChild(row);
-      } else {
-        leaderboard.forEach((player, index) => {
-          const pos = index + 1;
-          const row = document.createElement('tr');
+      const trophyImgEl = document.getElementById('leaderboard-user-avatar-trophy');
+      const emojiEl = document.getElementById('leaderboard-user-avatar-emoji');
+      const rankedDetailsEl = document.getElementById('leaderboard-user-ranked-details');
+      const categoryEl = document.getElementById('leaderboard-user-category');
+      const levelEl = document.getElementById('leaderboard-user-level');
+      const victoriesLabelEl = document.getElementById('leaderboard-user-victories-label');
+      
+      const TROPHY_IMAGES = {
+        'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
+        'Great': 'Sets/Trofeos/2-Great-1-4.png',
+        'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
+        'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
+        'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
+        'Maestro': 'Sets/Trofeos/6-Maestro.png'
+      };
 
-          let rowClass = '';
-          let badgeHtml = `${pos}`;
+      if (this.currentLeaderboardTab === 'ranked') {
+        const catFilter = document.getElementById('select-ranked-filter-category').value || 'all';
+        const lvlFilter = document.getElementById('select-ranked-filter-level').value || 'all';
+        
+        const res = await fetch(`/api/ranked/leaderboard?category=${catFilter}&level=${lvlFilter}`, { headers });
+        if (!res.ok) throw new Error('Failed to fetch ranked leaderboard');
+        
+        const data = await res.json();
+        const { leaderboard, summary, personal } = data;
 
-          if (pos === 1) {
-            rowClass = 'rank-row-1';
-            badgeHtml = `<span class="rank-badge platinum">👑 Platino</span>`;
-          } else if (pos === 2) {
-            rowClass = 'rank-row-2';
-            badgeHtml = `<span class="rank-badge diamond">💎 Diamante</span>`;
-          } else if (pos === 3) {
-            rowClass = 'rank-row-3';
-            badgeHtml = `<span class="rank-badge gold">🥇 Oro</span>`;
-          } else if (pos === 4) {
-            rowClass = 'rank-row-4';
-            badgeHtml = `<span class="rank-badge silver">🥈 Plata</span>`;
-          } else if (pos === 5) {
-            rowClass = 'rank-row-5';
-            badgeHtml = `<span class="rank-badge bronze">🥉 Bronce</span>`;
-          } else if (pos >= 6 && pos <= 10) {
-            rowClass = 'rank-row-challenger';
+        // 1. Update upper category count badges
+        if (summary) {
+          document.getElementById('count-cat-principiante').textContent = summary['Principiante'] || 0;
+          document.getElementById('count-cat-great').textContent = summary['Great'] || 0;
+          document.getElementById('count-cat-experto').textContent = summary['Experto'] || 0;
+          document.getElementById('count-cat-veterano').textContent = summary['Veterano'] || 0;
+          document.getElementById('count-cat-ultra').textContent = summary['Ultra'] || 0;
+          document.getElementById('count-cat-maestro').textContent = summary['Maestro'] || 0;
+        }
+
+        // 2. Update metric header label
+        document.getElementById('leaderboard-th-metric').textContent = 'Rendimiento';
+
+        // 3. Update sidebar stats
+        if (emojiEl) emojiEl.style.display = 'none';
+        if (trophyImgEl) trophyImgEl.style.display = 'block';
+        if (rankedDetailsEl) rankedDetailsEl.style.display = 'block';
+        if (victoriesLabelEl) victoriesLabelEl.textContent = 'Victorias Ranked';
+
+        const rankPosEl = document.getElementById('leaderboard-user-pos');
+        const rankVicEl = document.getElementById('leaderboard-user-victories');
+        const rankNameEl = document.getElementById('leaderboard-user-name');
+        const rankEmailEl = document.getElementById('leaderboard-user-email');
+
+        if (this.currentUser) {
+          rankNameEl.textContent = this.currentUser.name;
+          rankEmailEl.textContent = this.currentUser.email;
+          if (personal) {
+            rankPosEl.textContent = personal.position > 0 ? `#${personal.position}` : '#--';
+            rankVicEl.textContent = personal.victories;
+            if (categoryEl) categoryEl.textContent = personal.ranked_category;
+            if (levelEl) levelEl.textContent = personal.ranked_category === 'Maestro' ? '' : `Nivel ${personal.ranked_level}`;
+            if (trophyImgEl) trophyImgEl.src = TROPHY_IMAGES[personal.ranked_category] || TROPHY_IMAGES['Principiante'];
           }
+        } else {
+          rankNameEl.textContent = 'Invitado';
+          rankEmailEl.textContent = 'Inicia sesión para ver tu rango';
+          rankPosEl.textContent = '#--';
+          rankVicEl.textContent = '0';
+          if (categoryEl) categoryEl.textContent = 'Principiante';
+          if (levelEl) levelEl.textContent = 'Nivel 1';
+          if (trophyImgEl) trophyImgEl.src = TROPHY_IMAGES['Principiante'];
+        }
 
-          if (rowClass) row.className = rowClass;
-
-          row.innerHTML = `
-            <td style="padding: 15px; font-weight: 700;">${badgeHtml}</td>
-            <td style="padding: 15px;">
-              <strong>${player.name}</strong>
-              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px;">Partidas jugadas: ${player.total_games || 0}</div>
-            </td>
-            <td style="padding: 15px; text-align: right; font-weight: 700; color: var(--color-primary);">${player.victories}</td>
-          `;
+        // 4. Render items
+        if (leaderboard.length === 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 30px;">Ningún entrenador en este rango actualmente.</td>`;
           tbody.appendChild(row);
-        });
+        } else {
+          leaderboard.forEach((player, index) => {
+            const row = document.createElement('tr');
+            const trophyImg = TROPHY_IMAGES[player.ranked_category] || TROPHY_IMAGES['Principiante'];
+            
+            const badgeHtml = `<div style="display:flex; align-items:center; gap:8px;"><img class="ranked-trophy-cell-img" src="${trophyImg}" alt="Rango"> <span>#${index + 1}</span></div>`;
+            
+            const lvlText = player.ranked_category === 'Maestro' ? '' : ` - Nivel ${player.ranked_level}`;
+            const coachHtml = `
+              <strong>${player.name}</strong>
+              <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px;">
+                ${player.ranked_category}${lvlText} | Partidas Ranked: ${player.total_games || 0}
+              </div>
+            `;
+
+            let performanceText = '';
+            if (player.ranked_category === 'Maestro') {
+              performanceText = `V: ${player.master_ranked_wins || 0}`;
+            } else {
+              const RANK_LIMITS = { 'Principiante': 3, 'Great': 4, 'Experto': 5, 'Veterano': 5, 'Ultra': 5 };
+              const limit = RANK_LIMITS[player.ranked_category] || 3;
+              performanceText = `Racha: ${player.consecutive_wins || 0}/${limit}`;
+            }
+
+            row.innerHTML = `
+              <td style="padding: 15px; font-weight: 700;">${badgeHtml}</td>
+              <td style="padding: 15px;">${coachHtml}</td>
+              <td style="padding: 15px; text-align: right; font-weight: 700; color: #ffcb05;">${performanceText}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      } else {
+        // General leaderboard path
+        const res = await fetch('/api/leaderboard', { headers });
+        if (!res.ok) throw new Error('Failed to fetch leaderboard list');
+
+        const data = await res.json();
+        const { leaderboard, personal } = data;
+
+        // Reset metric header label
+        document.getElementById('leaderboard-th-metric').textContent = 'Victorias';
+
+        // Update sidebar stats
+        if (emojiEl) emojiEl.style.display = 'block';
+        if (trophyImgEl) trophyImgEl.style.display = 'none';
+        if (rankedDetailsEl) rankedDetailsEl.style.display = 'none';
+        if (victoriesLabelEl) victoriesLabelEl.textContent = 'Victorias';
+
+        const rankPosEl = document.getElementById('leaderboard-user-pos');
+        const rankVicEl = document.getElementById('leaderboard-user-victories');
+        const rankNameEl = document.getElementById('leaderboard-user-name');
+        const rankEmailEl = document.getElementById('leaderboard-user-email');
+
+        if (this.currentUser) {
+          rankNameEl.textContent = this.currentUser.name;
+          rankEmailEl.textContent = this.currentUser.email;
+          if (personal) {
+            rankPosEl.textContent = personal.position > 0 ? `#${personal.position}` : '#--';
+            rankVicEl.textContent = personal.victories;
+          }
+        } else {
+          rankNameEl.textContent = 'Invitado';
+          rankEmailEl.textContent = 'Inicia sesión para ver tu rango';
+          rankPosEl.textContent = '#--';
+          rankVicEl.textContent = '0';
+        }
+
+        if (leaderboard.length === 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 30px;">Ningún entrenador ha conseguido victorias aún.</td>`;
+          tbody.appendChild(row);
+        } else {
+          leaderboard.forEach((player, index) => {
+            const pos = index + 1;
+            const row = document.createElement('tr');
+
+            let rowClass = '';
+            let badgeHtml = `${pos}`;
+
+            if (pos === 1) {
+              rowClass = 'rank-row-1';
+              badgeHtml = `<span class="rank-badge platinum">👑 Platino</span>`;
+            } else if (pos === 2) {
+              rowClass = 'rank-row-2';
+              badgeHtml = `<span class="rank-badge diamond">💎 Diamante</span>`;
+            } else if (pos === 3) {
+              rowClass = 'rank-row-3';
+              badgeHtml = `<span class="rank-badge gold">🥇 Oro</span>`;
+            } else if (pos === 4) {
+              rowClass = 'rank-row-4';
+              badgeHtml = `<span class="rank-badge silver">🥈 Plata</span>`;
+            } else if (pos === 5) {
+              rowClass = 'rank-row-5';
+              badgeHtml = `<span class="rank-badge bronze">🥉 Bronce</span>`;
+            } else if (pos >= 6 && pos <= 10) {
+              rowClass = 'rank-row-challenger';
+            }
+
+            if (rowClass) row.className = rowClass;
+
+            row.innerHTML = `
+              <td style="padding: 15px; font-weight: 700;">${badgeHtml}</td>
+              <td style="padding: 15px;">
+                <strong>${player.name}</strong>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 4px;">Partidas Normales: ${player.total_games || 0}</div>
+              </td>
+              <td style="padding: 15px; text-align: right; font-weight: 700; color: var(--color-primary);">${player.victories}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
       }
 
       this.navigateTo('leaderboard');
@@ -673,11 +1058,19 @@ class AppController {
 
       tbody.innerHTML = '';
 
-      if (history.length === 0) {
+      const filteredHistory = history.filter(battle => {
+        const isRanked = !!battle.is_ranked;
+        return this.currentHistoryTab === 'ranked' ? isRanked : !isRanked;
+      });
+
+      if (filteredHistory.length === 0) {
         emptyMsg.style.display = 'block';
+        emptyMsg.textContent = this.currentHistoryTab === 'ranked'
+          ? 'No has disputado ninguna batalla ranked todavía.'
+          : 'No has disputado ninguna batalla online normal todavía.';
       } else {
         emptyMsg.style.display = 'none';
-        history.forEach(battle => {
+        filteredHistory.forEach(battle => {
           const row = document.createElement('tr');
           const outcomeClass = battle.result === 'won' ? 'won' : 'lost';
           const outcomeText = battle.result === 'won' ? 'Ganado' : 'Perdido';
@@ -691,8 +1084,14 @@ class AppController {
             hour: '2-digit', minute: '2-digit'
           });
 
+          let opponentDetailsHtml = `<strong>${battle.opponent_name}</strong>`;
+          if (battle.is_ranked) {
+            const oppLvlText = battle.opponent_category === 'Maestro' ? '' : ` (Nivel ${battle.opponent_level})`;
+            opponentDetailsHtml += `<div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">${battle.opponent_category}${oppLvlText}</div>`;
+          }
+
           row.innerHTML = `
-            <td style="padding: 15px;"><strong>${battle.opponent_name}</strong></td>
+            <td style="padding: 15px;">${opponentDetailsHtml}</td>
             <td style="padding: 15px;"><span class="history-outcome ${outcomeClass}">${outcomeText}</span></td>
             <td style="padding: 15px;">${durationText}</td>
             <td style="padding: 15px; text-align: right; color: var(--color-text-muted);">${date}</td>

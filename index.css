@@ -3916,3 +3916,129 @@ button {
   height: 100%;
   object-fit: contain;
 }
+
+/* ==========================================================================
+   SYSTEM COMPETITIVE (RANKED) STYLES
+   ========================================================================== */
+.ranked-match-banner {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1005;
+  background: linear-gradient(135deg, rgba(20, 22, 35, 0.95) 0%, rgba(10, 11, 18, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 8px;
+  padding: 10px 24px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.15);
+  animation: slideDownIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes slideDownIn {
+  from {
+    top: 40px;
+    opacity: 0;
+  }
+  to {
+    top: 70px;
+    opacity: 1;
+  }
+}
+
+.ranked-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.ranked-banner-badge {
+  background: linear-gradient(135deg, #e0a96d 0%, #d4af37 100%);
+  color: #000;
+  font-weight: 800;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
+}
+
+#ranked-banner-text {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ranked-category-card:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 203, 5, 0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 203, 5, 0.1);
+}
+
+.ranked-category-card.active {
+  background: rgba(255, 203, 5, 0.08) !important;
+  border-color: #ffcb05 !important;
+  box-shadow: 0 0 15px rgba(255, 203, 5, 0.2), inset 0 0 10px rgba(255, 203, 5, 0.05);
+}
+
+.ranked-trophy-cell-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.ranked-kpi-widget {
+  transition: all 0.25s ease;
+}
+.ranked-kpi-widget:hover {
+  border-color: rgba(59, 76, 202, 0.45) !important;
+  box-shadow: 0 4px 15px rgba(59, 76, 202, 0.15);
+}
+
+.pokeball-search-container.ranked {
+  border-color: rgba(255, 203, 5, 0.2);
+}
+.pokeball-searching-spinner.ranked {
+  border-top-color: #ffcb05;
+}
+
+/* Dashboard mini-tabs and winner highlight */
+.mini-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.mini-tab {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mini-tab:hover {
+  color: #fff;
+}
+
+.mini-tab.active {
+  background: var(--color-primary);
+  color: #fff !important;
+}
+
+.winner-highlight {
+  color: #ffcb05 !important;
+}

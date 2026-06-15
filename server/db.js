@@ -85,9 +85,34 @@ async function initDB() {
       id VARCHAR(255) PRIMARY KEY,
       email VARCHAR(255) UNIQUE NOT NULL,
       name VARCHAR(255) NOT NULL,
-      victories INT DEFAULT 0
+      victories INT DEFAULT 0,
+      ranked_category VARCHAR(50) DEFAULT 'Principiante',
+      ranked_level INT DEFAULT 1,
+      consecutive_wins INT DEFAULT 0,
+      consecutive_losses INT DEFAULT 0,
+      master_ranked_wins INT DEFAULT 0
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Migrations for users table if columns do not exist
+  try {
+    const columnsToAdd = [
+      { name: 'ranked_category', def: "VARCHAR(50) DEFAULT 'Principiante'" },
+      { name: 'ranked_level', def: 'INT DEFAULT 1' },
+      { name: 'consecutive_wins', def: 'INT DEFAULT 0' },
+      { name: 'consecutive_losses', def: 'INT DEFAULT 0' },
+      { name: 'master_ranked_wins', def: 'INT DEFAULT 0' }
+    ];
+    for (const col of columnsToAdd) {
+      const [cols] = await p.query(`SHOW COLUMNS FROM users LIKE ?`, [col.name]);
+      if (cols.length === 0) {
+        await p.query(`ALTER TABLE users ADD COLUMN \`${col.name}\` ${col.def}`);
+        console.log(`Added ${col.name} column to users table.`);
+      }
+    }
+  } catch (err) {
+    console.error('Error migrating users table:', err);
+  }
 
   // 2. Create Decks Table
   await p.query(`
@@ -121,10 +146,37 @@ async function initDB() {
       opponent_name VARCHAR(255) NOT NULL,
       result ENUM('won', 'lost') NOT NULL,
       duration INT NOT NULL,
+      is_ranked BOOLEAN DEFAULT FALSE,
+      user_category VARCHAR(50) DEFAULT NULL,
+      user_level INT DEFAULT NULL,
+      opponent_id VARCHAR(255) DEFAULT NULL,
+      opponent_category VARCHAR(50) DEFAULT NULL,
+      opponent_level INT DEFAULT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Migrations for battles table if columns do not exist
+  try {
+    const columnsToAdd = [
+      { name: 'is_ranked', def: 'BOOLEAN DEFAULT FALSE' },
+      { name: 'user_category', def: 'VARCHAR(50) DEFAULT NULL' },
+      { name: 'user_level', def: 'INT DEFAULT NULL' },
+      { name: 'opponent_id', def: 'VARCHAR(255) DEFAULT NULL' },
+      { name: 'opponent_category', def: 'VARCHAR(50) DEFAULT NULL' },
+      { name: 'opponent_level', def: 'INT DEFAULT NULL' }
+    ];
+    for (const col of columnsToAdd) {
+      const [cols] = await p.query(`SHOW COLUMNS FROM battles LIKE ?`, [col.name]);
+      if (cols.length === 0) {
+        await p.query(`ALTER TABLE battles ADD COLUMN \`${col.name}\` ${col.def}`);
+        console.log(`Added ${col.name} column to battles table.`);
+      }
+    }
+  } catch (err) {
+    console.error('Error migrating battles table:', err);
+  }
 
   console.log('MySQL Database and Tables initialized successfully.');
 }
@@ -188,11 +240,18 @@ async function deleteUserDeck(deckId, userId) {
   await query('DELETE FROM decks WHERE id = ? AND user_id = ? AND is_starter = FALSE', [deckId, userId]);
 }
 
-async function recordBattle(userId, opponentName, result, duration) {
-  await query(
-    'INSERT INTO battles (user_id, opponent_name, result, duration) VALUES (?, ?, ?, ?)',
-    [userId, opponentName, result, duration]
-  );
+async function recordBattle(userId, opponentName, result, duration, isRanked = false, userCategory = null, userLevel = null, opponentId = null, opponentCategory = null, opponentLevel = null) {
+  await query(`
+    INSERT INTO battles (
+      user_id, opponent_name, result, duration, 
+      is_ranked, user_category, user_level, 
+      opponent_id, opponent_category, opponent_level
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    userId, opponentName, result, duration, 
+    isRanked ? 1 : 0, userCategory, userLevel, 
+    opponentId, opponentCategory, opponentLevel
+  ]);
   if (result === 'won') {
     await query('UPDATE users SET victories = victories + 1 WHERE id = ?', [userId]);
   }
@@ -204,8 +263,9 @@ async function getUserBattleHistory(userId) {
 
 async function getLeaderboard() {
   return await query(`
-    SELECT name, victories, 
-      (SELECT COUNT(*) FROM battles WHERE battles.user_id = users.id) as total_games 
+    SELECT name, 
+      (SELECT COUNT(*) FROM battles WHERE battles.user_id = users.id AND battles.result = 'won' AND battles.is_ranked = 0) as victories,
+      (SELECT COUNT(*) FROM battles WHERE battles.user_id = users.id AND battles.is_ranked = 0) as total_games 
     FROM users 
     ORDER BY victories DESC, name ASC 
     LIMIT 250
@@ -216,15 +276,168 @@ async function getUserLeaderboardPosition(userId) {
   const user = await findUserById(userId);
   if (!user) return { position: 0, victories: 0 };
 
-  // Calculate position (count of users with more victories + 1)
-  const rows = await query(
-    'SELECT COUNT(*) as count FROM users WHERE victories > ? OR (victories = ? AND name < ?)',
-    [user.victories, user.victories, user.name]
+  const vRows = await query(
+    "SELECT COUNT(*) as victories FROM battles WHERE user_id = ? AND result = 'won' AND is_ranked = 0",
+    [userId]
   );
+  const normalVictories = vRows[0] ? vRows[0].victories : 0;
+
+  const rows = await query(`
+    SELECT COUNT(*) as count FROM (
+      SELECT u.id, u.name, 
+        (SELECT COUNT(*) FROM battles b WHERE b.user_id = u.id AND b.result = 'won' AND b.is_ranked = 0) as victories
+      FROM users u
+    ) as temp
+    WHERE victories > ? OR (temp.victories = ? AND temp.name < ?)
+  `, [normalVictories, normalVictories, user.name]);
+
   return {
     position: rows[0].count + 1,
-    victories: user.victories
+    victories: normalVictories
   };
+}
+
+const RANK_CONFIG = {
+  'Principiante': { maxLevel: 3, winsNeeded: 3, lossesLimit: 3, nextCategory: 'Great', prevCategory: null },
+  'Great': { maxLevel: 4, winsNeeded: 4, lossesLimit: 4, nextCategory: 'Experto', prevCategory: 'Principiante' },
+  'Experto': { maxLevel: 5, winsNeeded: 5, lossesLimit: 5, nextCategory: 'Veterano', prevCategory: 'Great' },
+  'Veterano': { maxLevel: 5, winsNeeded: 5, lossesLimit: 5, nextCategory: 'Ultra', prevCategory: 'Experto' },
+  'Ultra': { maxLevel: 5, winsNeeded: 5, lossesLimit: 5, nextCategory: 'Maestro', prevCategory: 'Veterano' },
+  'Maestro': { maxLevel: 0, winsNeeded: 0, lossesLimit: 10, nextCategory: null, prevCategory: 'Ultra' }
+};
+
+async function updateRankedStats(userId, result) {
+  const user = await findUserById(userId);
+  if (!user) return null;
+
+  let category = user.ranked_category || 'Principiante';
+  let level = user.ranked_level === undefined || user.ranked_level === null ? 1 : user.ranked_level;
+  let wins = user.consecutive_wins || 0;
+  let losses = user.consecutive_losses || 0;
+  let masterWins = user.master_ranked_wins || 0;
+
+  const config = RANK_CONFIG[category];
+  if (!config) return user;
+
+  if (result === 'won') {
+    losses = 0; // Se resetea en victorias de ranked
+    if (category === 'Maestro') {
+      masterWins += 1;
+    } else {
+      wins += 1;
+      if (wins >= config.winsNeeded) {
+        wins = 0;
+        if (level >= config.maxLevel) {
+          category = config.nextCategory;
+          level = category === 'Maestro' ? 0 : 1;
+        } else {
+          level += 1;
+        }
+      }
+    }
+  } else if (result === 'lost') {
+    wins = 0; // Se resetea en derrotas de ranked
+    losses += 1;
+    if (losses >= config.lossesLimit) {
+      losses = 0;
+      if (category === 'Maestro') {
+        category = 'Ultra';
+        level = 5;
+      } else {
+        if (level === 1) {
+          if (config.prevCategory) {
+            category = config.prevCategory;
+            level = RANK_CONFIG[category].maxLevel;
+          } else {
+            // Principiante 1, no desciende
+            level = 1;
+          }
+        } else {
+          level -= 1;
+        }
+      }
+    }
+  }
+
+  await query(`
+    UPDATE users 
+    SET ranked_category = ?, ranked_level = ?, consecutive_wins = ?, consecutive_losses = ?, master_ranked_wins = ?
+    WHERE id = ?
+  `, [category, level, wins, losses, masterWins, userId]);
+
+  return {
+    ...user,
+    ranked_category: category,
+    ranked_level: level,
+    consecutive_wins: wins,
+    consecutive_losses: losses,
+    master_ranked_wins: masterWins
+  };
+}
+
+async function getRankedLeaderboard(categoryFilter = null, levelFilter = null) {
+  let sql = `
+    SELECT id, name, victories, ranked_category, ranked_level, consecutive_wins, master_ranked_wins,
+      (SELECT COUNT(*) FROM battles WHERE battles.user_id = users.id AND battles.is_ranked = 1) as total_games
+    FROM users
+    WHERE 1=1
+  `;
+  const params = [];
+
+  if (categoryFilter && categoryFilter !== 'all') {
+    sql += ` AND ranked_category = ?`;
+    params.push(categoryFilter);
+  }
+
+  if (levelFilter && levelFilter !== 'all') {
+    sql += ` AND ranked_level = ?`;
+    params.push(parseInt(levelFilter));
+  }
+
+  sql += `
+    ORDER BY 
+      CASE ranked_category
+        WHEN 'Maestro' THEN 6
+        WHEN 'Ultra' THEN 5
+        WHEN 'Veterano' THEN 4
+        WHEN 'Experto' THEN 3
+        WHEN 'Great' THEN 2
+        WHEN 'Principiante' THEN 1
+        ELSE 0
+      END DESC,
+      ranked_level DESC,
+      master_ranked_wins DESC,
+      consecutive_wins DESC,
+      name ASC
+    LIMIT 250
+  `;
+
+  return await query(sql, params);
+}
+
+async function getRankedStatsSummary() {
+  const rows = await query(`
+    SELECT ranked_category, COUNT(*) as count 
+    FROM users 
+    GROUP BY ranked_category
+  `);
+  
+  const summary = {
+    'Principiante': 0,
+    'Great': 0,
+    'Experto': 0,
+    'Veterano': 0,
+    'Ultra': 0,
+    'Maestro': 0
+  };
+  
+  rows.forEach(r => {
+    if (summary[r.ranked_category] !== undefined) {
+      summary[r.ranked_category] = r.count;
+    }
+  });
+  
+  return summary;
 }
 
 module.exports = {
@@ -241,5 +454,8 @@ module.exports = {
   recordBattle,
   getUserBattleHistory,
   getLeaderboard,
-  getUserLeaderboardPosition
+  getUserLeaderboardPosition,
+  updateRankedStats,
+  getRankedLeaderboard,
+  getRankedStatsSummary
 };

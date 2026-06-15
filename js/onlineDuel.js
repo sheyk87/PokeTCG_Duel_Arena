@@ -47,9 +47,19 @@ export class OnlineDuel extends Duel {
           if (countEl) countEl.textContent = payload.onlineCount;
         }
 
+        else if (type === 'RANKED_QUEUE_STATUS') {
+          const countEl = document.getElementById('queue-ranked-online-count');
+          if (countEl) countEl.textContent = payload.onlineCount;
+        }
+
         else if (type === 'MATCH_START') {
           const pDeck = this.deckBuilder.savedDecks[this.selectedDeckId];
           await this.initOnlineMatch(payload, pDeck);
+        }
+
+        else if (type === 'MATCH_OVER') {
+          const isWin = payload.winnerId === this.localPlayerId;
+          this.endGameLocal(isWin ? 'player' : 'opponent', payload.reason, payload.isRanked, payload.rankedStats);
         }
 
         else if (type === 'STATE_UPDATE' || type === 'ACTION_REJECTED') {
@@ -127,12 +137,50 @@ export class OnlineDuel extends Duel {
     });
   }
 
+  async startRankedMatchFlow() {
+    const pDeckId = document.getElementById('player-duel-deck-select').value;
+    const pDeck = this.deckBuilder.savedDecks[pDeckId];
+    if (!pDeck) {
+      await window.customAlert('Mazo Inválido', 'Por favor selecciona un mazo válido.');
+      return;
+    }
+
+    document.getElementById('modal-deck-selector').classList.remove('active');
+    this.selectedDeckId = pDeckId;
+
+    const category = this.appController.currentUser ? this.appController.currentUser.ranked_category : 'Principiante';
+    const catEl = document.getElementById('queue-ranked-category');
+    if (catEl) catEl.textContent = category;
+
+    // Transition to screen-queue-ranked
+    this.appController.navigateTo('queueRanked');
+
+    this.setupWebSocket(() => {
+      this.socket.send(JSON.stringify({
+        type: 'JOIN_RANKED_QUEUE',
+        payload: { deckId: pDeckId }
+      }));
+    });
+  }
+
   leaveQueue() {
     this.stopDuelTimers();
     this.messageQueue = [];
     this.isProcessingQueue = false;
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify({ type: 'LEAVE_QUEUE' }));
+      this.socket.close();
+    }
+    this.isOnlineMatch = false;
+    this.appController.navigateTo('menu');
+  }
+
+  leaveRankedQueue() {
+    this.stopDuelTimers();
+    this.messageQueue = [];
+    this.isProcessingQueue = false;
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ type: 'LEAVE_RANKED_QUEUE' }));
       this.socket.close();
     }
     this.isOnlineMatch = false;
@@ -202,6 +250,29 @@ export class OnlineDuel extends Duel {
 
     // Transition to duel arena screen
     this.appController.navigateTo('duel');
+
+    // Show ranked matchmaking banner if this is a ranked battle
+    const banner = document.getElementById('ranked-match-banner');
+    const bannerText = document.getElementById('ranked-banner-text');
+    if (banner && bannerText) {
+      if (data.isRanked) {
+        const cat = data.opponentRankedCategory || 'Principiante';
+        const lvlText = cat === 'Maestro' ? '' : `, Nivel: ${data.opponentRankedLevel || 1}`;
+        const streakText = cat === 'Maestro' 
+          ? `Master Victorias: ${data.opponentConsecutiveWins || 0}`
+          : `Racha: ${data.opponentConsecutiveWins || 0} ganadas`;
+
+        bannerText.textContent = `Vinculado con Rival: ${opponentName}, Categoría: ${cat}${lvlText}, ${streakText}`;
+        banner.style.display = 'block';
+
+        if (this.rankedBannerTimeout) clearTimeout(this.rankedBannerTimeout);
+        this.rankedBannerTimeout = setTimeout(() => {
+          banner.style.display = 'none';
+        }, 10000);
+      } else {
+        banner.style.display = 'none';
+      }
+    }
 
     // 1. Setup local player state using server synced deck, hand, prizes
     this.player = this.createPlayerState('Tú', playerDeckTemplate, false);
@@ -1159,7 +1230,7 @@ export class OnlineDuel extends Duel {
   }
 
   // Ends game local only (when received match over from server)
-  endGameLocal(winnerSide, reason) {
+  endGameLocal(winnerSide, reason, isRanked = false, rankedStats = null) {
     this.phase = 'game-over';
     this.messageQueue = [];
     this.isProcessingQueue = false;
@@ -1180,6 +1251,83 @@ export class OnlineDuel extends Duel {
       if (gameOverImg) {
         gameOverImg.src = isWin ? 'cards/Win-Stars.png' : 'cards/Pikachu-Triste.gif';
       }
+
+      // Handle Ranked Stats display inside the game over modal
+      let statsContainer = document.getElementById('game-over-ranked-stats');
+      if (isRanked && rankedStats) {
+        if (!statsContainer) {
+          statsContainer = document.createElement('div');
+          statsContainer.id = 'game-over-ranked-stats';
+          statsContainer.style.margin = '15px 0';
+          statsContainer.style.padding = '15px';
+          statsContainer.style.background = 'rgba(255, 255, 255, 0.05)';
+          statsContainer.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+          statsContainer.style.borderRadius = '12px';
+          statsContainer.style.display = 'flex';
+          statsContainer.style.flexDirection = 'column';
+          statsContainer.style.alignItems = 'center';
+          statsContainer.style.gap = '8px';
+          
+          // Insert right before the buttons container
+          const actionsDiv = modal.querySelector('.modal-actions-centered');
+          const innerContent = modal.querySelector('.match-end-content') || modal.querySelector('.modal-container');
+          if (actionsDiv && innerContent) {
+            innerContent.insertBefore(statsContainer, actionsDiv);
+          }
+        }
+
+        const category = rankedStats.category || 'Principiante';
+        const levelText = category === 'Maestro' ? '' : `Nivel ${rankedStats.level || 1}`;
+        
+        const TROPHY_IMAGES = {
+          'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
+          'Great': 'Sets/Trofeos/2-Great-1-4.png',
+          'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
+          'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
+          'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
+          'Maestro': 'Sets/Trofeos/6-Maestro.png'
+        };
+        const trophyImg = TROPHY_IMAGES[category] || TROPHY_IMAGES['Principiante'];
+
+        let progressHtml = '';
+        if (category === 'Maestro') {
+          progressHtml = `
+            <div style="font-size: 0.85rem; color: #ffcb05; font-weight: 700; margin-top: 5px;">
+              Victorias en Maestro: ${rankedStats.masterRankedWins || 0}
+            </div>
+          `;
+        } else {
+          const RANK_LIMITS = { 'Principiante': 3, 'Great': 4, 'Experto': 5, 'Veterano': 5, 'Ultra': 5 };
+          const limit = RANK_LIMITS[category] || 3;
+          const wins = rankedStats.consecutiveWins || 0;
+          progressHtml = `
+            <div style="width: 100%; max-width: 240px; margin-top: 5px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 4px;">
+                <span>Progreso Racha:</span>
+                <strong>${wins}/${limit}</strong>
+              </div>
+              <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${(wins / limit) * 100}%; height: 100%; background: linear-gradient(90deg, #ffcb05, #ff9f05); border-radius: 3px;"></div>
+              </div>
+            </div>
+          `;
+        }
+
+        statsContainer.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center;">
+            <img src="${trophyImg}" style="width: 48px; height: 48px; object-fit: contain;">
+            <div style="text-align: left;">
+              <div style="font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Progreso Clasificatorio</div>
+              <div style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: #fff;">${category} ${levelText}</div>
+            </div>
+          </div>
+          ${progressHtml}
+        `;
+        statsContainer.style.display = 'flex';
+      } else if (statsContainer) {
+        statsContainer.style.display = 'none';
+      }
+
       modal.classList.add('active');
     }
 
@@ -2141,6 +2289,10 @@ export class OnlineDuel extends Duel {
       const p2Id = Object.keys(snapshot.players)[1];
       const targetId = snapshot.phase === 'must-promote-p1' ? p1Id : p2Id;
       this.phase = (targetId === this.localPlayerId) ? 'must-promote' : 'opponent-must-promote';
+    }
+
+    if (snapshot.turnOwnerId) {
+      this.turnOwner = snapshot.turnOwnerId === this.localPlayerId ? 'player' : 'opponent';
     }
 
     this.turnNumber = snapshot.turnNumber;

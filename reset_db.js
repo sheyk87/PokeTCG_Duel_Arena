@@ -20,10 +20,12 @@ async function run() {
     const deleteDecksResult = await db.query('DELETE FROM decks');
     console.log('Todos los decks eliminados.');
 
-    // 3. Reiniciar el contador de victorias de todos los usuarios a 0
-    console.log('Restableciendo contador de victorias de los usuarios a 0...');
-    const updateUsersResult = await db.query('UPDATE users SET victories = 0');
-    console.log('Estadísticas de victorias restablecidas.');
+    // 3. Reiniciar el contador de victorias de todos los usuarios y estadísticas competitivas
+    console.log('Restableciendo victorias y estadísticas competitivas a 0...');
+    const updateUsersResult = await db.query(
+      "UPDATE users SET victories = 0, ranked_category = 'Principiante', ranked_level = 1, consecutive_wins = 0, consecutive_losses = 0, master_ranked_wins = 0"
+    );
+    console.log('Estadísticas competitivas y victorias de los usuarios restablecidas.');
 
     // 4. Obtener todos los usuarios registrados para re-sembrar sus mazos iniciales
     console.log('Obteniendo lista de usuarios registrados...');

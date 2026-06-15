@@ -82,16 +82,31 @@
         <div class="menu-left-panel">
           <div class="menu-section-title" style="margin-top: 0;">Mi Perfil</div>
           <!-- User Profile widget in Menu -->
-          <div id="menu-user-profile" class="user-profile-widget" style="display: none; margin-bottom: 15px;">
+          <div id="menu-user-profile" class="user-profile-widget" style="display: none; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; width: 100%;">
             <div class="user-profile-info"
               style="display: flex; align-items: center; gap: 15px; background: rgba(255, 255, 255, 0.05); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--color-border); width: 100%;">
               <span class="user-avatar" style="font-size: 1.5rem;">🏆</span>
-              <div style="text-align: left;">
+              <div style="text-align: left; flex: 1;">
                 <h3 id="menu-username"
                   style="font-family: var(--font-display); font-size: 1.05rem; margin: 0; font-weight: 700; color: #fff;">
                   Entrenador</h3>
                 <p style="margin: 2px 0 0; font-size: 0.8rem; color: var(--color-text-muted);"><span
                     id="menu-user-victories">0</span> victorias online</p>
+              </div>
+            </div>
+            
+            <!-- Ranked Profile KPI Widget -->
+            <div id="menu-ranked-kpi" class="ranked-kpi-widget" 
+              style="display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, rgba(59, 76, 202, 0.12) 0%, rgba(20, 22, 35, 0.7) 100%); padding: 12px; border-radius: 12px; border: 1px solid rgba(59, 76, 202, 0.25); width: 100%;">
+              <img id="menu-ranked-trophy" src="Sets/Trofeos/1-Principiante-1-3.png" alt="Trofeo" style="width: 42px; height: 42px; object-fit: contain;">
+              <div style="text-align: left; flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                  <strong id="menu-ranked-title" style="font-family: var(--font-display); font-size: 0.85rem; color: #fff;">Principiante 1</strong>
+                  <span id="menu-ranked-streak" style="font-size: 0.7rem; color: var(--color-primary); font-weight: bold;">Racha: 0/3</span>
+                </div>
+                <div class="ranked-progress-bar-container" style="background: rgba(0, 0, 0, 0.4); height: 5px; border-radius: 3px; margin-top: 5px; overflow: hidden; position: relative;">
+                  <div id="menu-ranked-progress" style="background: linear-gradient(90deg, var(--color-primary) 0%, #ffcb05 100%); width: 0%; height: 100%; border-radius: 3px; transition: width 0.3s ease;"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -100,23 +115,39 @@
           <div class="news-stats-row">
             <div class="stat-box">
               <span class="stat-num" id="news-stat-players">0</span>
-              <span class="stat-label">Jugadores Online</span>
+              <span class="stat-label">Online</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num" id="news-stat-queue">0</span>
-              <span class="stat-label">Buscando Partida</span>
+              <span class="stat-num" id="news-stat-queue-normal">0</span>
+              <span class="stat-label">Buscando Normal</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num" id="news-stat-queue-ranked">0</span>
+              <span class="stat-label">Buscando Ranked</span>
             </div>
           </div>
 
           <div class="news-section" style="margin-top: 10px;">
-            <h3>Top 3 Entrenadores</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="margin: 0;">Top 3 Entrenadores</h3>
+              <div class="mini-tabs" id="top3-tabs">
+                <button class="mini-tab active" data-tab="normal">Normal</button>
+                <button class="mini-tab" data-tab="ranked">Ranked</button>
+              </div>
+            </div>
             <div id="news-top3-list" class="news-list">
               <div class="news-loading">Cargando...</div>
             </div>
           </div>
 
           <div class="news-section">
-            <h3>Últimos Duelos</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="margin: 0;">Últimos Duelos</h3>
+              <div class="mini-tabs" id="duels-tabs">
+                <button class="mini-tab active" data-tab="normal">Normal</button>
+                <button class="mini-tab" data-tab="ranked">Ranked</button>
+              </div>
+            </div>
             <div id="news-duels-list" class="news-list">
               <div class="news-loading">Cargando...</div>
             </div>
@@ -132,13 +163,17 @@
           </div>
 
           <div class="menu-section-title" style="align-self: flex-start; width: 100%;">Combatir</div>
-          <div class="menu-row-buttons" style="width: 100%;">
-            <button id="btn-play-ia" class="menu-btn primary" style="height: 60px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px;">
-              <span class="btn-icon">🤖</span> Vs I.A. (Gary)
+          <div class="menu-row-buttons" style="width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <button id="btn-play-ia" class="menu-btn primary" style="height: 60px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px;">
+              <span class="btn-icon">🤖</span> Vs I.A.
             </button>
             <button id="btn-play-online" class="menu-btn primary"
-              style="height: 60px; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--color-accent-green) 0%, #00b359 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 5px 20px rgba(0, 255, 135, 0.25);">
-              <span class="btn-icon">⚔️</span> Modo Online
+              style="height: 60px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, var(--color-accent-green) 0%, #00b359 100%); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 5px 15px rgba(0, 255, 135, 0.15); padding: 0 8px;">
+              <span class="btn-icon">⚔️</span> Sala Online
+            </button>
+            <button id="btn-play-ranked" class="menu-btn primary"
+              style="height: 60px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, #e0a96d 0%, #d4af37 100%); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.25); padding: 0 8px;">
+              <span class="btn-icon">🏆</span> Competitivo
             </button>
           </div>
           <div class="menu-row-buttons private-rooms-row" style="display: flex; gap: 15px; width: 100%;">
@@ -925,6 +960,14 @@
         </div>
       </header>
 
+      <!-- Ranked Opponent Info Banner -->
+      <div id="ranked-match-banner" class="ranked-match-banner" style="display: none;">
+        <div class="ranked-banner-content">
+          <span class="ranked-banner-badge">🏆 Clasificatoria</span>
+          <span id="ranked-banner-text">Vinculado con Rival: Gary, Categoría: Principiante, Nivel: 1, Racha: 0 ganadas</span>
+        </div>
+      </div>
+
       <!-- Interactive Instructions Banner -->
       <div id="duel-instructions-banner" class="instructions-banner">
         Fase de Preparación: Selecciona un Pokémon Básico de tu mano y haz clic en "Coloca Pokémon Activo" en el centro
@@ -1263,6 +1306,36 @@
       </div>
     </section>
 
+    <!-- SCREEN 6B: Matchmaking Queue Ranked -->
+    <section id="screen-queue-ranked" class="app-screen">
+      <div class="menu-background">
+        <div class="bg-gradient-circle"></div>
+      </div>
+      <div class="menu-content matchmaking-container"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 30px;">
+        <div class="pokeball-search-container ranked">
+          <div class="pokeball-searching-spinner ranked"></div>
+        </div>
+        <h2
+          style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: #ffcb05; margin: 0; text-shadow: 0 0 15px rgba(255, 203, 5, 0.3);">
+          Buscando Duelo Clasificatorio...</h2>
+        <p
+          style="color: var(--color-text-muted); font-size: 1.05rem; margin: 0; text-align: center; max-width: 450px; line-height: 1.5;">
+          El sistema te emparejará con un oponente de tu misma categoría competitiva. 
+          Categoría: <strong id="queue-ranked-category" style="color: #fff;">Principiante</strong>.
+        </p>
+        <div class="queue-status-box"
+          style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 203, 5, 0.25); padding: 15px 30px; border-radius: 12px; text-align: center; min-width: 280px; backdrop-filter: blur(10px);">
+          <span
+            style="font-size: 0.85rem; color: var(--color-text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Buscando en tu categoría actualmente:</span>
+          <strong id="queue-ranked-online-count"
+            style="font-size: 2rem; color: #ffcb05; font-family: var(--font-display);">1</strong>
+        </div>
+        <button id="btn-cancel-queue-ranked" class="menu-btn"
+          style="width: 220px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,203,5,0.3);">Cancelar Búsqueda</button>
+      </div>
+    </section>
+
     <!-- SCREEN 9: Private Room Waiting -->
     <section id="screen-private-waiting" class="app-screen">
       <div class="menu-background">
@@ -1318,13 +1391,19 @@
           style="width: 320px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0;">
           <div class="leaderboard-card user-rank-card"
             style="background: linear-gradient(135deg, rgba(59, 76, 202, 0.2) 0%, rgba(26, 28, 44, 0.75) 100%); border: 1px solid rgba(59, 76, 202, 0.3); border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px);">
-            <div style="font-size: 3rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,203,5,0.3));">🏆
+            <div id="leaderboard-user-avatar-container" style="font-size: 3rem; margin-bottom: 12px; height: 60px; display: flex; align-items: center; justify-content: center;">
+              <span id="leaderboard-user-avatar-emoji" style="filter: drop-shadow(0 0 10px rgba(255,203,5,0.3));">🏆</span>
+              <img id="leaderboard-user-avatar-trophy" src="" alt="Trofeo" style="display: none; width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,203,5,0.3));">
             </div>
             <h3 id="leaderboard-user-name"
               style="font-family: var(--font-display); font-size: 1.35rem; margin: 0 0 5px; color: #fff; font-weight: 700;">
               Entrenador</h3>
-            <p id="leaderboard-user-email" style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 20px;">
+            <p id="leaderboard-user-email" style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 10px;">
               email@correo.com</p>
+
+            <div id="leaderboard-user-ranked-details" style="display: none; font-size: 0.95rem; font-weight: 700; color: #ffcb05; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">
+              <span id="leaderboard-user-category">Principiante</span> <span id="leaderboard-user-level">1</span>
+            </div>
 
             <div
               style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; border-top: 1px solid var(--color-border); padding-top: 20px;">
@@ -1335,7 +1414,7 @@
                   style="font-size: 1.8rem; color: var(--color-primary); font-family: var(--font-display); display: block; margin-top: 4px;">#--</strong>
               </div>
               <div>
-                <span
+                <span id="leaderboard-user-victories-label"
                   style="font-size: 0.75rem; color: var(--color-text-muted); display: block; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Victorias</span>
                 <strong id="leaderboard-user-victories"
                   style="font-size: 1.8rem; color: #fff; font-family: var(--font-display); display: block; margin-top: 4px;">0</strong>
@@ -1370,19 +1449,89 @@
         <!-- Main ranking table -->
         <div class="leaderboard-table-container"
           style="flex: 1; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
-          <div
-            style="padding: 20px 25px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="font-family: var(--font-display); font-size: 1.25rem; color: #fff; margin: 0; font-weight: 700;">
-              Top 250 Entrenadores</h3>
+          
+          <div style="padding: 15px 25px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div class="leaderboard-tabs" style="display: flex; gap: 10px;">
+              <button id="btn-leaderboard-tab-general" class="pill-btn active" style="padding: 6px 18px; font-size: 0.85rem;">Victorias Totales</button>
+              <button id="btn-leaderboard-tab-ranked" class="pill-btn" style="padding: 6px 18px; font-size: 0.85rem;">Liga Competitiva (Ranked)</button>
+            </div>
+            <h3 id="leaderboard-table-title" style="font-family: var(--font-display); font-size: 1.15rem; color: #fff; margin: 0; font-weight: 700;">
+              Top 250 General</h3>
           </div>
+
+          <!-- Tablero de categorías y filtros para el Leaderboard Competitivo -->
+          <div id="ranked-leaderboard-header" style="display: none; padding: 20px 25px 0; border-bottom: 1px solid var(--color-border); flex-direction: column; gap: 15px;">
+            <!-- Contenedor de las 6 categorías superiores con conteos de jugadores -->
+            <div class="ranked-categories-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; width: 100%;">
+              <div class="ranked-category-card" data-category="Principiante" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/1-Principiante-1-3.png" alt="Principiante" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Principiante</div>
+                <strong id="count-cat-principiante" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+              <div class="ranked-category-card" data-category="Great" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/2-Great-1-4.png" alt="Great" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Great</div>
+                <strong id="count-cat-great" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+              <div class="ranked-category-card" data-category="Experto" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/3-Experto-1-5.png" alt="Experto" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Experto</div>
+                <strong id="count-cat-experto" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+              <div class="ranked-category-card" data-category="Veterano" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/4-Veterano-1-5.png" alt="Veterano" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Veterano</div>
+                <strong id="count-cat-veterano" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+              <div class="ranked-category-card" data-category="Ultra" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/5-Ultra-1-5.png" alt="Ultra" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Ultra</div>
+                <strong id="count-cat-ultra" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+              <div class="ranked-category-card" data-category="Maestro" style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                <img src="Sets/Trofeos/6-Maestro.png" alt="Maestro" style="width: 28px; height: 28px; object-fit: contain; margin-bottom: 4px;">
+                <div style="font-size: 0.7rem; color: var(--color-text-muted); font-weight: 600;">Maestro</div>
+                <strong id="count-cat-maestro" style="font-size: 0.9rem; color: #ffcb05;">0</strong>
+              </div>
+            </div>
+
+            <!-- Filtros de categoría y nivel -->
+            <div class="ranked-filters-row" style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; justify-content: flex-start;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="select-ranked-filter-category" style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Categoría:</label>
+                <select id="select-ranked-filter-category" style="background: rgba(20,22,35,0.9); border: 1px solid var(--color-border); padding: 5px 10px; border-radius: 6px; color: #fff; font-size: 0.8rem; cursor: pointer; outline: none; border-color: rgba(255,255,255,0.15);">
+                  <option value="all">Todas las Categorías</option>
+                  <option value="Principiante">Principiante</option>
+                  <option value="Great">Great</option>
+                  <option value="Experto">Experto</option>
+                  <option value="Veterano">Veterano</option>
+                  <option value="Ultra">Ultra</option>
+                  <option value="Maestro">Maestro</option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="select-ranked-filter-level" style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Nivel:</label>
+                <select id="select-ranked-filter-level" style="background: rgba(20,22,35,0.9); border: 1px solid var(--color-border); padding: 5px 10px; border-radius: 6px; color: #fff; font-size: 0.8rem; cursor: pointer; outline: none; border-color: rgba(255,255,255,0.15);">
+                  <option value="all">Todos los Niveles</option>
+                  <option value="1">Nivel 1</option>
+                  <option value="2">Nivel 2</option>
+                  <option value="3">Nivel 3</option>
+                  <option value="4">Nivel 4</option>
+                  <option value="5">Nivel 5</option>
+                </select>
+              </div>
+              <button id="btn-clear-ranked-filters" class="menu-btn secondary compact" style="margin: 0; padding: 5px 12px; font-size: 0.75rem; min-width: auto; height: auto;">Limpiar Filtros</button>
+            </div>
+          </div>
+
           <div class="scrollable-leaderboard-list" style="flex: 1; overflow-y: auto; padding: 15px;">
             <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; text-align: left;">
               <thead>
-                <tr
+                <tr id="leaderboard-thead-tr"
                   style="border-bottom: 1px solid var(--color-border); font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">
                   <th style="padding: 15px; width: 100px;">Posición</th>
                   <th style="padding: 15px;">Entrenador</th>
-                  <th style="padding: 15px; width: 150px; text-align: right;">Victorias</th>
+                  <th id="leaderboard-th-metric" style="padding: 15px; width: 150px; text-align: right;">Victorias</th>
                 </tr>
               </thead>
               <tbody id="leaderboard-tbody">
@@ -1404,8 +1553,12 @@
       <div class="screen-layout history-layout" style="padding: 30px; justify-content: center; overflow-y: auto;">
         <div class="history-table-container"
           style="width: 100%; max-width: 900px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); height: fit-content; max-height: 90%;">
-          <div style="padding: 20px 25px; border-bottom: 1px solid var(--color-border);">
-            <h3 style="font-family: var(--font-display); font-size: 1.25rem; color: #fff; margin: 0; font-weight: 700;">
+          <div style="padding: 20px 25px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div class="history-tabs" style="display: flex; gap: 10px;">
+              <button id="btn-history-tab-normal" class="pill-btn active" style="padding: 6px 18px; font-size: 0.85rem;">Combates Normales</button>
+              <button id="btn-history-tab-ranked" class="pill-btn" style="padding: 6px 18px; font-size: 0.85rem;">Liga Competitiva (Ranked)</button>
+            </div>
+            <h3 id="history-table-title" style="font-family: var(--font-display); font-size: 1.25rem; color: #fff; margin: 0; font-weight: 700;">
               Tus Combates Recientes</h3>
           </div>
           <div class="scrollable-history-list" style="overflow-y: auto; padding: 15px;">
