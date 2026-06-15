@@ -1,0 +1,22 @@
+FROM node:25-alpine
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar dependencias de producción
+RUN npm ci --omit=dev
+
+# Copiar el código fuente de la aplicación (excluyendo lo declarado en .dockerignore)
+COPY . .
+
+# Puerto de escucha del contenedor (interno)
+EXPOSE 3000
+
+# Variable de entorno de producción
+ENV NODE_ENV=production
+
+# Comando para iniciar la aplicación
+CMD ["node", "server.js"]

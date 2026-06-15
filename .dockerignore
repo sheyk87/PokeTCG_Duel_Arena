@@ -1,0 +1,12 @@
+node_modules/
+npm-debug.log
+.git/
+.gitignore
+.env
+.env.local
+.gemini/
+ToDo.txt
+*.md
+*.zip
+*.tar.gz
+logs/

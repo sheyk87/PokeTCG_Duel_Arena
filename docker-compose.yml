@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    # El backend no expone puertos al host, protegiendo el acceso directo.
+    # Solo es accesible internamente a través de la red del compose.
+    networks:
+      - poke_network
+      - templates_default
+    env_file:
+      - .env
+    volumes:
+      # Volumen persistente para almacenar las posiciones y configuraciones del campo de batalla.
+      # Docker poblará este volumen con las imágenes iniciales y el positions.json en el primer arranque.
+      - battlefield_data:/app/cards/Battlefields
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    # Solo el frontend expone puertos de conexión al exterior (puerto 80).
+    ports:
+      - "80:80"
+    networks:
+      - poke_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  battlefield_data:
+
+networks:
+  poke_network:
+    driver: bridge
+  templates_default:
+    external: true
