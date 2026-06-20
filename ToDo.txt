@@ -1,2 +1,2 @@
 - Agregar un sistema de moderación para moderadores y administradores, en el que se pueda banear un usuario (temporal o permanentemente), o eliminarlo del sistema.
-- Agregar sistema de torneos
+- Agregar sistema de torneos y emblemas

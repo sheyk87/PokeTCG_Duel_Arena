@@ -851,13 +851,13 @@ export class DeckBuilder {
       });
     }
 
-    const coinBackSelect = document.getElementById('deck-coin-back-select');
+    const btnSelectCoinBack = document.getElementById('btn-select-coin-back');
     const selectCoinFrontBtn = document.getElementById('btn-select-coin-front');
     const selectCardBackBtn = document.getElementById('btn-select-card-back');
 
-    if (coinBackSelect) {
-      coinBackSelect.disabled = !!this.currentDeck.isStarter;
-      coinBackSelect.value = this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp';
+    if (btnSelectCoinBack) {
+      if (this.currentDeck.isStarter) btnSelectCoinBack.style.opacity = '0.5';
+      else btnSelectCoinBack.style.opacity = '1';
     }
     if (selectCoinFrontBtn) {
       if (this.currentDeck.isStarter) selectCoinFrontBtn.style.opacity = '0.5';
@@ -867,6 +867,12 @@ export class DeckBuilder {
       if (this.currentDeck.isStarter) selectCardBackBtn.style.opacity = '0.5';
       else selectCardBackBtn.style.opacity = '1';
     }
+
+    const backPath = this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp';
+    const coinBackImg = document.getElementById('deck-coin-back-img');
+    const coinBackName = document.getElementById('deck-coin-back-name');
+    if (coinBackImg) coinBackImg.src = 'Assets/' + backPath;
+    if (coinBackName) coinBackName.textContent = backPath.split('/').pop().replace('BACK-', '').replace('.webp', '').replace(/-/g, ' ');
 
     // Update previews
     const frontPath = this.currentDeck.coinFront || 'Coins/acerola-acerola.webp';
@@ -1248,18 +1254,6 @@ export class DeckBuilder {
   }
 
   bindCustomizationSelectors() {
-    const coinBackSelect = document.getElementById('deck-coin-back-select');
-    if (coinBackSelect) {
-      coinBackSelect.addEventListener('change', () => {
-        if (this.currentDeck.isStarter) {
-          window.customAlert?.('Info', 'No puedes personalizar un mazo preconstruido.');
-          coinBackSelect.value = this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp';
-          return;
-        }
-        this.currentDeck.coinBack = coinBackSelect.value;
-      });
-    }
-
     const btnSelectCoinFront = document.getElementById('btn-select-coin-front');
     btnSelectCoinFront?.addEventListener('click', async () => {
       if (this.currentDeck.isStarter) {
@@ -1267,6 +1261,15 @@ export class DeckBuilder {
         return;
       }
       await this.openCoinFrontSelector();
+    });
+
+    const btnSelectCoinBack = document.getElementById('btn-select-coin-back');
+    btnSelectCoinBack?.addEventListener('click', async () => {
+      if (this.currentDeck.isStarter) {
+        window.customAlert?.('Info', 'No puedes personalizar un mazo preconstruido.');
+        return;
+      }
+      await this.openCoinBackSelector();
     });
 
     const btnSelectCardBack = document.getElementById('btn-select-card-back');
@@ -1308,7 +1311,7 @@ export class DeckBuilder {
         const option = document.createElement('div');
         option.className = 'coin-option';
         option.style.cursor = 'pointer';
-        option.style.padding = '8px';
+        option.style.padding = '10px';
         option.style.borderRadius = '8px';
         option.style.border = '2px solid transparent';
         option.style.display = 'flex';
@@ -1323,8 +1326,8 @@ export class DeckBuilder {
         }
         
         option.innerHTML = `
-          <img src="Assets/${coin.path}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 50%;">
-          <span style="font-size: 0.65rem; margin-top: 4px; text-align: center; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${coin.name}</span>
+          <img src="Assets/${coin.path}" style="width: 75px; height: 75px; object-fit: contain; border-radius: 50%;">
+          <span style="font-size: 0.7rem; margin-top: 6px; text-align: center; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${coin.name}</span>
         `;
         
         option.addEventListener('click', () => {
@@ -1345,6 +1348,67 @@ export class DeckBuilder {
     } catch (err) {
       console.error(err);
       window.customAlert?.('Error', 'No se pudieron cargar las monedas.');
+    }
+  }
+
+  async openCoinBackSelector() {
+    try {
+      const res = await fetch('/api/coins');
+      if (!res.ok) throw new Error('Failed to load coins');
+      const coins = await res.json();
+      
+      const grid = document.getElementById('coin-back-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const backCoins = [];
+      coins.forEach(c => {
+        if (c.includes('BACK-')) {
+          backCoins.push({ path: 'Coins/' + c, name: c.replace('BACK-', '').replace('.webp', '').replace(/-/g, ' ') });
+        }
+      });
+      
+      backCoins.forEach(coin => {
+        const option = document.createElement('div');
+        option.className = 'coin-option';
+        option.style.cursor = 'pointer';
+        option.style.padding = '10px';
+        option.style.borderRadius = '8px';
+        option.style.border = '2px solid transparent';
+        option.style.display = 'flex';
+        option.style.flexDirection = 'column';
+        option.style.alignItems = 'center';
+        option.style.background = 'rgba(255,255,255,0.05)';
+        option.style.transition = 'all 0.2s';
+        
+        if (this.currentDeck.coinBack === coin.path) {
+          option.style.borderColor = 'var(--color-primary)';
+          option.style.background = 'rgba(59, 76, 202, 0.2)';
+        }
+        
+        option.innerHTML = `
+          <img src="Assets/${coin.path}" style="width: 75px; height: 75px; object-fit: contain; border-radius: 50%;">
+          <span style="font-size: 0.7rem; margin-top: 6px; text-align: center; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${coin.name}</span>
+        `;
+        
+        option.addEventListener('click', () => {
+          this.currentDeck.coinBack = coin.path;
+          
+          const previewImg = document.getElementById('deck-coin-back-img');
+          const previewName = document.getElementById('deck-coin-back-name');
+          if (previewImg) previewImg.src = 'Assets/' + coin.path;
+          if (previewName) previewName.textContent = coin.name;
+          
+          document.getElementById('modal-coin-back-selector').classList.remove('active');
+        });
+        
+        grid.appendChild(option);
+      });
+      
+      document.getElementById('modal-coin-back-selector').classList.add('active');
+    } catch (err) {
+      console.error(err);
+      window.customAlert?.('Error', 'No se pudieron cargar las monedas de reverso.');
     }
   }
 
@@ -1369,7 +1433,7 @@ export class DeckBuilder {
         const option = document.createElement('div');
         option.className = 'sleeve-option';
         option.style.cursor = 'pointer';
-        option.style.padding = '8px';
+        option.style.padding = '10px';
         option.style.borderRadius = '8px';
         option.style.border = '2px solid transparent';
         option.style.display = 'flex';
@@ -1384,8 +1448,8 @@ export class DeckBuilder {
         }
         
         option.innerHTML = `
-          <img src="Assets/${sleeve.path}" style="width: 45px; height: 60px; object-fit: cover; border-radius: 4px; background: #000;">
-          <span style="font-size: 0.65rem; margin-top: 4px; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${sleeve.name}</span>
+          <img src="Assets/${sleeve.path}" style="width: 90px; height: 125px; object-fit: cover; border-radius: 4px; background: #000;">
+          <span style="font-size: 0.7rem; margin-top: 6px; text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${sleeve.name}</span>
         `;
         
         option.addEventListener('click', () => {

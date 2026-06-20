@@ -666,7 +666,7 @@ class AppController {
           option.style.background = 'rgba(59, 76, 202, 0.2)';
         }
         
-        option.innerHTML = `<img src="Assets/Icons/${iconName}" style="width: 50px; height: 50px; object-fit: contain;">`;
+        option.innerHTML = `<img src="Assets/Icons/${iconName}" style="width: 75px; height: 75px; object-fit: contain;">`;
         
         option.addEventListener('click', async () => {
           try {

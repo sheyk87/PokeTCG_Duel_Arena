@@ -916,10 +916,10 @@
                 <!-- Coin Back Selector -->
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;">
                   <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Moneda Seca (Back)</label>
-                  <select id="deck-coin-back-select" style="background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; width: 100%; height: 50px; outline: none; box-sizing: border-box;">
-                    <option value="Coins/BACK-monsterball-poke-ball.webp">Monster Ball</option>
-                    <option value="Coins/BACK-premiumset-special-set-01.webp">Premium Set</option>
-                  </select>
+                  <div id="btn-select-coin-back" style="display: flex; align-items: center; gap: 10px; background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.2s;" title="Elegir Moneda Seca">
+                    <img id="deck-coin-back-img" src="Assets/Coins/BACK-monsterball-poke-ball.webp" alt="Coin Back" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain; flex-shrink: 0;">
+                    <span id="deck-coin-back-name" style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Monster Ball</span>
+                  </div>
                 </div>
               </div>
 
@@ -1897,7 +1897,7 @@
       <button class="modal-close-btn">&times;</button>
       <h2>Elegir Foto de Perfil</h2>
       <p>Selecciona un Pokémon de la lista para usar como tu foto de perfil:</p>
-      <div id="avatar-grid" class="avatar-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+      <div id="avatar-grid" class="avatar-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
         <!-- Populated dynamically -->
       </div>
     </div>
@@ -1909,7 +1909,7 @@
       <button class="modal-close-btn">&times;</button>
       <h2>Elegir Diseño Cara de Moneda</h2>
       <p>Selecciona una imagen de las carpetas Coins o Icons para el frente de la moneda:</p>
-      <div id="coin-front-grid" class="coin-front-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+      <div id="coin-front-grid" class="coin-front-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
         <!-- Populated dynamically -->
       </div>
     </div>
@@ -1921,7 +1921,19 @@
       <button class="modal-close-btn">&times;</button>
       <h2>Elegir Reverso de Carta (Sleeve)</h2>
       <p>Selecciona un diseño para la parte trasera de las cartas de este mazo:</p>
-      <div id="card-back-grid" class="card-back-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+      <div id="card-back-grid" class="card-back-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 15: Coin Back Selector -->
+  <div id="modal-coin-back-selector" class="modal-overlay">
+    <div class="modal-container medium">
+      <button class="modal-close-btn">&times;</button>
+      <h2>Elegir Diseño Seca de Moneda (Back)</h2>
+      <p>Selecciona un diseño para el reverso de la moneda:</p>
+      <div id="coin-back-grid" class="coin-back-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
         <!-- Populated dynamically -->
       </div>
     </div>
