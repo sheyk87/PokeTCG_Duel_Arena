@@ -278,6 +278,13 @@ export class OnlineDuel extends Duel {
     // 1. Setup local player state using server synced deck, hand, prizes
     this.player = this.createPlayerState('Tú', playerDeckTemplate, false);
 
+    this.player.custom = data.playerDeckCustom || {
+      boxImage: 'Decks/pokeball.png',
+      coinFront: 'Coins/acerola-acerola.webp',
+      coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: 'pokemon_card_backside.png'
+    };
+
     // Clear and set deck
     this.player.deck = [];
     data.deck.forEach((entry) => {
@@ -362,6 +369,13 @@ export class OnlineDuel extends Duel {
       }
     };
 
+    this.opponent.custom = data.opponentDeckCustom || {
+      boxImage: 'Decks/pokeball.png',
+      coinFront: 'Coins/acerola-acerola.webp',
+      coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: 'pokemon_card_backside.png'
+    };
+
     // Populate opponent hand and prizes mock cards
     for (let i = 0; i < data.opponentHandSize; i++) {
       this.opponent.hand.push({
@@ -439,6 +453,14 @@ export class OnlineDuel extends Duel {
     coinModal.classList.add('active');
     coin.className = 'coin'; // Reset anims
     resultText.textContent = 'Lanzando moneda...';
+
+    // Set custom coin faces for the starting modal flip using player's coin
+    if (this.player && this.player.custom) {
+      const hFace = coin.querySelector('.heads');
+      const tFace = coin.querySelector('.tails');
+      if (hFace) hFace.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinFront}')`, 'important');
+      if (tFace) tFace.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinBack}')`, 'important');
+    }
 
     await new Promise(r => setTimeout(r, 200));
 
@@ -1288,12 +1310,12 @@ export class OnlineDuel extends Duel {
         const levelText = category === 'Maestro' ? '' : `Nivel ${rankedStats.level || 1}`;
         
         const TROPHY_IMAGES = {
-          'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
-          'Great': 'Sets/Trofeos/2-Great-1-4.png',
-          'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
-          'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
-          'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
-          'Maestro': 'Sets/Trofeos/6-Maestro.png'
+          'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+          'Great': 'Assets/Trofeos/2-Great-1-4.png',
+          'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+          'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+          'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+          'Maestro': 'Assets/Trofeos/6-Maestro.png'
         };
         const trophyImg = TROPHY_IMAGES[category] || TROPHY_IMAGES['Principiante'];
 

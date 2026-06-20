@@ -237,7 +237,7 @@ export class BattlefieldEditor {
       this.images = await imgRes.json();
 
       // 2. Fetch positions JSON
-      const posRes = await fetch('/cards/Battlefields/positions.json');
+      const posRes = await fetch('/Assets/Battlefields/positions.json');
       this.positionsData = await posRes.json();
 
       // Render the sidebar list
@@ -252,7 +252,7 @@ export class BattlefieldEditor {
           const hasCustom = this.positionsData[img] && Object.keys(this.positionsData[img]).includes('player-active');
 
           item.innerHTML = `
-            <img src="/cards/Battlefields/${img}" alt="${img}">
+            <img src="/Assets/Battlefields/${img}" alt="${img}">
             <div class="battlefield-thumb-info">
               <div class="battlefield-thumb-name">${img}</div>
               <div class="battlefield-thumb-status">${hasCustom ? 'Configurado Custom' : 'Configuración Automática'}</div>
@@ -303,7 +303,7 @@ export class BattlefieldEditor {
     // Render Editor Board background & slot overlay divs
     const board = document.getElementById('editor-board');
     if (board) {
-      board.style.backgroundImage = `url('/cards/Battlefields/${themeName}')`;
+      board.style.backgroundImage = `url('/Assets/Battlefields/${themeName}')`;
       board.innerHTML = ''; // Clear previous
 
       // Create a div overlay for each slot

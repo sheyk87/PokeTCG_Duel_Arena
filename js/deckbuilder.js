@@ -142,6 +142,8 @@ export class DeckBuilder {
         });
       });
     }
+
+    this.bindCustomizationSelectors();
   }
 
   onShow() {
@@ -417,7 +419,10 @@ export class DeckBuilder {
         id: 'starter-overgrowth',
         name: 'Overgrowth (Grass/Water Starter)',
         isStarter: true,
-        boxImage: 'pokeball.png',
+        boxImage: 'Decks/pokeball.png',
+        coinFront: 'Coins/acerola-acerola.webp',
+        coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+        cardBack: 'pokemon_card_backside.png',
         cards: [
           { cardId: 'base1-2', count: 2 },   // Blastoise (Stage 2)
           { cardId: 'base1-42', count: 3 },  // Wartortle (Stage 1)
@@ -442,7 +447,10 @@ export class DeckBuilder {
         id: 'starter-zap',
         name: 'Zap! (Lightning/Psychic Starter)',
         isStarter: true,
-        boxImage: 'pokeball.png',
+        boxImage: 'Decks/pokeball.png',
+        coinFront: 'Coins/acerola-acerola.webp',
+        coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+        cardBack: 'pokemon_card_backside.png',
         cards: [
           { cardId: 'base1-1', count: 2 },   // Alakazam (Stage 2)
           { cardId: 'base1-32', count: 3 },  // Kadabra (Stage 1)
@@ -482,7 +490,10 @@ export class DeckBuilder {
               name: d.name,
               cards: cardsObj,
               isStarter: !!d.is_starter,
-              boxImage: d.box_image || 'pokeball.png'
+              boxImage: d.box_image || 'Decks/pokeball.png',
+              coinFront: d.coin_front || 'Coins/acerola-acerola.webp',
+              coinBack: d.coin_back || 'Coins/BACK-monsterball-poke-ball.webp',
+              cardBack: d.card_back || 'pokemon_card_backside.png'
             };
           });
           this.loadDeckSelectorDropdown();
@@ -500,7 +511,16 @@ export class DeckBuilder {
       this.savedDecks = saved ? JSON.parse(saved) : {};
       for (const id in this.savedDecks) {
         if (!this.savedDecks[id].boxImage) {
-          this.savedDecks[id].boxImage = 'pokeball.png';
+          this.savedDecks[id].boxImage = 'Decks/pokeball.png';
+        }
+        if (!this.savedDecks[id].coinFront) {
+          this.savedDecks[id].coinFront = 'Coins/acerola-acerola.webp';
+        }
+        if (!this.savedDecks[id].coinBack) {
+          this.savedDecks[id].coinBack = 'Coins/BACK-monsterball-poke-ball.webp';
+        }
+        if (!this.savedDecks[id].cardBack) {
+          this.savedDecks[id].cardBack = 'pokemon_card_backside.png';
         }
       }
     } catch (e) {
@@ -543,7 +563,10 @@ export class DeckBuilder {
       id: 'custom-' + Date.now(),
       name: 'Mazo Personalizado ' + (Object.keys(this.savedDecks).length + 1),
       cards: [],
-      boxImage: 'pokeball.png'
+      boxImage: 'Decks/pokeball.png',
+      coinFront: 'Coins/acerola-acerola.webp',
+      coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: 'pokemon_card_backside.png'
     };
     this.renderDeckWorkspace();
   }
@@ -576,7 +599,10 @@ export class DeckBuilder {
             id: this.currentDeck.id,
             name: this.currentDeck.name,
             cards: this.currentDeck.cards,
-            boxImage: this.currentDeck.boxImage || 'pokeball.png'
+            boxImage: this.currentDeck.boxImage || 'Decks/pokeball.png',
+            coinFront: this.currentDeck.coinFront || 'Coins/acerola-acerola.webp',
+            coinBack: this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp',
+            cardBack: this.currentDeck.cardBack || 'pokemon_card_backside.png'
           })
         });
       } catch (err) {
@@ -791,7 +817,8 @@ export class DeckBuilder {
     // Render box cover visual state
     const boxSelector = document.getElementById('deck-box-selector');
     if (boxSelector) {
-      const activeBox = this.currentDeck.boxImage || 'pokeball.png';
+      let activeBox = this.currentDeck.boxImage || 'Decks/pokeball.png';
+      if (!activeBox.startsWith('Decks/')) activeBox = 'Decks/' + activeBox;
       boxSelector.querySelectorAll('.box-option').forEach(opt => {
         if (opt.dataset.box === activeBox) {
           opt.classList.add('active');
@@ -806,6 +833,36 @@ export class DeckBuilder {
         }
       });
     }
+
+    const coinBackSelect = document.getElementById('deck-coin-back-select');
+    const selectCoinFrontBtn = document.getElementById('btn-select-coin-front');
+    const selectCardBackBtn = document.getElementById('btn-select-card-back');
+
+    if (coinBackSelect) {
+      coinBackSelect.disabled = !!this.currentDeck.isStarter;
+      coinBackSelect.value = this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp';
+    }
+    if (selectCoinFrontBtn) {
+      if (this.currentDeck.isStarter) selectCoinFrontBtn.style.opacity = '0.5';
+      else selectCoinFrontBtn.style.opacity = '1';
+    }
+    if (selectCardBackBtn) {
+      if (this.currentDeck.isStarter) selectCardBackBtn.style.opacity = '0.5';
+      else selectCardBackBtn.style.opacity = '1';
+    }
+
+    // Update previews
+    const frontPath = this.currentDeck.coinFront || 'Coins/acerola-acerola.webp';
+    const coinFrontImg = document.getElementById('deck-coin-front-img');
+    const coinFrontName = document.getElementById('deck-coin-front-name');
+    if (coinFrontImg) coinFrontImg.src = 'Assets/' + frontPath;
+    if (coinFrontName) coinFrontName.textContent = frontPath.split('/').pop().replace('.webp', '').replace(/-/g, ' ');
+
+    const sleevePath = this.currentDeck.cardBack || 'pokemon_card_backside.png';
+    const cardBackImg = document.getElementById('deck-card-back-img');
+    const cardBackName = document.getElementById('deck-card-back-name');
+    if (cardBackImg) cardBackImg.src = 'Assets/' + sleevePath;
+    if (cardBackName) cardBackName.textContent = sleevePath === 'pokemon_card_backside.png' ? 'Por Defecto' : sleevePath.split('/').pop().replace('.webp', '').replace(/-/g, ' ');
 
     if (!this.deckListTbody) return;
     this.deckListTbody.innerHTML = '';
@@ -1115,7 +1172,8 @@ export class DeckBuilder {
       cardEl.className = 'deck-card';
       
       const cardsCount = deck.cards.reduce((sum, entry) => sum + entry.count, 0);
-      const boxImg = deck.boxImage || 'pokeball.png';
+      let boxImg = deck.boxImage || 'Decks/pokeball.png';
+      if (!boxImg.startsWith('Decks/')) boxImg = 'Decks/' + boxImg;
       
       // Categorize deck: check types in cards to build tags
       const energyTypes = new Set();
@@ -1139,15 +1197,15 @@ export class DeckBuilder {
       if (energyTypes.size === 0 && !deck.isStarter) {
         tagsHtml += `<span class="deck-tag">Personalizado</span>`;
       }
-
+ 
       let deleteHtml = '';
       if (!deck.isStarter) {
         deleteHtml = `<button class="deck-delete-btn" title="Eliminar Mazo">×</button>`;
       }
-
+ 
       cardEl.innerHTML = `
         ${deleteHtml}
-        <img class="deck-box-img" src="cards/Decks/${boxImg}" alt="${deck.name}">
+        <img class="deck-box-img" src="Assets/${boxImg}" alt="${deck.name}">
         <h3>${deck.name}</h3>
         <div class="deck-meta">${cardsCount} cartas</div>
         <div class="deck-tags">${tagsHtml}</div>
@@ -1169,6 +1227,168 @@ export class DeckBuilder {
       }
 
       grid.appendChild(cardEl);
+    }
+  }
+
+  bindCustomizationSelectors() {
+    const coinBackSelect = document.getElementById('deck-coin-back-select');
+    if (coinBackSelect) {
+      coinBackSelect.addEventListener('change', () => {
+        if (this.currentDeck.isStarter) {
+          window.customAlert?.('Info', 'No puedes personalizar un mazo preconstruido.');
+          coinBackSelect.value = this.currentDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp';
+          return;
+        }
+        this.currentDeck.coinBack = coinBackSelect.value;
+      });
+    }
+
+    const btnSelectCoinFront = document.getElementById('btn-select-coin-front');
+    btnSelectCoinFront?.addEventListener('click', async () => {
+      if (this.currentDeck.isStarter) {
+        window.customAlert?.('Info', 'No puedes personalizar un mazo preconstruido.');
+        return;
+      }
+      await this.openCoinFrontSelector();
+    });
+
+    const btnSelectCardBack = document.getElementById('btn-select-card-back');
+    btnSelectCardBack?.addEventListener('click', async () => {
+      if (this.currentDeck.isStarter) {
+        window.customAlert?.('Info', 'No puedes personalizar un mazo preconstruido.');
+        return;
+      }
+      await this.openSleeveSelector();
+    });
+  }
+
+  async openCoinFrontSelector() {
+    try {
+      const [coinsRes, iconsRes] = await Promise.all([
+        fetch('/api/coins'),
+        fetch('/api/profile/icons')
+      ]);
+      if (!coinsRes.ok || !iconsRes.ok) throw new Error('Failed to load coin assets');
+      
+      const coins = await coinsRes.json();
+      const icons = await iconsRes.json();
+      
+      const grid = document.getElementById('coin-front-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const allCoins = [];
+      coins.forEach(c => {
+        if (!c.includes('BACK-')) {
+          allCoins.push({ path: 'Coins/' + c, name: c.replace('.webp', '').replace(/-/g, ' ') });
+        }
+      });
+      icons.forEach(i => {
+        allCoins.push({ path: 'Icons/' + i, name: i.replace('.webp', '').replace(/-/g, ' ') });
+      });
+      
+      allCoins.forEach(coin => {
+        const option = document.createElement('div');
+        option.className = 'coin-option';
+        option.style.cursor = 'pointer';
+        option.style.padding = '8px';
+        option.style.borderRadius = '8px';
+        option.style.border = '2px solid transparent';
+        option.style.display = 'flex';
+        option.style.flexDirection = 'column';
+        option.style.alignItems = 'center';
+        option.style.background = 'rgba(255,255,255,0.05)';
+        option.style.transition = 'all 0.2s';
+        
+        if (this.currentDeck.coinFront === coin.path) {
+          option.style.borderColor = 'var(--color-primary)';
+          option.style.background = 'rgba(59, 76, 202, 0.2)';
+        }
+        
+        option.innerHTML = `
+          <img src="Assets/${coin.path}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 50%;">
+          <span style="font-size: 0.65rem; margin-top: 4px; text-align: center; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${coin.name}</span>
+        `;
+        
+        option.addEventListener('click', () => {
+          this.currentDeck.coinFront = coin.path;
+          
+          const previewImg = document.getElementById('deck-coin-front-img');
+          const previewName = document.getElementById('deck-coin-front-name');
+          if (previewImg) previewImg.src = 'Assets/' + coin.path;
+          if (previewName) previewName.textContent = coin.name;
+          
+          document.getElementById('modal-coin-front-selector').classList.remove('active');
+        });
+        
+        grid.appendChild(option);
+      });
+      
+      document.getElementById('modal-coin-front-selector').classList.add('active');
+    } catch (err) {
+      console.error(err);
+      window.customAlert?.('Error', 'No se pudieron cargar las monedas.');
+    }
+  }
+
+  async openSleeveSelector() {
+    try {
+      const res = await fetch('/api/sleeves');
+      if (!res.ok) throw new Error('Failed to load sleeves');
+      const sleeves = await res.json();
+      
+      const grid = document.getElementById('card-back-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      const allSleeves = [
+        { path: 'pokemon_card_backside.png', name: 'Por Defecto' }
+      ];
+      sleeves.forEach(s => {
+        allSleeves.push({ path: 'Sleeves/' + s, name: s.replace('.webp', '').replace(/-/g, ' ') });
+      });
+      
+      allSleeves.forEach(sleeve => {
+        const option = document.createElement('div');
+        option.className = 'sleeve-option';
+        option.style.cursor = 'pointer';
+        option.style.padding = '8px';
+        option.style.borderRadius = '8px';
+        option.style.border = '2px solid transparent';
+        option.style.display = 'flex';
+        option.style.flexDirection = 'column';
+        option.style.alignItems = 'center';
+        option.style.background = 'rgba(255,255,255,0.05)';
+        option.style.transition = 'all 0.2s';
+        
+        if (this.currentDeck.cardBack === sleeve.path) {
+          option.style.borderColor = 'var(--color-primary)';
+          option.style.background = 'rgba(59, 76, 202, 0.2)';
+        }
+        
+        option.innerHTML = `
+          <img src="Assets/${sleeve.path}" style="width: 45px; height: 60px; object-fit: cover; border-radius: 4px; background: #000;">
+          <span style="font-size: 0.65rem; margin-top: 4px; text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${sleeve.name}</span>
+        `;
+        
+        option.addEventListener('click', () => {
+          this.currentDeck.cardBack = sleeve.path;
+          
+          const previewImg = document.getElementById('deck-card-back-img');
+          const previewName = document.getElementById('deck-card-back-name');
+          if (previewImg) previewImg.src = 'Assets/' + sleeve.path;
+          if (previewName) previewName.textContent = sleeve.name;
+          
+          document.getElementById('modal-card-back-selector').classList.remove('active');
+        });
+        
+        grid.appendChild(option);
+      });
+      
+      document.getElementById('modal-card-back-selector').classList.add('active');
+    } catch (err) {
+      console.error(err);
+      window.customAlert?.('Error', 'No se pudieron cargar las fundas.');
     }
   }
 }

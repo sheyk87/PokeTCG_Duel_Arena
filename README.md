@@ -33,7 +33,8 @@ El proyecto está construido enteramente sobre tecnologías web estándar (HTML5
 ## 2. Estructura del Proyecto
 
 *   `/cards`: Archivos JSON con los datos de las cartas organizadas por sets (ej. Base Set).
-*   `/Sets`: Catálogo principal de expansiones (ej. `en.json`) e imágenes de trofeos para las categorías de liga.
+*   `/Sets`: Catálogo principal de expansiones (ej. `en.json`).
+*   `/Assets/Trofeos`: Imágenes de trofeos para las categorías de liga.
 *   `/Reglas`: Manuales oficiales en PDF y texto plano.
 *   `/Ejemplos`: Capturas de pantalla e imágenes de referencia del tablero y el editor.
 *   `/Reportes`: Informes de diseño de emparejamiento, cumplimiento de reglas y análisis de microservicios.
@@ -125,7 +126,7 @@ El modo clasificatorio permite a los entrenadores ascender a través de ligas me
     - **Ultra**: Niveles 1 a 5 (5 victorias por nivel. Límite de derrotas: 5).
     - **Maestro**: Rango supremo sin niveles. Los jugadores se ordenan descendente e históricamente por victorias ranked totales en este rango (`master_ranked_wins`). Límite de derrotas: 10.
 *   **Descenso**: Si se alcanza el límite de derrotas consecutivas de la categoría actual, el jugador baja un nivel. Si se encuentra en nivel 1, desciende de categoría (los jugadores en Principiante 1 no pueden descender más). Al bajar del rango Maestro por racha de derrotas, el jugador cae a Ultra 5.
-*   **Trophy Assets**: Se cargan visualmente desde `/Sets/Trofeos` usando las imágenes oficiales asignadas a cada categoría de liga.
+*   **Trophy Assets**: Se cargan visualmente desde `/Assets/Trofeos` usando las imágenes oficiales asignadas a cada categoría de liga.
 
 ---
 

@@ -352,7 +352,7 @@ export class Duel {
     }
   }
 
-  async flipCoinVisual(message = "Lanzando moneda...") {
+  async flipCoinVisual(message = "Lanzando moneda...", side = 'player') {
     this.playSound('coin');
     const coinModal = document.getElementById('modal-coin-flip');
     const coin = document.getElementById('game-coin');
@@ -364,6 +364,16 @@ export class Duel {
 
     coin.className = 'coin';
     if (resultText) resultText.textContent = message;
+    
+    // Set custom coin faces for the modal flip
+    const user = side === 'player' ? this.player : this.opponent;
+    if (user && user.custom) {
+      const hFace = coin.querySelector('.heads');
+      const tFace = coin.querySelector('.tails');
+      if (hFace) hFace.style.setProperty('background-image', `url('/Assets/${user.custom.coinFront}')`, 'important');
+      if (tFace) tFace.style.setProperty('background-image', `url('/Assets/${user.custom.coinBack}')`, 'important');
+    }
+
     coinModal.classList.add('active');
 
     const isHeads = Math.random() < 0.5;
@@ -549,7 +559,7 @@ export class Duel {
 
     // Reload coordinates dynamically before starting the match so edits are visible immediately
     try {
-      const resPos = await fetch(`/cards/Battlefields/positions.json?t=${Date.now()}`);
+      const resPos = await fetch(`/Assets/Battlefields/positions.json?t=${Date.now()}`);
       this.positionsData = await resPos.json();
       this.applyThemeCoordinates();
     } catch (e) {
@@ -566,9 +576,66 @@ export class Duel {
 
     document.getElementById('modal-deck-selector').classList.remove('active');
 
+    // Resolve Gary's custom randomized options
+    let garySleeve = 'pokemon_card_backside.png';
+    let garyCoinBack = 'Coins/BACK-monsterball-poke-ball.webp';
+    let garyCoinFront = 'Coins/acerola-acerola.webp';
+
+    try {
+      const [sleevesRes, coinsRes, iconsRes] = await Promise.all([
+        fetch('/api/sleeves'),
+        fetch('/api/coins'),
+        fetch('/api/profile/icons')
+      ]);
+      if (sleevesRes.ok && coinsRes.ok && iconsRes.ok) {
+        const sleeves = await sleevesRes.json();
+        const coins = await coinsRes.json();
+        const icons = await iconsRes.json();
+        
+        if (sleeves.length > 0) {
+          const sleeveOptions = ['pokemon_card_backside.png', ...sleeves.map(s => 'Sleeves/' + s)];
+          garySleeve = sleeveOptions[Math.floor(Math.random() * sleeveOptions.length)];
+        }
+        
+        const coinBackOptions = [
+          'Coins/BACK-monsterball-poke-ball.webp',
+          'Coins/BACK-premiumset-special-set-01.webp'
+        ];
+        garyCoinBack = coinBackOptions[Math.floor(Math.random() * coinBackOptions.length)];
+        
+        const coinFrontOptions = [];
+        coins.forEach(c => {
+          if (!c.includes('BACK-')) coinFrontOptions.push('Coins/' + c);
+        });
+        icons.forEach(i => {
+          coinFrontOptions.push('Icons/' + i);
+        });
+        
+        if (coinFrontOptions.length > 0) {
+          garyCoinFront = coinFrontOptions[Math.floor(Math.random() * coinFrontOptions.length)];
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to dynamically fetch randomized options for Gary:', err);
+    }
+
     // Setup player structures
     this.player = this.createPlayerState('Tú', pDeck, false);
     this.opponent = this.createPlayerState('Gary (AI)', oDeck, true);
+
+    this.player.custom = {
+      boxImage: pDeck.boxImage || 'Decks/pokeball.png',
+      coinFront: pDeck.coinFront || 'Coins/acerola-acerola.webp',
+      coinBack: pDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: pDeck.cardBack || 'pokemon_card_backside.png'
+    };
+    
+    this.opponent.custom = {
+      boxImage: 'Decks/pokeball.png',
+      coinFront: garyCoinFront,
+      coinBack: garyCoinBack,
+      cardBack: garySleeve
+    };
 
     this.phase = 'setup';
     this.turnNumber = 1;
@@ -719,6 +786,14 @@ export class Duel {
     coinModal.classList.add('active');
     coin.className = 'coin'; // Reset anims
     resultText.textContent = 'Lanzando moneda...';
+
+    // Set custom coin faces for the starting modal flip using player's coin
+    if (this.player && this.player.custom) {
+      const hFace = coin.querySelector('.heads');
+      const tFace = coin.querySelector('.tails');
+      if (hFace) hFace.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinFront}')`, 'important');
+      if (tFace) tFace.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinBack}')`, 'important');
+    }
 
     const coinIsHeads = Math.random() < 0.5;
 
@@ -1753,7 +1828,7 @@ export class Duel {
       title.style.color = isWin ? 'var(--color-accent-green)' : 'var(--color-accent-red)';
       reasonText.textContent = reason;
       if (gameOverImg) {
-        gameOverImg.src = isWin ? 'cards/Win-Stars.png' : 'cards/Pikachu-Triste.gif';
+        gameOverImg.src = isWin ? 'Assets/Win-Stars.png' : 'Assets/Pikachu-Triste.gif';
       }
       modal.classList.add('active');
     }
@@ -1846,6 +1921,36 @@ export class Duel {
   // UI Updates and Card placements
   updateBoardUI() {
     if (!this.player) return;
+
+    // Set custom sleeves / card back images dynamically
+    const pDeckPile = document.getElementById('player-deck-pile');
+    const oDeckPile = document.getElementById('opponent-deck-pile');
+
+    if (pDeckPile && this.player.custom && this.player.custom.cardBack) {
+      pDeckPile.style.setProperty('background-image', `url('/Assets/${this.player.custom.cardBack}')`, 'important');
+    }
+    if (oDeckPile && this.opponent.custom && this.opponent.custom.cardBack) {
+      oDeckPile.style.setProperty('background-image', `url('/Assets/${this.opponent.custom.cardBack}')`, 'important');
+    }
+
+    // Update board coins
+    const pCoinHeads = document.querySelector('#player-coin-inner .heads');
+    const pCoinTails = document.querySelector('#player-coin-inner .tails');
+    if (pCoinHeads && this.player.custom && this.player.custom.coinFront) {
+      pCoinHeads.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinFront}')`, 'important');
+    }
+    if (pCoinTails && this.player.custom && this.player.custom.coinBack) {
+      pCoinTails.style.setProperty('background-image', `url('/Assets/${this.player.custom.coinBack}')`, 'important');
+    }
+
+    const oCoinHeads = document.querySelector('#opponent-coin-inner .heads');
+    const oCoinTails = document.querySelector('#opponent-coin-inner .tails');
+    if (oCoinHeads && this.opponent.custom && this.opponent.custom.coinFront) {
+      oCoinHeads.style.setProperty('background-image', `url('/Assets/${this.opponent.custom.coinFront}')`, 'important');
+    }
+    if (oCoinTails && this.opponent.custom && this.opponent.custom.coinBack) {
+      oCoinTails.style.setProperty('background-image', `url('/Assets/${this.opponent.custom.coinBack}')`, 'important');
+    }
 
     // Ensure Pass Turn button state matches turn owner and phase
     const passBtn = document.getElementById('btn-pass-turn');
@@ -2184,6 +2289,10 @@ export class Duel {
       const slot = document.createElement('div');
       slot.className = `prize-slot ${i < count ? 'card-back' : 'empty'}`;
       slot.setAttribute('data-index', i);
+      
+      if (i < count && user.custom && user.custom.cardBack) {
+        slot.style.setProperty('background-image', `url('/Assets/${user.custom.cardBack}')`, 'important');
+      }
       
       if (side === 'player' && i < count) {
         slot.style.cursor = 'pointer';
@@ -2599,7 +2708,7 @@ export class Duel {
       const res = await fetch('/api/battlefields');
       const images = await res.json();
 
-      const resPos = await fetch('/cards/Battlefields/positions.json');
+      const resPos = await fetch('/Assets/Battlefields/positions.json');
       this.positionsData = await resPos.json();
 
       const themeSelector = document.getElementById('select-board-theme');
@@ -2784,7 +2893,7 @@ export class Duel {
     }
 
     board.classList.add('has-playmat');
-    board.style.backgroundImage = `url('/cards/Battlefields/${this.boardTheme}')`;
+    board.style.backgroundImage = `url('/Assets/Battlefields/${this.boardTheme}')`;
 
     const coords = this.getThemeCoordinates(this.boardTheme);
     if (!coords) return;
@@ -2909,8 +3018,12 @@ export class Duel {
 
     const fromRect = originEl.getBoundingClientRect();
 
+    const user = drawingSide === 'player' ? this.player : this.opponent;
     const clone = document.createElement('div');
     clone.className = 'card-back animating-prize-card';
+    if (user && user.custom && user.custom.cardBack) {
+      clone.style.setProperty('background-image', `url('/Assets/${user.custom.cardBack}')`, 'important');
+    }
 
     clone.style.position = 'fixed';
     clone.style.left = `${fromRect.left}px`;

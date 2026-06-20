@@ -205,16 +205,70 @@ const server = http.createServer(async (req, res) => {
     if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
     try {
       const body = await getRequestBody(req);
-      const { id, name, cards, boxImage } = JSON.parse(body);
+      const { id, name, cards, boxImage, coinFront, coinBack, cardBack } = JSON.parse(body);
       if (!id || !name || !cards) {
         return sendJSON(res, 400, { error: 'Missing deck parameters' });
       }
-      const saved = await db.saveUserDeck(id, currentUser.id, name, JSON.stringify(cards), boxImage);
+      const saved = await db.saveUserDeck(id, currentUser.id, name, JSON.stringify(cards), boxImage, coinFront, coinBack, cardBack);
       return sendJSON(res, 200, saved);
     } catch (err) {
       console.error(err);
       return sendJSON(res, 500, { error: 'Failed to save deck' });
     }
+  }
+
+  if (safePath === '/api/user/update-avatar' && req.method === 'POST') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const body = await getRequestBody(req);
+      const { avatar } = JSON.parse(body);
+      if (!avatar) return sendJSON(res, 400, { error: 'Missing avatar parameter' });
+      await db.query('UPDATE users SET avatar = ? WHERE id = ?', [avatar, currentUser.id]);
+      currentUser.avatar = avatar;
+      return sendJSON(res, 200, { success: true, avatar });
+    } catch (err) {
+      console.error(err);
+      return sendJSON(res, 500, { error: 'Failed to update avatar' });
+    }
+  }
+
+  if (safePath === '/api/profile/icons' && req.method === 'GET') {
+    const iconsDir = path.join(PUBLIC_DIR, 'Assets', 'Icons');
+    fs.readdir(iconsDir, (err, files) => {
+      if (err) return sendJSON(res, 500, { error: 'Failed to read icons directory' });
+      const images = files.filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+      });
+      return sendJSON(res, 200, images);
+    });
+    return;
+  }
+
+  if (safePath === '/api/coins' && req.method === 'GET') {
+    const coinsDir = path.join(PUBLIC_DIR, 'Assets', 'Coins');
+    fs.readdir(coinsDir, (err, files) => {
+      if (err) return sendJSON(res, 500, { error: 'Failed to read coins directory' });
+      const images = files.filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+      });
+      return sendJSON(res, 200, images);
+    });
+    return;
+  }
+
+  if (safePath === '/api/sleeves' && req.method === 'GET') {
+    const sleevesDir = path.join(PUBLIC_DIR, 'Assets', 'Sleeves');
+    fs.readdir(sleevesDir, (err, files) => {
+      if (err) return sendJSON(res, 500, { error: 'Failed to read sleeves directory' });
+      const images = files.filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+      });
+      return sendJSON(res, 200, images);
+    });
+    return;
   }
 
   if (safePath === '/api/decks/delete' && req.method === 'POST') {
@@ -358,7 +412,7 @@ const server = http.createServer(async (req, res) => {
         return sendJSON(res, 400, { error: 'Missing theme or positions data' });
       }
 
-      const jsonPath = path.join(PUBLIC_DIR, 'cards', 'Battlefields', 'positions.json');
+      const jsonPath = path.join(PUBLIC_DIR, 'Assets', 'Battlefields', 'positions.json');
       
       fs.readFile(jsonPath, 'utf8', (err, data) => {
         let current = {};
@@ -387,7 +441,7 @@ const server = http.createServer(async (req, res) => {
 
   // PRESERVED ORIGINAL: Handle GET api/battlefields
   if (req.method === 'GET' && safePath === '/api/battlefields') {
-    const battlefieldsDir = path.join(PUBLIC_DIR, 'cards', 'Battlefields');
+    const battlefieldsDir = path.join(PUBLIC_DIR, 'Assets', 'Battlefields');
     fs.readdir(battlefieldsDir, (err, files) => {
       if (err) {
         return sendJSON(res, 500, { error: 'Failed to read battlefields directory' });
@@ -518,12 +572,25 @@ async function tryMatchmaking() {
   try {
     // Load decks from DB
     const [d1, d2] = await Promise.all([
-      db.query('SELECT cards FROM decks WHERE id = ?', [p1.deckId]),
-      db.query('SELECT cards FROM decks WHERE id = ?', [p2.deckId])
+      db.query('SELECT cards, box_image, coin_front, coin_back, card_back FROM decks WHERE id = ?', [p1.deckId]),
+      db.query('SELECT cards, box_image, coin_front, coin_back, card_back FROM decks WHERE id = ?', [p2.deckId])
     ]);
 
     const deck1 = d1[0] ? (typeof d1[0].cards === 'string' ? JSON.parse(d1[0].cards) : d1[0].cards) : [];
     const deck2 = d2[0] ? (typeof d2[0].cards === 'string' ? JSON.parse(d2[0].cards) : d2[0].cards) : [];
+
+    const deck1Custom = {
+      boxImage: d1[0] && d1[0].box_image ? d1[0].box_image : 'Decks/pokeball.png',
+      coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/acerola-acerola.webp',
+      coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: d1[0] && d1[0].card_back ? d1[0].card_back : 'pokemon_card_backside.png'
+    };
+    const deck2Custom = {
+      boxImage: d2[0] && d2[0].box_image ? d2[0].box_image : 'Decks/pokeball.png',
+      coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/acerola-acerola.webp',
+      coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+      cardBack: d2[0] && d2[0].card_back ? d2[0].card_back : 'pokemon_card_backside.png'
+    };
 
     const shuffledDeck1 = expandAndShuffleDeck(deck1);
     const shuffledDeck2 = expandAndShuffleDeck(deck2);
@@ -557,6 +624,8 @@ async function tryMatchmaking() {
         p1Id: gameState.p1Id,
         p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p1.user.id,
+        playerDeckCustom: deck1Custom,
+        opponentDeckCustom: deck2Custom,
         hand: gameState.players[p1.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         prizes: gameState.players[p1.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         deck: gameState.players[p1.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
@@ -575,6 +644,8 @@ async function tryMatchmaking() {
         p1Id: gameState.p1Id,
         p2Id: gameState.p2Id,
         goesFirst: goesFirstId === p2.user.id,
+        playerDeckCustom: deck2Custom,
+        opponentDeckCustom: deck1Custom,
         hand: gameState.players[p2.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         prizes: gameState.players[p2.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
         deck: gameState.players[p2.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
@@ -615,12 +686,25 @@ async function tryRankedMatchmaking() {
 
       try {
         const [d1, d2] = await Promise.all([
-          db.query('SELECT cards FROM decks WHERE id = ?', [p1.deckId]),
-          db.query('SELECT cards FROM decks WHERE id = ?', [p2.deckId])
+          db.query('SELECT cards, box_image, coin_front, coin_back, card_back FROM decks WHERE id = ?', [p1.deckId]),
+          db.query('SELECT cards, box_image, coin_front, coin_back, card_back FROM decks WHERE id = ?', [p2.deckId])
         ]);
 
         const deck1 = d1[0] ? (typeof d1[0].cards === 'string' ? JSON.parse(d1[0].cards) : d1[0].cards) : [];
         const deck2 = d2[0] ? (typeof d2[0].cards === 'string' ? JSON.parse(d2[0].cards) : d2[0].cards) : [];
+
+        const deck1Custom = {
+          boxImage: d1[0] && d1[0].box_image ? d1[0].box_image : 'Decks/pokeball.png',
+          coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/acerola-acerola.webp',
+          coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+          cardBack: d1[0] && d1[0].card_back ? d1[0].card_back : 'pokemon_card_backside.png'
+        };
+        const deck2Custom = {
+          boxImage: d2[0] && d2[0].box_image ? d2[0].box_image : 'Decks/pokeball.png',
+          coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/acerola-acerola.webp',
+          coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+          cardBack: d2[0] && d2[0].card_back ? d2[0].card_back : 'pokemon_card_backside.png'
+        };
 
         const shuffledDeck1 = expandAndShuffleDeck(deck1);
         const shuffledDeck2 = expandAndShuffleDeck(deck2);
@@ -662,6 +746,8 @@ async function tryRankedMatchmaking() {
             opponentRankedCategory: user2Data ? user2Data.ranked_category : 'Principiante',
             opponentRankedLevel: user2Data ? user2Data.ranked_level : 1,
             opponentConsecutiveWins: user2Data ? user2Data.consecutive_wins : 0,
+            playerDeckCustom: deck1Custom,
+            opponentDeckCustom: deck2Custom,
             hand: gameState.players[p1.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
             prizes: gameState.players[p1.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
             deck: gameState.players[p1.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
@@ -684,6 +770,8 @@ async function tryRankedMatchmaking() {
             opponentRankedCategory: user1Data ? user1Data.ranked_category : 'Principiante',
             opponentRankedLevel: user1Data ? user1Data.ranked_level : 1,
             opponentConsecutiveWins: user1Data ? user1Data.consecutive_wins : 0,
+            playerDeckCustom: deck2Custom,
+            opponentDeckCustom: deck1Custom,
             hand: gameState.players[p2.user.id].hand.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
             prizes: gameState.players[p2.user.id].prizes.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),
             deck: gameState.players[p2.user.id].deck.map(c => ({ cardId: c.card.cardId || c.card.id, instanceId: c.instanceId })),

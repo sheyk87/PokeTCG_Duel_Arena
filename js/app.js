@@ -488,6 +488,17 @@ class AppController {
     document.getElementById('btn-cancel-private-waiting')?.addEventListener('click', () => {
       this.onlineDuel.cancelPrivateRoom();
     });
+
+    document.getElementById('btn-change-avatar')?.addEventListener('click', () => {
+      this.openAvatarSelector();
+    });
+
+    // Close all modal overlays on close button click
+    document.querySelectorAll('.modal-overlay .modal-close-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.target.closest('.modal-overlay').classList.remove('active');
+      });
+    });
   }
 
   // Session verification on load
@@ -605,10 +616,14 @@ class AppController {
     const profileWidget = document.getElementById('menu-user-profile');
     const usernameEl = document.getElementById('menu-username');
     const userVictoriesEl = document.getElementById('menu-user-victories');
+    const menuAvatar = document.getElementById('menu-user-avatar');
 
     if (profileWidget && usernameEl && userVictoriesEl && this.currentUser) {
       usernameEl.textContent = this.currentUser.name;
       userVictoriesEl.textContent = this.currentUser.victories;
+      if (menuAvatar && this.currentUser.avatar) {
+        menuAvatar.src = 'Assets/' + this.currentUser.avatar;
+      }
       profileWidget.style.display = 'block';
     }
 
@@ -618,6 +633,109 @@ class AppController {
     this.updateRankedProfileUI();
     this.updateDashboard();
     this.navigateTo('menu');
+  }
+
+  async openAvatarSelector() {
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch('/api/profile/icons', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch profile icons');
+      const icons = await res.json();
+      
+      const grid = document.getElementById('avatar-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      
+      icons.forEach(iconName => {
+        const option = document.createElement('div');
+        option.className = 'avatar-option';
+        option.style.cursor = 'pointer';
+        option.style.padding = '5px';
+        option.style.borderRadius = '8px';
+        option.style.border = '2px solid transparent';
+        option.style.display = 'flex';
+        option.style.alignItems = 'center';
+        option.style.justifyContent = 'center';
+        option.style.background = 'rgba(255,255,255,0.05)';
+        option.style.transition = 'all 0.2s';
+        
+        if (this.currentUser && this.currentUser.avatar === 'Icons/' + iconName) {
+          option.style.borderColor = 'var(--color-primary)';
+          option.style.background = 'rgba(59, 76, 202, 0.2)';
+        }
+        
+        option.innerHTML = `<img src="Assets/Icons/${iconName}" style="width: 50px; height: 50px; object-fit: contain;">`;
+        
+        option.addEventListener('click', async () => {
+          try {
+            const updateRes = await fetch('/api/user/update-avatar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ avatar: 'Icons/' + iconName })
+            });
+            if (updateRes.ok) {
+              const result = await updateRes.json();
+              this.currentUser.avatar = result.avatar;
+              
+              const menuAvatar = document.getElementById('menu-user-avatar');
+              if (menuAvatar) menuAvatar.src = 'Assets/' + result.avatar;
+              
+              document.getElementById('modal-avatar-selector').classList.remove('active');
+            } else {
+              window.customAlert('Error', 'No se pudo actualizar el avatar.');
+            }
+          } catch (err) {
+            console.error(err);
+            window.customAlert('Error', 'Error al conectar con el servidor.');
+          }
+        });
+        
+        grid.appendChild(option);
+      });
+      
+      document.getElementById('modal-avatar-selector').classList.add('active');
+    } catch (err) {
+      console.error(err);
+      window.customAlert('Error', 'No se pudieron cargar los avatares.');
+    }
+  }
+
+  async updateUserRankIcon() {
+    if (!this.currentUser) return;
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/leaderboard', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.personal) {
+          const pos = data.personal.position;
+          let rankIcon = '⭐';
+          if (pos === 1) rankIcon = '👑';
+          else if (pos === 2) rankIcon = '💎';
+          else if (pos === 3) rankIcon = '🥇';
+          else if (pos === 4) rankIcon = '🥈';
+          else if (pos === 5) rankIcon = '🥉';
+          else if (pos >= 6 && pos <= 250) rankIcon = '🏆';
+          else rankIcon = '⭐';
+
+          const menuRankIconEl = document.getElementById('menu-user-rank-icon');
+          if (menuRankIconEl) {
+            menuRankIconEl.textContent = rankIcon;
+            menuRankIconEl.title = `Puesto #${pos} en la clasificación general`;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to update user rank icon:', err);
+    }
   }
 
   async updateRankedProfileUI() {
@@ -642,14 +760,14 @@ class AppController {
           kpiTitle.textContent = `${category}${level}`;
 
           const TROPHY_IMAGES = {
-            'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
-            'Great': 'Sets/Trofeos/2-Great-1-4.png',
-            'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
-            'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
-            'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
-            'Maestro': 'Sets/Trofeos/6-Maestro.png'
+            'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+            'Great': 'Assets/Trofeos/2-Great-1-4.png',
+            'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+            'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+            'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+            'Maestro': 'Assets/Trofeos/6-Maestro.png'
           };
-          kpiTrophy.src = TROPHY_IMAGES[category] || 'Sets/Trofeos/1-Principiante-1-3.png';
+          kpiTrophy.src = TROPHY_IMAGES[category] || 'Assets/Trofeos/1-Principiante-1-3.png';
 
           const RANK_LIMITS = { 'Principiante': 3, 'Great': 4, 'Experto': 5, 'Veterano': 5, 'Ultra': 5, 'Maestro': 0 };
           const limit = RANK_LIMITS[category] || 0;
@@ -674,6 +792,7 @@ class AppController {
     await this.updateDashboardTop3();
     await this.updateDashboardRecentDuels();
     this.updateRankedProfileUI();
+    this.updateUserRankIcon();
   }
 
   async updateDashboardStatus() {
@@ -717,12 +836,12 @@ class AppController {
             top3ListEl.innerHTML = '<div class="news-loading">No hay datos aún</div>';
           } else {
             const TROPHY_IMAGES = {
-              'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
-              'Great': 'Sets/Trofeos/2-Great-1-4.png',
-              'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
-              'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
-              'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
-              'Maestro': 'Sets/Trofeos/6-Maestro.png'
+              'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+              'Great': 'Assets/Trofeos/2-Great-1-4.png',
+              'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+              'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+              'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+              'Maestro': 'Assets/Trofeos/6-Maestro.png'
             };
             top3.forEach((player, idx) => {
               const div = document.createElement('div');
@@ -849,12 +968,12 @@ class AppController {
       const victoriesLabelEl = document.getElementById('leaderboard-user-victories-label');
       
       const TROPHY_IMAGES = {
-        'Principiante': 'Sets/Trofeos/1-Principiante-1-3.png',
-        'Great': 'Sets/Trofeos/2-Great-1-4.png',
-        'Experto': 'Sets/Trofeos/3-Experto-1-5.png',
-        'Veterano': 'Sets/Trofeos/4-Veterano-1-5.png',
-        'Ultra': 'Sets/Trofeos/5-Ultra-1-5.png',
-        'Maestro': 'Sets/Trofeos/6-Maestro.png'
+        'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+        'Great': 'Assets/Trofeos/2-Great-1-4.png',
+        'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+        'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+        'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+        'Maestro': 'Assets/Trofeos/6-Maestro.png'
       };
 
       if (this.currentLeaderboardTab === 'ranked') {
@@ -976,6 +1095,18 @@ class AppController {
           if (personal) {
             rankPosEl.textContent = personal.position > 0 ? `#${personal.position}` : '#--';
             rankVicEl.textContent = personal.victories;
+            
+            // Update leaderboard left sidebar emoji based on position
+            let rankIcon = '⭐';
+            const pos = personal.position;
+            if (pos === 1) rankIcon = '👑';
+            else if (pos === 2) rankIcon = '💎';
+            else if (pos === 3) rankIcon = '🥇';
+            else if (pos === 4) rankIcon = '🥈';
+            else if (pos === 5) rankIcon = '🥉';
+            else if (pos >= 6 && pos <= 250) rankIcon = '🏆';
+            else rankIcon = '⭐';
+            if (emojiEl) emojiEl.textContent = rankIcon;
           }
         } else {
           rankNameEl.textContent = 'Invitado';

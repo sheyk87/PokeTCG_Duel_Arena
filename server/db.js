@@ -90,7 +90,8 @@ async function initDB() {
       ranked_level INT DEFAULT 1,
       consecutive_wins INT DEFAULT 0,
       consecutive_losses INT DEFAULT 0,
-      master_ranked_wins INT DEFAULT 0
+      master_ranked_wins INT DEFAULT 0,
+      avatar VARCHAR(255) DEFAULT 'Icons/pikachu-.webp'
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
 
@@ -101,7 +102,8 @@ async function initDB() {
       { name: 'ranked_level', def: 'INT DEFAULT 1' },
       { name: 'consecutive_wins', def: 'INT DEFAULT 0' },
       { name: 'consecutive_losses', def: 'INT DEFAULT 0' },
-      { name: 'master_ranked_wins', def: 'INT DEFAULT 0' }
+      { name: 'master_ranked_wins', def: 'INT DEFAULT 0' },
+      { name: 'avatar', def: "VARCHAR(255) DEFAULT 'Icons/pikachu-.webp'" }
     ];
     for (const col of columnsToAdd) {
       const [cols] = await p.query(`SHOW COLUMNS FROM users LIKE ?`, [col.name]);
@@ -122,20 +124,34 @@ async function initDB() {
       name VARCHAR(255) NOT NULL,
       cards JSON NOT NULL,
       is_starter BOOLEAN DEFAULT FALSE,
-      box_image VARCHAR(255) DEFAULT 'pokeball.png',
+      box_image VARCHAR(255) DEFAULT 'Decks/pokeball.png',
+      coin_front VARCHAR(255) DEFAULT 'Coins/acerola-acerola.webp',
+      coin_back VARCHAR(255) DEFAULT 'Coins/BACK-monsterball-poke-ball.webp',
+      card_back VARCHAR(255) DEFAULT 'pokemon_card_backside.png',
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
 
-  // Migration: Add box_image column if table already exists without it
+  // Migration: Add box_image and other custom columns if table already exists without them
   try {
-    const [columns] = await p.query(`SHOW COLUMNS FROM decks LIKE 'box_image'`);
-    if (columns.length === 0) {
-      await p.query(`ALTER TABLE decks ADD COLUMN box_image VARCHAR(255) DEFAULT 'pokeball.png'`);
-      console.log('Added box_image column to decks table.');
+    const deckColumns = [
+      { name: 'box_image', def: "VARCHAR(255) DEFAULT 'Decks/pokeball.png'" },
+      { name: 'coin_front', def: "VARCHAR(255) DEFAULT 'Coins/acerola-acerola.webp'" },
+      { name: 'coin_back', def: "VARCHAR(255) DEFAULT 'Coins/BACK-monsterball-poke-ball.webp'" },
+      { name: 'card_back', def: "VARCHAR(255) DEFAULT 'pokemon_card_backside.png'" }
+    ];
+    for (const col of deckColumns) {
+      const [cols] = await p.query(`SHOW COLUMNS FROM decks LIKE ?`, [col.name]);
+      if (cols.length === 0) {
+        await p.query(`ALTER TABLE decks ADD COLUMN \`${col.name}\` ${col.def}`);
+        console.log(`Added ${col.name} column to decks table.`);
+      }
     }
+    // Migrate old values
+    await p.query(`UPDATE decks SET box_image = 'Decks/pokeball.png' WHERE box_image = 'pokeball.png'`);
+    await p.query(`UPDATE decks SET box_image = CONCAT('Decks/', box_image) WHERE box_image NOT LIKE 'Decks/%'`);
   } catch (err) {
-    console.error('Error adding box_image column to decks table:', err);
+    console.error('Error migrating decks table:', err);
   }
 
   // 3. Create Battles Table
@@ -202,16 +218,16 @@ async function registerOrLoginUser(id, email, name) {
   let user = await findUserById(id);
   if (!user) {
     // Register new user
-    await query('INSERT INTO users (id, email, name, victories) VALUES (?, ?, ?, 0)', [id, email, name]);
-    user = { id, email, name, victories: 0 };
+    await query('INSERT INTO users (id, email, name, victories, avatar) VALUES (?, ?, ?, 0, ?)', [id, email, name, 'Icons/pikachu-.webp']);
+    user = { id, email, name, victories: 0, avatar: 'Icons/pikachu-.webp' };
     
     // Seed starter decks
     for (let i = 0; i < STARTER_DECKS.length; i++) {
       const deck = STARTER_DECKS[i];
       const deckId = `starter-${id}-${i + 1}`;
       await query(
-        'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image) VALUES (?, ?, ?, ?, TRUE, ?)',
-        [deckId, id, deck.name, JSON.stringify(deck.cards), 'pokeball.png']
+        'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image, coin_front, coin_back, card_back) VALUES (?, ?, ?, ?, TRUE, ?, ?, ?, ?)',
+        [deckId, id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/acerola-acerola.webp', 'Coins/BACK-monsterball-poke-ball.webp', 'pokemon_card_backside.png']
       );
     }
   }
@@ -222,18 +238,27 @@ async function getUserDecks(userId) {
   return await query('SELECT * FROM decks WHERE user_id = ?', [userId]);
 }
 
-async function saveUserDeck(deckId, userId, name, cardsJson, boxImage) {
-  if (!boxImage) boxImage = 'pokeball.png';
+async function saveUserDeck(deckId, userId, name, cardsJson, boxImage, coinFront, coinBack, cardBack) {
+  if (!boxImage) boxImage = 'Decks/pokeball.png';
+  if (!coinFront) coinFront = 'Coins/acerola-acerola.webp';
+  if (!coinBack) coinBack = 'Coins/BACK-monsterball-poke-ball.webp';
+  if (!cardBack) cardBack = 'pokemon_card_backside.png';
   // Check if exists
   const rows = await query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, userId]);
   if (rows.length > 0) {
     // Update
-    await query('UPDATE decks SET name = ?, cards = ?, box_image = ? WHERE id = ? AND user_id = ?', [name, cardsJson, boxImage, deckId, userId]);
+    await query(
+      'UPDATE decks SET name = ?, cards = ?, box_image = ?, coin_front = ?, coin_back = ?, card_back = ? WHERE id = ? AND user_id = ?',
+      [name, cardsJson, boxImage, coinFront, coinBack, cardBack, deckId, userId]
+    );
   } else {
     // Insert new
-    await query('INSERT INTO decks (id, user_id, name, cards, is_starter, box_image) VALUES (?, ?, ?, ?, FALSE, ?)', [deckId, userId, name, cardsJson, boxImage]);
+    await query(
+      'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image, coin_front, coin_back, card_back) VALUES (?, ?, ?, ?, FALSE, ?, ?, ?, ?)',
+      [deckId, userId, name, cardsJson, boxImage, coinFront, coinBack, cardBack]
+    );
   }
-  return { id: deckId, user_id: userId, name, cards: JSON.parse(cardsJson), box_image: boxImage };
+  return { id: deckId, user_id: userId, name, cards: JSON.parse(cardsJson), box_image: boxImage, coin_front: coinFront, coin_back: coinBack, card_back: cardBack };
 }
 
 async function deleteUserDeck(deckId, userId) {
