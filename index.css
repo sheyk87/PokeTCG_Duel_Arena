@@ -734,6 +734,15 @@ button {
   overflow-y: auto;
 }
 
+.deckbuilder-customization-header:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--color-border-glow) !important;
+}
+
+.deckbuilder-customization-header.active {
+  border-color: var(--color-primary) !important;
+}
+
 .deck-meta-input {
   display: flex;
   gap: 10px;

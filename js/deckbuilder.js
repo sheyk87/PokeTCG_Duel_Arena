@@ -142,6 +142,23 @@ export class DeckBuilder {
         });
       });
     }
+    // Toggle Customization and Box design section
+    const toggleCustomizationBtn = document.getElementById('btn-toggle-customization');
+    const customizationCollapsible = document.getElementById('deck-customization-collapsible');
+    toggleCustomizationBtn?.addEventListener('click', () => {
+      const isHidden = customizationCollapsible.style.display === 'none' || customizationCollapsible.style.display === '';
+      if (isHidden) {
+        customizationCollapsible.style.display = 'flex';
+        toggleCustomizationBtn.classList.add('active');
+        const arrow = toggleCustomizationBtn.querySelector('.custom-arrow-indicator');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+      } else {
+        customizationCollapsible.style.display = 'none';
+        toggleCustomizationBtn.classList.remove('active');
+        const arrow = toggleCustomizationBtn.querySelector('.custom-arrow-indicator');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    });
 
     this.bindCustomizationSelectors();
   }
@@ -1086,7 +1103,7 @@ export class DeckBuilder {
           id: 'custom-' + Date.now(),
           name: json.name || 'Mazo Importado',
           cards: cleanedCards,
-          boxImage: json.boxImage || 'pokeball.png'
+          boxImage: json.boxImage || 'Decks/pokeball.png'
         };
 
         this.renderCatalog();

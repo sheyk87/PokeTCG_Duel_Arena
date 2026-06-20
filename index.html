@@ -867,63 +867,71 @@
             <div class="stat-pill">Energy: <span id="deck-count-energy">0</span></div>
           </div>
 
-          <div class="deck-box-selector-container">
-            <span class="selector-title">Diseño de Caja</span>
-            <div class="deck-box-selector" id="deck-box-selector">
-              <div class="box-option active" data-box="Decks/pokeball.png" title="Poké Ball">
-                <img src="Assets/Decks/pokeball.png" alt="Poké Ball">
-              </div>
-              <div class="box-option" data-box="Decks/superball.png" title="Super Ball">
-                <img src="Assets/Decks/superball.png" alt="Super Ball">
-              </div>
-              <div class="box-option" data-box="Decks/ultraball.png" title="Ultra Ball">
-                <img src="Assets/Decks/ultraball.png" alt="Ultra Ball">
-              </div>
-              <div class="box-option" data-box="Decks/masterball.png" title="Master Ball">
-                <img src="Assets/Decks/masterball.png" alt="Master Ball">
-              </div>
-              <div class="box-option" data-box="Decks/amorball.png" title="Amor Ball">
-                <img src="Assets/Decks/amorball.png" alt="Amor Ball">
-              </div>
-              <div class="box-option" data-box="Decks/parkball.png" title="Park Ball">
-                <img src="Assets/Decks/parkball.png" alt="Park Ball">
-              </div>
-            </div>
+          <!-- Toggle Customización y Caja -->
+          <div class="deckbuilder-customization-header" id="btn-toggle-customization" style="cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; user-select: none; transition: all 0.2s;">
+            <span style="font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Personalización y Diseño</span>
+            <span class="custom-arrow-indicator" style="font-size: 0.8rem; color: var(--color-text-muted); transition: transform 0.2s;">▼</span>
           </div>
 
-          <!-- Customize Coin and Sleeve -->
-          <div class="deck-customization-container" style="display: flex; flex-direction: column; gap: 15px; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 10px; border: 1px solid var(--color-border); margin-top: 15px;">
-            <span class="selector-title" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block;">Personalización</span>
-            
-            <!-- Coin Customization -->
-            <div style="display: flex; gap: 15px; align-items: center;">
-              <!-- Coin Front Selector -->
-              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;">
-                <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Moneda Cara (Front)</label>
-                <div id="btn-select-coin-front" style="display: flex; align-items: center; gap: 10px; background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.2s;" title="Elegir Moneda Cara">
-                  <img id="deck-coin-front-img" src="Assets/Coins/acerola-acerola.webp" alt="Coin Front" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain; flex-shrink: 0;">
-                  <span id="deck-coin-front-name" style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Acerola</span>
+          <div id="deck-customization-collapsible" style="display: none; flex-direction: column; gap: 15px; margin-top: 10px;">
+            <div class="deck-box-selector-container" style="margin-top: 0;">
+              <span class="selector-title">Diseño de Caja</span>
+              <div class="deck-box-selector" id="deck-box-selector">
+                <div class="box-option active" data-box="Decks/pokeball.png" title="Poké Ball">
+                  <img src="Assets/Decks/pokeball.png" alt="Poké Ball">
+                </div>
+                <div class="box-option" data-box="Decks/superball.png" title="Super Ball">
+                  <img src="Assets/Decks/superball.png" alt="Super Ball">
+                </div>
+                <div class="box-option" data-box="Decks/ultraball.png" title="Ultra Ball">
+                  <img src="Assets/Decks/ultraball.png" alt="Ultra Ball">
+                </div>
+                <div class="box-option" data-box="Decks/masterball.png" title="Master Ball">
+                  <img src="Assets/Decks/masterball.png" alt="Master Ball">
+                </div>
+                <div class="box-option" data-box="Decks/amorball.png" title="Amor Ball">
+                  <img src="Assets/Decks/amorball.png" alt="Amor Ball">
+                </div>
+                <div class="box-option" data-box="Decks/parkball.png" title="Park Ball">
+                  <img src="Assets/Decks/parkball.png" alt="Park Ball">
+                </div>
+              </div>
+            </div>
+
+            <!-- Customize Coin and Sleeve -->
+            <div class="deck-customization-container" style="display: flex; flex-direction: column; gap: 15px; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 10px; border: 1px solid var(--color-border); margin-top: 0;">
+              <span class="selector-title" style="font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block;">Personalización</span>
+              
+              <!-- Coin Customization -->
+              <div style="display: flex; gap: 15px; align-items: center;">
+                <!-- Coin Front Selector -->
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+                  <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Moneda Cara (Front)</label>
+                  <div id="btn-select-coin-front" style="display: flex; align-items: center; gap: 10px; background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.2s;" title="Elegir Moneda Cara">
+                    <img id="deck-coin-front-img" src="Assets/Coins/acerola-acerola.webp" alt="Coin Front" style="width: 32px; height: 32px; border-radius: 50%; object-fit: contain; flex-shrink: 0;">
+                    <span id="deck-coin-front-name" style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Acerola</span>
+                  </div>
+                </div>
+
+                <!-- Coin Back Selector -->
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+                  <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Moneda Seca (Back)</label>
+                  <select id="deck-coin-back-select" style="background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; width: 100%; height: 50px; outline: none; box-sizing: border-box;">
+                    <option value="Coins/BACK-monsterball-poke-ball.webp">Monster Ball</option>
+                    <option value="Coins/BACK-premiumset-special-set-01.webp">Premium Set</option>
+                  </select>
                 </div>
               </div>
 
-              <!-- Coin Back Selector -->
-              <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;">
-                <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Moneda Seca (Back)</label>
-                <select id="deck-coin-back-select" style="background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 12px; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; width: 100%; height: 50px; outline: none; box-sizing: border-box;">
-                  <option value="Coins/BACK-monsterball-poke-ball.webp">Monster Ball</option>
-                  <option value="Coins/BACK-premiumset-special-set-01.webp">Premium Set</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Card Back Sleeve Customization -->
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Reverso de Carta (Sleeve)</label>
-              <div id="btn-select-card-back" style="display: flex; align-items: center; gap: 12px; background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 15px; cursor: pointer; transition: all 0.2s;" title="Elegir Reverso de Carta">
-                <img id="deck-card-back-img" src="Assets/pokemon_card_backside.png" alt="Sleeve" style="width: 32px; height: 44px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: #000;">
-                <div style="display: flex; flex-direction: column; text-align: left; min-width: 0;">
-                  <span id="deck-card-back-name" style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Por Defecto</span>
-                  <span style="font-size: 0.7rem; color: var(--color-text-muted);">Haz clic para cambiar</span>
+              <!-- Card Back Sleeve Customization -->
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 0.8rem; color: var(--color-text-muted); font-weight: 600;">Reverso de Carta (Sleeve)</label>
+                <div id="btn-select-card-back" style="display: flex; align-items: center; gap: 12px; background: var(--color-bg-dark); border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 15px; cursor: pointer; transition: all 0.2s;" title="Elegir Reverso de Carta">
+                  <img id="deck-card-back-img" src="Assets/pokemon_card_backside.png" alt="Sleeve" style="width: 32px; height: 44px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background: #000;">
+                  <div style="display: flex; flex-direction: column; text-align: left; min-width: 0;">
+                    <span id="deck-card-back-name" style="font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Por Defecto</span>
+                    <span style="font-size: 0.7rem; color: var(--color-text-muted);">Haz clic para cambiar</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1882,6 +1890,7 @@
         <button id="btn-submit-join-private" class="menu-btn primary">Unirse y Combatir</button>
       </div>
     </div>
+  </div>
   <!-- Modal 12: Profile Avatar Selector -->
   <div id="modal-avatar-selector" class="modal-overlay">
     <div class="modal-container medium">

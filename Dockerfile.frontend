@@ -12,6 +12,7 @@ COPY js /usr/share/nginx/html/js
 COPY cards /usr/share/nginx/html/cards
 COPY Sets /usr/share/nginx/html/Sets
 COPY decks /usr/share/nginx/html/decks
+COPY Assets /usr/share/nginx/html/Assets
 
 # Exponer el puerto estándar HTTP
 EXPOSE 80

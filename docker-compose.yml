@@ -13,7 +13,7 @@ services:
     volumes:
       # Volumen persistente para almacenar las posiciones y configuraciones del campo de batalla.
       # Docker poblará este volumen con las imágenes iniciales y el positions.json en el primer arranque.
-      - battlefield_data:/app/cards/Battlefields
+      - battlefield_data:/app/Assets/Battlefields
     restart: unless-stopped
 
   frontend:
