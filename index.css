@@ -1032,7 +1032,7 @@ button {
   grid-template-rows: 1fr 2px 1fr;
   padding: 15px 25px;
   gap: 10px;
-  overflow-y: auto;
+  overflow: hidden;
   position: relative; /* Enabled absolute positioning of overlays */
 }
 
@@ -1062,6 +1062,7 @@ button {
   z-index: 10;
   user-select: none;
   transition: transform 0.2s;
+  will-change: transform;
 }
 
 .board-coin-token:hover {
@@ -1075,6 +1076,7 @@ button {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.1s;
+  will-change: transform;
 }
 
 .board-coin-inner.flip-heads-anim {
@@ -1114,7 +1116,7 @@ button {
 
 .board-coin-face.heads {
   background-image: url('/cards/coin-front.png');
-  background-color: #ffd700; /* gold fallback */
+  background-color: #c0c0c0; /* silver fallback to prevent thick border styling */
 }
 
 .board-coin-face.tails {
@@ -1919,6 +1921,7 @@ button {
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.1s;
+  will-change: transform;
 }
 
 .coin.flip-heads-anim {
@@ -1951,6 +1954,7 @@ button {
 
 .coin-face.heads {
   background-image: url('/cards/coin-front.png');
+  background-color: #c0c0c0;
 }
 
 .coin-face.tails {

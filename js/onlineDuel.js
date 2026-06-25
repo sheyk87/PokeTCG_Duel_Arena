@@ -1279,7 +1279,7 @@ export class OnlineDuel extends Duel {
       title.style.color = isWin ? 'var(--color-accent-green)' : 'var(--color-accent-red)';
       reasonText.textContent = reason;
       if (gameOverImg) {
-        gameOverImg.src = isWin ? 'cards/Win-Stars.png' : 'cards/Pikachu-Triste.gif';
+        gameOverImg.src = isWin ? 'Assets/Win-Stars.png' : 'Assets/Pikachu-Triste.gif';
       }
 
       // Handle Ranked Stats display inside the game over modal
