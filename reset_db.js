@@ -45,7 +45,7 @@ async function run() {
           
           await db.query(
             'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image, coin_front, coin_back, card_back) VALUES (?, ?, ?, ?, TRUE, ?, ?, ?, ?)',
-            [deckId, user.id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/acerola-acerola.webp', 'Coins/BACK-monsterball-poke-ball.webp', 'pokemon_card_backside.png']
+            [deckId, user.id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/show(62).png', 'Coins/coin-back.png', 'pokemon_card_backside.png']
           );
           seededDecksCount++;
         }

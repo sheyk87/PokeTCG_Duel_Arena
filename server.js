@@ -581,14 +581,14 @@ async function tryMatchmaking() {
 
     const deck1Custom = {
       boxImage: d1[0] && d1[0].box_image ? d1[0].box_image : 'Decks/pokeball.png',
-      coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/acerola-acerola.webp',
-      coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+      coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/show(62).png',
+      coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/coin-back.png',
       cardBack: d1[0] && d1[0].card_back ? d1[0].card_back : 'pokemon_card_backside.png'
     };
     const deck2Custom = {
       boxImage: d2[0] && d2[0].box_image ? d2[0].box_image : 'Decks/pokeball.png',
-      coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/acerola-acerola.webp',
-      coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+      coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/show(62).png',
+      coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/coin-back.png',
       cardBack: d2[0] && d2[0].card_back ? d2[0].card_back : 'pokemon_card_backside.png'
     };
 
@@ -695,14 +695,14 @@ async function tryRankedMatchmaking() {
 
         const deck1Custom = {
           boxImage: d1[0] && d1[0].box_image ? d1[0].box_image : 'Decks/pokeball.png',
-          coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/acerola-acerola.webp',
-          coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+          coinFront: d1[0] && d1[0].coin_front ? d1[0].coin_front : 'Coins/show(62).png',
+          coinBack: d1[0] && d1[0].coin_back ? d1[0].coin_back : 'Coins/coin-back.png',
           cardBack: d1[0] && d1[0].card_back ? d1[0].card_back : 'pokemon_card_backside.png'
         };
         const deck2Custom = {
           boxImage: d2[0] && d2[0].box_image ? d2[0].box_image : 'Decks/pokeball.png',
-          coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/acerola-acerola.webp',
-          coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/BACK-monsterball-poke-ball.webp',
+          coinFront: d2[0] && d2[0].coin_front ? d2[0].coin_front : 'Coins/show(62).png',
+          coinBack: d2[0] && d2[0].coin_back ? d2[0].coin_back : 'Coins/coin-back.png',
           cardBack: d2[0] && d2[0].card_back ? d2[0].card_back : 'pokemon_card_backside.png'
         };
 

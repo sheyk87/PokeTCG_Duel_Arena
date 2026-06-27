@@ -125,8 +125,8 @@ async function initDB() {
       cards JSON NOT NULL,
       is_starter BOOLEAN DEFAULT FALSE,
       box_image VARCHAR(255) DEFAULT 'Decks/pokeball.png',
-      coin_front VARCHAR(255) DEFAULT 'Coins/acerola-acerola.webp',
-      coin_back VARCHAR(255) DEFAULT 'Coins/BACK-monsterball-poke-ball.webp',
+      coin_front VARCHAR(255) DEFAULT 'Coins/show(62).png',
+      coin_back VARCHAR(255) DEFAULT 'Coins/coin-back.png',
       card_back VARCHAR(255) DEFAULT 'pokemon_card_backside.png',
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -136,8 +136,8 @@ async function initDB() {
   try {
     const deckColumns = [
       { name: 'box_image', def: "VARCHAR(255) DEFAULT 'Decks/pokeball.png'" },
-      { name: 'coin_front', def: "VARCHAR(255) DEFAULT 'Coins/acerola-acerola.webp'" },
-      { name: 'coin_back', def: "VARCHAR(255) DEFAULT 'Coins/BACK-monsterball-poke-ball.webp'" },
+      { name: 'coin_front', def: "VARCHAR(255) DEFAULT 'Coins/show(62).png'" },
+      { name: 'coin_back', def: "VARCHAR(255) DEFAULT 'Coins/coin-back.png'" },
       { name: 'card_back', def: "VARCHAR(255) DEFAULT 'pokemon_card_backside.png'" }
     ];
     for (const col of deckColumns) {
@@ -227,7 +227,7 @@ async function registerOrLoginUser(id, email, name) {
       const deckId = `starter-${id}-${i + 1}`;
       await query(
         'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image, coin_front, coin_back, card_back) VALUES (?, ?, ?, ?, TRUE, ?, ?, ?, ?)',
-        [deckId, id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/acerola-acerola.webp', 'Coins/BACK-monsterball-poke-ball.webp', 'pokemon_card_backside.png']
+        [deckId, id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/show(62).png', 'Coins/coin-back.png', 'pokemon_card_backside.png']
       );
     }
   }
@@ -240,8 +240,8 @@ async function getUserDecks(userId) {
 
 async function saveUserDeck(deckId, userId, name, cardsJson, boxImage, coinFront, coinBack, cardBack) {
   if (!boxImage) boxImage = 'Decks/pokeball.png';
-  if (!coinFront) coinFront = 'Coins/acerola-acerola.webp';
-  if (!coinBack) coinBack = 'Coins/BACK-monsterball-poke-ball.webp';
+  if (!coinFront) coinFront = 'Coins/show(62).png';
+  if (!coinBack) coinBack = 'Coins/coin-back.png';
   if (!cardBack) cardBack = 'pokemon_card_backside.png';
   // Check if exists
   const rows = await query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, userId]);

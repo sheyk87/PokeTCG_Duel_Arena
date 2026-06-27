@@ -578,8 +578,8 @@ export class Duel {
 
     // Resolve Gary's custom randomized options
     let garySleeve = 'pokemon_card_backside.png';
-    let garyCoinBack = 'Coins/BACK-monsterball-poke-ball.webp';
-    let garyCoinFront = 'Coins/acerola-acerola.webp';
+    let garyCoinBack = 'Coins/coin-back.png';
+    let garyCoinFront = 'Coins/show(62).png';
 
     try {
       const [sleevesRes, coinsRes, iconsRes] = await Promise.all([
@@ -598,14 +598,15 @@ export class Duel {
         }
         
         const coinBackOptions = [
-          'Coins/BACK-monsterball-poke-ball.webp',
-          'Coins/BACK-premiumset-special-set-01.webp'
+          'Coins/coin-back.png',
+          'Coins/coin-back2.png',
+          'Coins/coin-back3.png'
         ];
         garyCoinBack = coinBackOptions[Math.floor(Math.random() * coinBackOptions.length)];
         
         const coinFrontOptions = [];
         coins.forEach(c => {
-          if (!c.includes('BACK-')) coinFrontOptions.push('Coins/' + c);
+          if (!['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(c)) coinFrontOptions.push('Coins/' + c);
         });
         icons.forEach(i => {
           coinFrontOptions.push('Icons/' + i);
@@ -625,8 +626,8 @@ export class Duel {
 
     this.player.custom = {
       boxImage: pDeck.boxImage || 'Decks/pokeball.png',
-      coinFront: pDeck.coinFront || 'Coins/acerola-acerola.webp',
-      coinBack: pDeck.coinBack || 'Coins/BACK-monsterball-poke-ball.webp',
+      coinFront: pDeck.coinFront || 'Coins/show(62).png',
+      coinBack: pDeck.coinBack || 'Coins/coin-back.png',
       cardBack: pDeck.cardBack || 'pokemon_card_backside.png'
     };
     

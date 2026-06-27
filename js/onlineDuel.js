@@ -280,8 +280,8 @@ export class OnlineDuel extends Duel {
 
     this.player.custom = data.playerDeckCustom || {
       boxImage: 'Decks/pokeball.png',
-      coinFront: 'Coins/acerola-acerola.webp',
-      coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+      coinFront: 'Coins/show(62).png',
+      coinBack: 'Coins/coin-back.png',
       cardBack: 'pokemon_card_backside.png'
     };
 
@@ -371,8 +371,8 @@ export class OnlineDuel extends Duel {
 
     this.opponent.custom = data.opponentDeckCustom || {
       boxImage: 'Decks/pokeball.png',
-      coinFront: 'Coins/acerola-acerola.webp',
-      coinBack: 'Coins/BACK-monsterball-poke-ball.webp',
+      coinFront: 'Coins/show(62).png',
+      coinBack: 'Coins/coin-back.png',
       cardBack: 'pokemon_card_backside.png'
     };
 
