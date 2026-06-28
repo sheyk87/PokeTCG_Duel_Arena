@@ -342,7 +342,27 @@ class AppController {
       const tabRanked = document.getElementById('btn-history-tab-ranked');
       if (tabNorm) tabNorm.classList.add('active');
       if (tabRanked) tabRanked.classList.remove('active');
+      
+      const searchInput = document.getElementById('input-history-search');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('btn-clear-history-search');
+      if (clearBtn) clearBtn.style.display = 'none';
+
       this.showHistory();
+    });
+
+    // History search listeners
+    const searchInput = document.getElementById('input-history-search');
+    searchInput?.addEventListener('input', () => {
+      this.renderHistory();
+    });
+
+    const clearSearchBtn = document.getElementById('btn-clear-history-search');
+    clearSearchBtn?.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        this.renderHistory();
+      }
     });
 
     // Dashboard Top 3 mini-tabs
@@ -1182,59 +1202,99 @@ class AppController {
       });
       if (!res.ok) throw new Error('Failed to load private battles history');
 
-      const history = await res.json();
-      
-      const tbody = document.getElementById('history-tbody');
-      const emptyMsg = document.getElementById('history-empty-message');
-
-      tbody.innerHTML = '';
-
-      const filteredHistory = history.filter(battle => {
-        const isRanked = !!battle.is_ranked;
-        return this.currentHistoryTab === 'ranked' ? isRanked : !isRanked;
-      });
-
-      if (filteredHistory.length === 0) {
-        emptyMsg.style.display = 'block';
-        emptyMsg.textContent = this.currentHistoryTab === 'ranked'
-          ? 'No has disputado ninguna batalla ranked todavía.'
-          : 'No has disputado ninguna batalla online normal todavía.';
-      } else {
-        emptyMsg.style.display = 'none';
-        filteredHistory.forEach(battle => {
-          const row = document.createElement('tr');
-          const outcomeClass = battle.result === 'won' ? 'won' : 'lost';
-          const outcomeText = battle.result === 'won' ? 'Ganado' : 'Perdido';
-
-          const mins = Math.floor(battle.duration / 60);
-          const secs = battle.duration % 60;
-          const durationText = `${mins}:${secs.toString().padStart(2, '0')} min`;
-
-          const date = new Date(battle.created_at).toLocaleDateString('es-ES', {
-            year: 'numeric', month: 'short', day: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-          });
-
-          let opponentDetailsHtml = `<strong>${battle.opponent_name}</strong>`;
-          if (battle.is_ranked) {
-            const oppLvlText = battle.opponent_category === 'Maestro' ? '' : ` (Nivel ${battle.opponent_level})`;
-            opponentDetailsHtml += `<div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">${battle.opponent_category}${oppLvlText}</div>`;
-          }
-
-          row.innerHTML = `
-            <td style="padding: 15px;">${opponentDetailsHtml}</td>
-            <td style="padding: 15px;"><span class="history-outcome ${outcomeClass}">${outcomeText}</span></td>
-            <td style="padding: 15px;">${durationText}</td>
-            <td style="padding: 15px; text-align: right; color: var(--color-text-muted);">${date}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
+      this.loadedHistory = await res.json();
+      this.renderHistory();
 
       this.navigateTo('history');
     } catch (err) {
       console.error(err);
       await window.customAlert('Error de Conexión', 'Error de conexión al recuperar el historial.');
+    }
+  }
+
+  renderHistory() {
+    const history = this.loadedHistory || [];
+    const tbody = document.getElementById('history-tbody');
+    const emptyMsg = document.getElementById('history-empty-message');
+    const searchInput = document.getElementById('input-history-search');
+    const clearBtn = document.getElementById('btn-clear-history-search');
+
+    if (tbody) tbody.innerHTML = '';
+
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    if (clearBtn) {
+      clearBtn.style.display = searchTerm ? 'block' : 'none';
+    }
+
+    // 1. Filtrar por pestaña (normal vs ranked)
+    let filtered = history.filter(battle => {
+      const isRanked = !!battle.is_ranked;
+      return this.currentHistoryTab === 'ranked' ? isRanked : !isRanked;
+    });
+
+    // 2. Filtrar por búsqueda si hay término
+    if (searchTerm) {
+      filtered = filtered.filter(battle => {
+        // Rival
+        const opponentMatch = battle.opponent_name.toLowerCase().includes(searchTerm);
+        
+        // Resultado ("won"/"lost" y traducido "ganado"/"perdido")
+        const outcomeText = battle.result === 'won' ? 'ganado' : 'perdido';
+        const outcomeMatch = outcomeText.includes(searchTerm) || battle.result.toLowerCase().includes(searchTerm);
+
+        // Fecha formateada en es-ES
+        const date = new Date(battle.created_at).toLocaleDateString('es-ES', {
+          year: 'numeric', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        }).toLowerCase();
+        const dateMatch = date.includes(searchTerm);
+
+        return opponentMatch || outcomeMatch || dateMatch;
+      });
+    }
+
+    if (!tbody) return;
+
+    if (filtered.length === 0) {
+      emptyMsg.style.display = 'block';
+      if (searchTerm) {
+        emptyMsg.textContent = 'No se encontraron combates que coincidan con la búsqueda.';
+      } else {
+        emptyMsg.textContent = this.currentHistoryTab === 'ranked'
+          ? 'No has disputado ninguna batalla ranked todavía.'
+          : 'No has disputado ninguna batalla online normal todavía.';
+      }
+    } else {
+      emptyMsg.style.display = 'none';
+      filtered.forEach(battle => {
+        const row = document.createElement('tr');
+        const outcomeClass = battle.result === 'won' ? 'won' : 'lost';
+        const outcomeText = battle.result === 'won' ? 'Ganado' : 'Perdido';
+
+        const mins = Math.floor(battle.duration / 60);
+        const secs = battle.duration % 60;
+        const durationText = `${mins}:${secs.toString().padStart(2, '0')} min`;
+
+        const date = new Date(battle.created_at).toLocaleDateString('es-ES', {
+          year: 'numeric', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+
+        let opponentDetailsHtml = `<strong>${battle.opponent_name}</strong>`;
+        if (battle.is_ranked) {
+          const oppLvlText = battle.opponent_category === 'Maestro' ? '' : ` (Nivel ${battle.opponent_level})`;
+          opponentDetailsHtml += `<div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">${battle.opponent_category}${oppLvlText}</div>`;
+        }
+
+        row.innerHTML = `
+          <td style="padding: 15px;">${opponentDetailsHtml}</td>
+          <td style="padding: 15px;"><span class="history-outcome ${outcomeClass}">${outcomeText}</span></td>
+          <td style="padding: 15px;">${durationText}</td>
+          <td style="padding: 15px; text-align: right; color: var(--color-text-muted);">${date}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
   }
 }
