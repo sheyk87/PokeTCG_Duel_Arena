@@ -206,7 +206,16 @@ async function query(sql, params) {
 // User helper methods
 async function findUserById(userId) {
   const rows = await query('SELECT * FROM users WHERE id = ?', [userId]);
-  return rows[0] || null;
+  if (!rows[0]) return null;
+  const user = rows[0];
+
+  // Obtener victorias online normales (casual, no ranked)
+  const vRows = await query(
+    "SELECT COUNT(*) as victories FROM battles WHERE user_id = ? AND result = 'won' AND is_ranked = 0",
+    [userId]
+  );
+  user.normal_victories = vRows[0] ? vRows[0].victories : 0;
+  return user;
 }
 
 async function findUserByEmail(email) {

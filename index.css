@@ -4128,3 +4128,36 @@ button {
   border-radius: 4px;
   object-fit: cover;
 }
+
+/* Cosmetics locked states */
+.box-option.locked,
+.avatar-option.locked,
+.coin-option.locked,
+.sleeve-option.locked {
+  filter: grayscale(100%) brightness(0.6);
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+.box-option.locked::after,
+.avatar-option.locked::after,
+.coin-option.locked::after,
+.sleeve-option.locked::after {
+  content: '🔒';
+  position: absolute;
+  font-size: 1.2rem;
+  color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+}
+
+/* System modals stacking priority (always on top of selection modals) */
+#modal-alert,
+#modal-confirm {
+  z-index: 10000;
+}

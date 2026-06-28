@@ -127,6 +127,16 @@ export class DeckBuilder {
           window.customAlert?.('Info', 'No puedes cambiar el diseño de caja de un mazo inicial.');
           return;
         }
+
+        const options = Array.from(boxSelector.querySelectorAll('.box-option'));
+        const index = options.indexOf(option);
+        const normalVictories = window.appController?.currentUser ? (window.appController.currentUser.normal_victories || 0) : 0;
+        const isLocked = index > 0 && normalVictories < index * 10;
+
+        if (isLocked) {
+          window.customAlert?.('Diseño Bloqueado', `Este diseño de caja requiere ${index * 10} victorias en Online Normal (tienes ${normalVictories}).`);
+          return;
+        }
         
         // Update boxImage in currentDeck
         const boxName = option.dataset.box;
@@ -836,11 +846,32 @@ export class DeckBuilder {
     if (boxSelector) {
       let activeBox = this.currentDeck.boxImage || 'Decks/pokeball.png';
       if (!activeBox.startsWith('Decks/')) activeBox = 'Decks/' + activeBox;
-      boxSelector.querySelectorAll('.box-option').forEach(opt => {
+      
+      const normalVictories = window.appController?.currentUser ? (window.appController.currentUser.normal_victories || 0) : 0;
+      const boxOptions = Array.from(boxSelector.querySelectorAll('.box-option'));
+      
+      boxOptions.forEach((opt, idx) => {
         if (opt.dataset.box === activeBox) {
           opt.classList.add('active');
         } else {
           opt.classList.remove('active');
+        }
+
+        const isLocked = idx > 0 && normalVictories < idx * 10;
+        if (isLocked) {
+          opt.classList.add('locked');
+          opt.title = `Bloqueado (Requiere ${idx * 10} victorias en Online Normal. Tienes ${normalVictories})`;
+        } else {
+          opt.classList.remove('locked');
+          const titles = {
+            'Decks/pokeball.png': 'Poké Ball',
+            'Decks/superball.png': 'Super Ball',
+            'Decks/ultraball.png': 'Ultra Ball',
+            'Decks/masterball.png': 'Master Ball',
+            'Decks/amorball.png': 'Amor Ball',
+            'Decks/parkball.png': 'Park Ball'
+          };
+          opt.title = titles[opt.dataset.box] || '';
         }
         
         if (this.currentDeck.isStarter) {
@@ -1297,17 +1328,30 @@ export class DeckBuilder {
       if (!grid) return;
       grid.innerHTML = '';
       
-      const allCoins = [];
-      coins.forEach(c => {
-        if (!['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(c)) {
-          allCoins.push({ path: 'Coins/' + c, name: c.replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
-        }
+      const defaultCoinPath = 'Coins/show(62).png';
+
+      // Filtrar y ordenar las de Coins
+      const coinsList = coins
+        .filter(c => !['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(c) && 'Coins/' + c !== defaultCoinPath)
+        .sort();
+
+      // Ordenar las de Icons
+      const iconsList = icons.sort();
+
+      const allCoins = [
+        { path: defaultCoinPath, name: 'Por Defecto' }
+      ];
+
+      coinsList.forEach(c => {
+        allCoins.push({ path: 'Coins/' + c, name: c.replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
       });
-      icons.forEach(i => {
+      iconsList.forEach(i => {
         allCoins.push({ path: 'Icons/' + i, name: i.replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
       });
+
+      const normalVictories = window.appController?.currentUser ? (window.appController.currentUser.normal_victories || 0) : 0;
       
-      allCoins.forEach(coin => {
+      allCoins.forEach((coin, index) => {
         const option = document.createElement('div');
         option.className = 'coin-option';
         option.style.cursor = 'pointer';
@@ -1319,8 +1363,13 @@ export class DeckBuilder {
         option.style.alignItems = 'center';
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
+
+        const isLocked = index > 0 && normalVictories < index * 3;
         
-        if (this.currentDeck.coinFront === coin.path) {
+        if (isLocked) {
+          option.classList.add('locked');
+          option.title = `Bloqueado (Requiere ${index * 3} victorias en Online Normal. Tienes ${normalVictories})`;
+        } else if (this.currentDeck.coinFront === coin.path) {
           option.style.borderColor = 'var(--color-primary)';
           option.style.background = 'rgba(59, 76, 202, 0.2)';
         }
@@ -1331,6 +1380,11 @@ export class DeckBuilder {
         `;
         
         option.addEventListener('click', () => {
+          if (isLocked) {
+            window.customAlert?.('Moneda Bloqueada', `Esta cara de moneda requiere ${index * 3} victorias en Online Normal (tienes ${normalVictories}).`);
+            return;
+          }
+          
           this.currentDeck.coinFront = coin.path;
           
           const previewImg = document.getElementById('deck-coin-front-img');
@@ -1361,14 +1415,21 @@ export class DeckBuilder {
       if (!grid) return;
       grid.innerHTML = '';
       
-      const backCoins = [];
-      coins.forEach(c => {
-        if (['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(c)) {
-          backCoins.push({ path: 'Coins/' + c, name: c.replace('BACK-', '').replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
+      const defaultCoinBack = 'coin-back.png';
+      const otherCoinBacks = ['coin-back2.png', 'coin-back3.png'].sort();
+      
+      const backCoins = [
+        { path: 'Coins/' + defaultCoinBack, name: 'Fondo Default' }
+      ];
+      otherCoinBacks.forEach(c => {
+        if (coins.includes(c)) {
+          backCoins.push({ path: 'Coins/' + c, name: c.replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
         }
       });
       
-      backCoins.forEach(coin => {
+      const normalVictories = window.appController?.currentUser ? (window.appController.currentUser.normal_victories || 0) : 0;
+
+      backCoins.forEach((coin, index) => {
         const option = document.createElement('div');
         option.className = 'coin-option';
         option.style.cursor = 'pointer';
@@ -1380,8 +1441,13 @@ export class DeckBuilder {
         option.style.alignItems = 'center';
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
+
+        const isLocked = index > 0 && normalVictories < index * 10;
         
-        if (this.currentDeck.coinBack === coin.path) {
+        if (isLocked) {
+          option.classList.add('locked');
+          option.title = `Bloqueado (Requiere ${index * 10} victorias en Online Normal. Tienes ${normalVictories})`;
+        } else if (this.currentDeck.coinBack === coin.path) {
           option.style.borderColor = 'var(--color-primary)';
           option.style.background = 'rgba(59, 76, 202, 0.2)';
         }
@@ -1392,6 +1458,11 @@ export class DeckBuilder {
         `;
         
         option.addEventListener('click', () => {
+          if (isLocked) {
+            window.customAlert?.('Moneda Bloqueada', `Este reverso de moneda requiere ${index * 10} victorias en Online Normal (tienes ${normalVictories}).`);
+            return;
+          }
+          
           this.currentDeck.coinBack = coin.path;
           
           const previewImg = document.getElementById('deck-coin-back-img');
@@ -1422,14 +1493,18 @@ export class DeckBuilder {
       if (!grid) return;
       grid.innerHTML = '';
       
+      const sortedSleeves = sleeves.sort();
+
       const allSleeves = [
         { path: 'pokemon_card_backside.png', name: 'Por Defecto' }
       ];
-      sleeves.forEach(s => {
+      sortedSleeves.forEach(s => {
         allSleeves.push({ path: 'Sleeves/' + s, name: s.replace('.webp', '').replace('.png', '').replace(/-/g, ' ') });
       });
       
-      allSleeves.forEach(sleeve => {
+      const normalVictories = window.appController?.currentUser ? (window.appController.currentUser.normal_victories || 0) : 0;
+
+      allSleeves.forEach((sleeve, index) => {
         const option = document.createElement('div');
         option.className = 'sleeve-option';
         option.style.cursor = 'pointer';
@@ -1442,7 +1517,12 @@ export class DeckBuilder {
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
         
-        if (this.currentDeck.cardBack === sleeve.path) {
+        const isLocked = index > 0 && normalVictories < index * 3;
+        
+        if (isLocked) {
+          option.classList.add('locked');
+          option.title = `Bloqueado (Requiere ${index * 3} victorias en Online Normal. Tienes ${normalVictories})`;
+        } else if (this.currentDeck.cardBack === sleeve.path) {
           option.style.borderColor = 'var(--color-primary)';
           option.style.background = 'rgba(59, 76, 202, 0.2)';
         }
@@ -1453,6 +1533,11 @@ export class DeckBuilder {
         `;
         
         option.addEventListener('click', () => {
+          if (isLocked) {
+            window.customAlert?.('Funda Bloqueada', `Esta funda de mazo requiere ${index * 3} victorias en Online Normal (tienes ${normalVictories}).`);
+            return;
+          }
+          
           this.currentDeck.cardBack = sleeve.path;
           
           const previewImg = document.getElementById('deck-card-back-img');

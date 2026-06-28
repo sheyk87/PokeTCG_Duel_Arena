@@ -209,6 +209,116 @@ const server = http.createServer(async (req, res) => {
       if (!id || !name || !cards) {
         return sendJSON(res, 400, { error: 'Missing deck parameters' });
       }
+
+      // Validar si los cosméticos del mazo están desbloqueados
+      const freshUser = await db.findUserById(currentUser.id);
+      const normalVictories = freshUser ? freshUser.normal_victories : 0;
+
+      // 1. Validar Box Image (Caja)
+      if (boxImage) {
+        const boxes = [
+          'Decks/pokeball.png',
+          'Decks/superball.png',
+          'Decks/ultraball.png',
+          'Decks/masterball.png',
+          'Decks/amorball.png',
+          'Decks/parkball.png'
+        ];
+        let normalizedBox = boxImage;
+        if (!normalizedBox.startsWith('Decks/')) normalizedBox = 'Decks/' + normalizedBox;
+        
+        const boxIndex = boxes.indexOf(normalizedBox);
+        if (boxIndex > 0 && normalVictories < boxIndex * 10) {
+          return sendJSON(res, 403, { error: `Diseño de caja bloqueado. Requiere ${boxIndex * 10} victorias.` });
+        }
+      }
+
+      // 2. Validar Coin Back (Moneda Back)
+      if (coinBack) {
+        const defaultCoinBack = 'coin-back.png';
+        const coinsDir = path.join(PUBLIC_DIR, 'Assets', 'Coins');
+        let files = [];
+        try {
+          files = fs.readdirSync(coinsDir);
+        } catch (e) {
+          console.error('Failed to read Coins dir', e);
+        }
+        
+        const backCoinsList = files.filter(f => ['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(f));
+        const sortedBacks = [defaultCoinBack];
+        backCoinsList.filter(x => x !== defaultCoinBack).sort().forEach(c => sortedBacks.push(c));
+
+        const coinBackFile = coinBack.replace('Coins/', '');
+        const backIndex = sortedBacks.indexOf(coinBackFile);
+        if (backIndex > 0 && normalVictories < backIndex * 10) {
+          return sendJSON(res, 403, { error: `Cara de moneda back bloqueada. Requiere ${backIndex * 10} victorias.` });
+        }
+      }
+
+      // 3. Validar Card Back (Sleeve)
+      if (cardBack) {
+        const defaultSleeve = 'pokemon_card_backside.png';
+        const sleevesDir = path.join(PUBLIC_DIR, 'Assets', 'Sleeves');
+        let files = [];
+        try {
+          files = fs.readdirSync(sleevesDir);
+        } catch (e) {
+          console.error('Failed to read Sleeves dir', e);
+        }
+        
+        const sleevesList = files.filter(f => {
+          const ext = path.extname(f).toLowerCase();
+          return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+        }).sort();
+
+        const allSleeves = [defaultSleeve];
+        sleevesList.forEach(s => allSleeves.push('Sleeves/' + s));
+
+        const sleeveIndex = allSleeves.indexOf(cardBack);
+        if (sleeveIndex > 0 && normalVictories < sleeveIndex * 3) {
+          return sendJSON(res, 403, { error: `Funda (Sleeve) bloqueada. Requiere ${sleeveIndex * 3} victorias.` });
+        }
+      }
+
+      // 4. Validar Coin Front (Moneda Front)
+      if (coinFront) {
+        const defaultCoinFront = 'Coins/show(62).png';
+        const coinsDir = path.join(PUBLIC_DIR, 'Assets', 'Coins');
+        const iconsDir = path.join(PUBLIC_DIR, 'Assets', 'Icons');
+        
+        let coinFiles = [];
+        let iconFiles = [];
+        try {
+          coinFiles = fs.readdirSync(coinsDir);
+          iconFiles = fs.readdirSync(iconsDir);
+        } catch (e) {
+          console.error('Failed to read Coins or Icons dir', e);
+        }
+
+        const coinFrontsList = coinFiles.filter(f => {
+          const ext = path.extname(f).toLowerCase();
+          return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext) && !['coin-back.png', 'coin-back2.png', 'coin-back3.png'].includes(f);
+        });
+
+        const iconFrontsList = iconFiles.filter(f => {
+          const ext = path.extname(f).toLowerCase();
+          return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+        });
+
+        const defaultCoinFileName = 'show(62).png';
+        const sortedCoins = coinFrontsList.filter(x => x !== defaultCoinFileName).sort();
+        const sortedIcons = iconFrontsList.sort();
+
+        const allCoins = [defaultCoinFront];
+        sortedCoins.forEach(c => allCoins.push('Coins/' + c));
+        sortedIcons.forEach(i => allCoins.push('Icons/' + i));
+
+        const coinFrontIndex = allCoins.indexOf(coinFront);
+        if (coinFrontIndex > 0 && normalVictories < coinFrontIndex * 3) {
+          return sendJSON(res, 403, { error: `Cara de moneda front bloqueada. Requiere ${coinFrontIndex * 3} victorias.` });
+        }
+      }
+
       const saved = await db.saveUserDeck(id, currentUser.id, name, JSON.stringify(cards), boxImage, coinFront, coinBack, cardBack);
       return sendJSON(res, 200, saved);
     } catch (err) {
@@ -223,6 +333,33 @@ const server = http.createServer(async (req, res) => {
       const body = await getRequestBody(req);
       const { avatar } = JSON.parse(body);
       if (!avatar) return sendJSON(res, 400, { error: 'Missing avatar parameter' });
+
+      // Validar si el avatar está desbloqueado
+      const freshUser = await db.findUserById(currentUser.id);
+      const normalVictories = freshUser ? freshUser.normal_victories : 0;
+
+      const iconsDir = path.join(PUBLIC_DIR, 'Assets', 'Icons');
+      const files = fs.readdirSync(iconsDir);
+      const images = files.filter(f => {
+        const ext = path.extname(f).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.webp', '.avif'].includes(ext);
+      });
+
+      const defaultAvatar = 'pikachu-.webp';
+      const sortedIcons = images.filter(x => x !== defaultAvatar).sort();
+      sortedIcons.unshift(defaultAvatar);
+
+      const iconFileName = avatar.replace('Icons/', '');
+      const iconIndex = sortedIcons.indexOf(iconFileName);
+
+      if (iconIndex === -1) {
+        return sendJSON(res, 400, { error: 'Invalid avatar icon name' });
+      }
+
+      if (iconIndex > 0 && normalVictories < iconIndex * 3) {
+        return sendJSON(res, 403, { error: `Avatar is locked. Requires ${iconIndex * 3} wins, but you have ${normalVictories}.` });
+      }
+
       await db.query('UPDATE users SET avatar = ? WHERE id = ?', [avatar, currentUser.id]);
       currentUser.avatar = avatar;
       return sendJSON(res, 200, { success: true, avatar });

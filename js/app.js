@@ -667,8 +667,15 @@ class AppController {
       const grid = document.getElementById('avatar-grid');
       if (!grid) return;
       grid.innerHTML = '';
+
+      // Ordenar determinísticamente con el default (pikachu-.webp) al principio
+      const defaultAvatar = 'pikachu-.webp';
+      const sortedIcons = icons.filter(x => x !== defaultAvatar).sort();
+      sortedIcons.unshift(defaultAvatar);
+
+      const normalVictories = this.currentUser ? (this.currentUser.normal_victories || 0) : 0;
       
-      icons.forEach(iconName => {
+      sortedIcons.forEach((iconName, index) => {
         const option = document.createElement('div');
         option.className = 'avatar-option';
         option.style.cursor = 'pointer';
@@ -680,8 +687,13 @@ class AppController {
         option.style.justifyContent = 'center';
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
+
+        const isLocked = index > 0 && normalVictories < index * 3;
         
-        if (this.currentUser && this.currentUser.avatar === 'Icons/' + iconName) {
+        if (isLocked) {
+          option.classList.add('locked');
+          option.title = `Bloqueado (Requiere ${index * 3} victorias en Online Normal. Tienes ${normalVictories})`;
+        } else if (this.currentUser && this.currentUser.avatar === 'Icons/' + iconName) {
           option.style.borderColor = 'var(--color-primary)';
           option.style.background = 'rgba(59, 76, 202, 0.2)';
         }
@@ -689,6 +701,11 @@ class AppController {
         option.innerHTML = `<img src="Assets/Icons/${iconName}" style="width: 75px; height: 75px; object-fit: contain;">`;
         
         option.addEventListener('click', async () => {
+          if (isLocked) {
+            window.customAlert('Avatar Bloqueado', `Este avatar requiere ${index * 3} victorias en Online Normal (tienes ${normalVictories}).`);
+            return;
+          }
+          
           try {
             const updateRes = await fetch('/api/user/update-avatar', {
               method: 'POST',
