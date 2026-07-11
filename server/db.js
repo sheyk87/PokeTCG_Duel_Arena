@@ -350,11 +350,16 @@ async function updateRankedStats(userId, result) {
   let losses = user.consecutive_losses || 0;
   let masterWins = user.master_ranked_wins || 0;
 
+  const prevCategory = category;
+  const prevLevel = level;
+
   let isPromotion = false;
   let promotionType = '';
+  let isDemotion = false;
+  let demotionType = '';
 
   const config = RANK_CONFIG[category];
-  if (!config) return { ...user, isPromotion, promotionType };
+  if (!config) return { ...user, isPromotion, promotionType, isDemotion, demotionType };
 
   if (result === 'won') {
     losses = 0; // Se resetea en victorias de ranked
@@ -397,6 +402,14 @@ async function updateRankedStats(userId, result) {
         }
       }
     }
+
+    if (category !== prevCategory) {
+      isDemotion = true;
+      demotionType = 'category';
+    } else if (level !== prevLevel) {
+      isDemotion = true;
+      demotionType = 'level';
+    }
   }
 
   await query(`
@@ -413,7 +426,9 @@ async function updateRankedStats(userId, result) {
     consecutive_losses: losses,
     master_ranked_wins: masterWins,
     isPromotion,
-    promotionType
+    promotionType,
+    isDemotion,
+    demotionType
   };
 }
 

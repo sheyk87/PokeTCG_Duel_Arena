@@ -176,6 +176,19 @@ class AppController {
         }
       }
 
+      const pendingDemotionStr = localStorage.getItem('pkmn_pending_demotion');
+      if (pendingDemotionStr) {
+        try {
+          const { title, img, message } = JSON.parse(pendingDemotionStr);
+          this.showAnnouncementModal(title, img, message);
+          localStorage.removeItem('pkmn_pending_demotion');
+          this.onlineDuel.pendingDemotion = null;
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       const pendingUnlocksStr = localStorage.getItem('pkmn_pending_unlocks');
       if (pendingUnlocksStr) {
         try {
@@ -194,6 +207,10 @@ class AppController {
         const { title, img, message } = this.onlineDuel.pendingPromotion;
         this.showAnnouncementModal(title, img, message);
         this.onlineDuel.pendingPromotion = null;
+      } else if (this.onlineDuel.pendingDemotion) {
+        const { title, img, message } = this.onlineDuel.pendingDemotion;
+        this.showAnnouncementModal(title, img, message);
+        this.onlineDuel.pendingDemotion = null;
       } else if (this.onlineDuel.pendingUnlocks) {
         const { title, img, message } = this.onlineDuel.pendingUnlocks;
         this.showAnnouncementModal(title, img, message);
@@ -918,15 +935,27 @@ class AppController {
         console.error(e);
       }
     } else {
-      const pendingUnlocksStr = localStorage.getItem('pkmn_pending_unlocks');
-      if (pendingUnlocksStr) {
+      const pendingDemotionStr = localStorage.getItem('pkmn_pending_demotion');
+      if (pendingDemotionStr) {
         try {
-          const { title, img, message } = JSON.parse(pendingUnlocksStr);
+          const { title, img, message } = JSON.parse(pendingDemotionStr);
           this.showAnnouncementModal(title, img, message);
-          localStorage.removeItem('pkmn_pending_unlocks');
-          if (this.onlineDuel) this.onlineDuel.pendingUnlocks = null;
+          localStorage.removeItem('pkmn_pending_demotion');
+          if (this.onlineDuel) this.onlineDuel.pendingDemotion = null;
         } catch (e) {
           console.error(e);
+        }
+      } else {
+        const pendingUnlocksStr = localStorage.getItem('pkmn_pending_unlocks');
+        if (pendingUnlocksStr) {
+          try {
+            const { title, img, message } = JSON.parse(pendingUnlocksStr);
+            this.showAnnouncementModal(title, img, message);
+            localStorage.removeItem('pkmn_pending_unlocks');
+            if (this.onlineDuel) this.onlineDuel.pendingUnlocks = null;
+          } catch (e) {
+            console.error(e);
+          }
         }
       }
     }

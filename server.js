@@ -1001,7 +1001,9 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
         consecutiveLosses: newRankData.consecutive_losses,
         masterRankedWins: newRankData.master_ranked_wins,
         isPromotion: !!newRankData.isPromotion,
-        promotionType: newRankData.promotionType || ''
+        promotionType: newRankData.promotionType || '',
+        isDemotion: !!newRankData.isDemotion,
+        demotionType: newRankData.demotionType || ''
       } : null
     }
   });

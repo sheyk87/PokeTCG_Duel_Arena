@@ -246,9 +246,11 @@ export class OnlineDuel extends Duel {
     this.prevLevel = this.appController.currentUser?.ranked_level || 1;
     this.prevNormalVictories = this.appController.currentUser?.normal_victories || 0;
     this.pendingPromotion = null;
+    this.pendingDemotion = null;
     this.pendingUnlocks = null;
 
     localStorage.removeItem('pkmn_pending_promotion');
+    localStorage.removeItem('pkmn_pending_demotion');
     localStorage.removeItem('pkmn_pending_unlocks');
 
     // Clear elements
@@ -1344,6 +1346,43 @@ export class OnlineDuel extends Duel {
           message: msg
         };
         localStorage.setItem('pkmn_pending_promotion', JSON.stringify(this.pendingPromotion));
+      }
+    } else if (isRanked && rankedStats && !isWin) {
+      const isDemotion = !!rankedStats.isDemotion;
+      const demotionType = rankedStats.demotionType || '';
+      const newCategory = rankedStats.category || 'Principiante';
+      const newLevel = rankedStats.level || 1;
+
+      console.log('[OnlineDuel] Server reported ranked demotion:', {
+        isDemotion,
+        demotionType,
+        newCategory,
+        newLevel
+      });
+
+      if (isDemotion) {
+        const TROPHY_IMAGES = {
+          'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+          'Great': 'Assets/Trofeos/2-Great-1-4.png',
+          'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+          'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+          'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+          'Maestro': 'Assets/Trofeos/6-Maestro.png'
+        };
+        const trophyImg = TROPHY_IMAGES[newCategory] || TROPHY_IMAGES['Principiante'];
+        let msg = '';
+        if (demotionType === 'category') {
+          msg = `Lo sentimos. Has descendido a la categoría <strong>${newCategory}</strong>. Tu nivel actual es ${newLevel === 0 ? '' : newLevel}.`;
+        } else {
+          msg = `Lo sentimos. Has descendido al <strong>Nivel ${newLevel}</strong> de la categoría <strong>${newCategory}</strong>.`;
+        }
+
+        this.pendingDemotion = {
+          title: '¡DESCENSO DE RANGO!',
+          img: trophyImg,
+          message: msg
+        };
+        localStorage.setItem('pkmn_pending_demotion', JSON.stringify(this.pendingDemotion));
       }
     } else if (!isRanked && isWin) {
       // Normal / Casual match victory unlock checks
