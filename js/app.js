@@ -159,7 +159,46 @@ class AppController {
     this.onlineDuel.onGameExit = () => {
       const chatPanel = document.getElementById('online-chat-panel');
       if (chatPanel) chatPanel.style.display = 'none';
+      this.updateDashboard();
       this.navigateTo('menu');
+
+      // Check for pending ranked promotions or reward unlocks in localStorage
+      const pendingPromoStr = localStorage.getItem('pkmn_pending_promotion');
+      if (pendingPromoStr) {
+        try {
+          const { title, img, message } = JSON.parse(pendingPromoStr);
+          this.showAnnouncementModal(title, img, message);
+          localStorage.removeItem('pkmn_pending_promotion');
+          this.onlineDuel.pendingPromotion = null;
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const pendingUnlocksStr = localStorage.getItem('pkmn_pending_unlocks');
+      if (pendingUnlocksStr) {
+        try {
+          const { title, img, message } = JSON.parse(pendingUnlocksStr);
+          this.showAnnouncementModal(title, img, message);
+          localStorage.removeItem('pkmn_pending_unlocks');
+          this.onlineDuel.pendingUnlocks = null;
+          return;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Memory fallbacks
+      if (this.onlineDuel.pendingPromotion) {
+        const { title, img, message } = this.onlineDuel.pendingPromotion;
+        this.showAnnouncementModal(title, img, message);
+        this.onlineDuel.pendingPromotion = null;
+      } else if (this.onlineDuel.pendingUnlocks) {
+        const { title, img, message } = this.onlineDuel.pendingUnlocks;
+        this.showAnnouncementModal(title, img, message);
+        this.onlineDuel.pendingUnlocks = null;
+      }
     };
     this.duel.onGameStart = () => this.navigateTo('duel');
     this.onlineDuel.onGameStart = () => this.navigateTo('duel');
@@ -513,6 +552,36 @@ class AppController {
       this.openAvatarSelector();
     });
 
+    // Help and rules modal events
+    document.getElementById('btn-show-help-modal')?.addEventListener('click', () => {
+      document.querySelectorAll('#modal-help-guide .help-tab-btn').forEach(b => {
+        if (b.getAttribute('data-tab') === 'online') b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      document.querySelectorAll('#modal-help-guide .help-tab-panel').forEach(p => {
+        if (p.id === 'help-panel-online') p.style.display = 'block';
+        else p.style.display = 'none';
+      });
+      document.getElementById('modal-help-guide').classList.add('active');
+    });
+
+    document.querySelectorAll('#modal-help-guide .help-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#modal-help-guide .help-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('#modal-help-guide .help-tab-panel').forEach(p => p.style.display = 'none');
+        
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        const targetPanel = document.getElementById(`help-panel-${tab}`);
+        if (targetPanel) targetPanel.style.display = 'block';
+      });
+    });
+
+    // Announcement Close
+    document.getElementById('btn-close-announcement')?.addEventListener('click', () => {
+      document.getElementById('modal-announcement').classList.remove('active');
+    });
+
     // Close all modal overlays on close button click
     document.querySelectorAll('.modal-overlay .modal-close-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -640,7 +709,7 @@ class AppController {
 
     if (profileWidget && usernameEl && userVictoriesEl && this.currentUser) {
       usernameEl.textContent = this.currentUser.name;
-      userVictoriesEl.textContent = this.currentUser.victories;
+      userVictoriesEl.textContent = this.currentUser.normal_victories;
       if (menuAvatar && this.currentUser.avatar) {
         menuAvatar.src = 'Assets/' + this.currentUser.avatar;
       }
@@ -786,6 +855,12 @@ class AppController {
         const stats = await res.json();
         this.currentUser = stats;
 
+        // Update victories count under avatar dynamically
+        const userVictoriesEl = document.getElementById('menu-user-victories');
+        if (userVictoriesEl) {
+          userVictoriesEl.textContent = stats.normal_victories;
+        }
+
         const kpiTitle = document.getElementById('menu-ranked-title');
         const kpiStreak = document.getElementById('menu-ranked-streak');
         const kpiProgress = document.getElementById('menu-ranked-progress');
@@ -830,6 +905,31 @@ class AppController {
     await this.updateDashboardRecentDuels();
     this.updateRankedProfileUI();
     this.updateUserRankIcon();
+
+    // Check for any pending promotions or unlocks saved in localStorage
+    const pendingPromoStr = localStorage.getItem('pkmn_pending_promotion');
+    if (pendingPromoStr) {
+      try {
+        const { title, img, message } = JSON.parse(pendingPromoStr);
+        this.showAnnouncementModal(title, img, message);
+        localStorage.removeItem('pkmn_pending_promotion');
+        if (this.onlineDuel) this.onlineDuel.pendingPromotion = null;
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const pendingUnlocksStr = localStorage.getItem('pkmn_pending_unlocks');
+      if (pendingUnlocksStr) {
+        try {
+          const { title, img, message } = JSON.parse(pendingUnlocksStr);
+          this.showAnnouncementModal(title, img, message);
+          localStorage.removeItem('pkmn_pending_unlocks');
+          if (this.onlineDuel) this.onlineDuel.pendingUnlocks = null;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
   }
 
   async updateDashboardStatus() {
@@ -1312,6 +1412,20 @@ class AppController {
         `;
         tbody.appendChild(row);
       });
+    }
+  }
+
+  showAnnouncementModal(title, imgSrc, message) {
+    const modal = document.getElementById('modal-announcement');
+    const titleEl = document.getElementById('announcement-title');
+    const imgEl = document.getElementById('announcement-img');
+    const msgEl = document.getElementById('announcement-message');
+
+    if (modal && titleEl && imgEl && msgEl) {
+      titleEl.textContent = title;
+      imgEl.src = imgSrc;
+      msgEl.innerHTML = message;
+      modal.classList.add('active');
     }
   }
 }

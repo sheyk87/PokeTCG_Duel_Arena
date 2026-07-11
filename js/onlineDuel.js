@@ -241,6 +241,16 @@ export class OnlineDuel extends Duel {
     this.localPlayerId = data.localPlayerId || this.appController.currentUser?.id || SESSIONS_LOCAL_USER_ID();
     console.log('[OnlineDuel] initOnlineMatch: localPlayerId is', this.localPlayerId);
 
+    // Capture user stats before match starts to evaluate rank changes and rewards unlocks
+    this.prevCategory = this.appController.currentUser?.ranked_category || 'Principiante';
+    this.prevLevel = this.appController.currentUser?.ranked_level || 1;
+    this.prevNormalVictories = this.appController.currentUser?.normal_victories || 0;
+    this.pendingPromotion = null;
+    this.pendingUnlocks = null;
+
+    localStorage.removeItem('pkmn_pending_promotion');
+    localStorage.removeItem('pkmn_pending_unlocks');
+
     // Clear elements
     const logBox = document.getElementById('duel-log');
     if (logBox) logBox.innerHTML = '';
@@ -1298,6 +1308,67 @@ export class OnlineDuel extends Duel {
     const isWin = winnerSide === 'player';
     if (isWin) this.playSound('victory');
 
+    if (isRanked && rankedStats && isWin) {
+      const isPromotion = !!rankedStats.isPromotion;
+      const promotionType = rankedStats.promotionType || '';
+      const newCategory = rankedStats.category || 'Principiante';
+      const newLevel = rankedStats.level || 1;
+
+      console.log('[OnlineDuel] Server reported ranked promotion:', {
+        isPromotion,
+        promotionType,
+        newCategory,
+        newLevel
+      });
+
+      if (isPromotion) {
+        const TROPHY_IMAGES = {
+          'Principiante': 'Assets/Trofeos/1-Principiante-1-3.png',
+          'Great': 'Assets/Trofeos/2-Great-1-4.png',
+          'Experto': 'Assets/Trofeos/3-Experto-1-5.png',
+          'Veterano': 'Assets/Trofeos/4-Veterano-1-5.png',
+          'Ultra': 'Assets/Trofeos/5-Ultra-1-5.png',
+          'Maestro': 'Assets/Trofeos/6-Maestro.png'
+        };
+        const trophyImg = TROPHY_IMAGES[newCategory] || TROPHY_IMAGES['Principiante'];
+        let msg = '';
+        if (promotionType === 'category') {
+          msg = `¡Felicidades! Has ascendido a la categoría <strong>${newCategory}</strong>! Tu nivel actual es ${newLevel === 0 ? '' : newLevel}.`;
+        } else {
+          msg = `¡Felicidades! Has subido al <strong>Nivel ${newLevel}</strong> de la categoría <strong>${newCategory}</strong>!`;
+        }
+
+        this.pendingPromotion = {
+          title: '¡ASCENSO DE RANGO!',
+          img: trophyImg,
+          message: msg
+        };
+        localStorage.setItem('pkmn_pending_promotion', JSON.stringify(this.pendingPromotion));
+      }
+    } else if (!isRanked && isWin) {
+      // Normal / Casual match victory unlock checks
+      const newNormalVictories = this.prevNormalVictories + 1;
+      let unlocks = [];
+      if (newNormalVictories > 0 && newNormalVictories % 3 === 0) {
+        unlocks.push('✨ Nuevo Avatar de Perfil');
+        unlocks.push('✨ Nuevo Reverso de Carta (Sleeve)');
+        unlocks.push('✨ Nuevo Frente de Moneda (Cara)');
+      }
+      if (newNormalVictories > 0 && newNormalVictories % 10 === 0) {
+        unlocks.push('✨ Nuevo Reverso de Moneda (Seca)');
+        unlocks.push('✨ Nuevo Diseño de Caja de Mazo');
+      }
+
+      if (unlocks.length > 0) {
+        this.pendingUnlocks = {
+          title: '¡NUEVAS RECOMPENSAS!',
+          img: 'Assets/Win-Stars.png',
+          message: `¡Felicitaciones! Has alcanzado <strong>${newNormalVictories} victorias</strong> en el modo Online Normal y has desbloqueado:<br><br>${unlocks.join('<br>')}`
+        };
+        localStorage.setItem('pkmn_pending_unlocks', JSON.stringify(this.pendingUnlocks));
+      }
+    }
+
     const modal = document.getElementById('modal-game-over');
     const title = document.getElementById('game-over-title');
     const reasonText = document.getElementById('game-over-reason');
@@ -2084,7 +2155,11 @@ export class OnlineDuel extends Duel {
       case 'GAME_OVER_RESOLVED': {
         const { winnerId, reason } = event;
         const isWin = winnerId === this.localPlayerId;
-        this.endGameLocal(isWin ? 'player' : 'opponent', reason);
+        // En combates online, dejamos que el mensaje MATCH_OVER maneje endGameLocal
+        // para recibir correctamente las estadísticas de ranked y promociones.
+        if (!this.isOnlineMatch) {
+          this.endGameLocal(isWin ? 'player' : 'opponent', reason);
+        }
         break;
       }
 

@@ -1492,6 +1492,21 @@ button {
   border-radius: 8px;
 }
 
+#btn-pass-turn:disabled {
+  background: #333644 !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.help-tab-btn.active {
+  background: var(--color-primary) !important;
+  border-color: var(--color-secondary) !important;
+  box-shadow: 0 0 10px rgba(59, 76, 202, 0.4);
+}
+
 .combat-btn {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--color-border);

@@ -350,8 +350,11 @@ async function updateRankedStats(userId, result) {
   let losses = user.consecutive_losses || 0;
   let masterWins = user.master_ranked_wins || 0;
 
+  let isPromotion = false;
+  let promotionType = '';
+
   const config = RANK_CONFIG[category];
-  if (!config) return user;
+  if (!config) return { ...user, isPromotion, promotionType };
 
   if (result === 'won') {
     losses = 0; // Se resetea en victorias de ranked
@@ -361,11 +364,14 @@ async function updateRankedStats(userId, result) {
       wins += 1;
       if (wins >= config.winsNeeded) {
         wins = 0;
+        isPromotion = true;
         if (level >= config.maxLevel) {
           category = config.nextCategory;
           level = category === 'Maestro' ? 0 : 1;
+          promotionType = 'category';
         } else {
           level += 1;
+          promotionType = 'level';
         }
       }
     }
@@ -405,7 +411,9 @@ async function updateRankedStats(userId, result) {
     ranked_level: level,
     consecutive_wins: wins,
     consecutive_losses: losses,
-    master_ranked_wins: masterWins
+    master_ranked_wins: masterWins,
+    isPromotion,
+    promotionType
   };
 }
 

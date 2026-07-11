@@ -217,10 +217,13 @@
           </div>
 
           <div class="menu-section-title">Ayuda y Reglas</div>
-          <div class="menu-grid-buttons">
-            <a href="Reglas/cri_rulebook_latam.pdf" target="_blank" class="menu-btn menu-btn-full-width" style="text-decoration: none; height: 48px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <div class="menu-grid-buttons" style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="Reglas/cri_rulebook_latam.pdf" target="_blank" class="menu-btn menu-btn-full-width" style="text-decoration: none; height: 48px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; width: 100%;">
               <span class="btn-icon">📕</span> Reglamento de Juego
             </a>
+            <button id="btn-show-help-modal" class="menu-btn menu-btn-full-width" style="height: 48px; font-size: 0.9rem; margin: 0; width: 100%;">
+              <span class="btn-icon">❓</span> Ayuda y Guía de Arena
+            </button>
           </div>
 
           <button id="btn-logout" class="menu-btn"
@@ -1943,6 +1946,141 @@
       <p>Selecciona un diseño para el reverso de la moneda:</p>
       <div id="coin-back-grid" class="coin-back-selection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
         <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 16: Ayuda y Guía de Arena -->
+  <div id="modal-help-guide" class="modal-overlay">
+    <div class="modal-container medium" style="max-height: 85vh; width: 680px; display: flex; flex-direction: column;">
+      <button class="modal-close-btn">&times;</button>
+      <h2>Ayuda y Guía de Arena</h2>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 5px;">Selecciona una pestaña para ver la guía sobre cada tema:</p>
+      
+      <!-- Tab selectors -->
+      <div class="help-tabs-container" style="display: flex; gap: 8px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+        <button class="help-tab-btn active" data-tab="online" style="background: rgba(255,255,255,0.05); border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s;">Combate Online y Tops</button>
+        <button class="help-tab-btn" data-tab="ranked" style="background: rgba(255,255,255,0.05); border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s;">Ranked y Descenso</button>
+        <button class="help-tab-btn" data-tab="private" style="background: rgba(255,255,255,0.05); border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s;">Salas Privadas</button>
+        <button class="help-tab-btn" data-tab="rewards" style="background: rgba(255,255,255,0.05); border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s;">Recompensas</button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div id="help-tab-contents" class="scrollable-mini" style="flex: 1; overflow-y: auto; max-height: 380px; padding: 10px 5px; font-size: 0.85rem; line-height: 1.5; color: #e0e6ed;">
+        <!-- Online Tab -->
+        <div class="help-tab-panel active" id="help-panel-online" style="display: block;">
+          <h3 style="color: var(--color-primary); font-family: var(--font-display); font-size: 1rem; margin-bottom: 8px;">Combate Online y Clasificaciones</h3>
+          <p>El sistema multijugador te permite enfrentarte a otros entrenadores en tiempo real de forma sencilla y directa.</p>
+          
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">¿Cómo jugar y buscar partida?</h4>
+          <p>Al seleccionar <strong>Jugar Normal (Casual)</strong> o <strong>Jugar Ranked (Competitivo)</strong>, el juego te pedirá elegir uno de tus mazos legales. Luego ingresarás a la <strong>Cola de Espera (Matchmaking Queue)</strong>. El sistema buscará de manera automática a otro jugador activo que esté esperando en la misma cola. Una vez emparejados, la pantalla cambiará a la Arena de Duelo y se realizará el lanzamiento de moneda inicial para ver quién empieza.</p>
+          
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">El Tablero Sandbox Manual</h4>
+          <p>El combate online funciona bajo la modalidad de <strong>Sandbox Manual</strong>. Es similar a jugar con cartas físicas sobre una mesa: tienes total libertad para arrastrar tus cartas, unir energías, evolucionar y modificar contadores de daño (+10 / +50) o aplicar condiciones especiales. Los ataques se declaran por el chat de la partida y el daño se aplica manualmente usando el sistema de honor.</p>
+
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">Tops de la Clasificación General</h4>
+          <p>En el menú de "Clasificación", se listan los 250 mejores entrenadores de la arena con más victorias acumuladas en partidas online, representados por íconos especiales según su rango:</p>
+          <ul style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 4px; list-style-type: none; padding-left: 0;">
+            <li>👑 <strong>Platino:</strong> Top 1</li>
+            <li>💎 <strong>Diamante:</strong> Top 2</li>
+            <li>🥇 <strong>Oro:</strong> Top 3</li>
+            <li>🥈 <strong>Plata:</strong> Top 4</li>
+            <li>🥉 <strong>Bronce:</strong> Top 5</li>
+            <li>🏆 <strong>Retadores:</strong> Top 6 a 10</li>
+            <li>⭐ <strong>Entrenadores:</strong> Top 11 a 250</li>
+          </ul>
+        </div>
+
+        <!-- Ranked Tab -->
+        <div class="help-tab-panel" id="help-panel-ranked" style="display: none;">
+          <h3 style="color: var(--color-primary); font-family: var(--font-display); font-size: 1rem; margin-bottom: 8px;">Sistema Ranked (Clasificatorio)</h3>
+          <p>En el modo competitivo (Ranked), juegas partidas serias para subir de rango y medir tu habilidad.</p>
+          
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">¿Contra quién combates?</h4>
+          <p>Para asegurar duelos justos y competitivos, el emparejamiento en Ranked es restrictivo. <strong>El sistema solo te emparejará contra entrenadores que tengan tu misma categoría o una categoría adyacente</strong>. Por ejemplo, un jugador en rango <em>Principiante</em> solo puede enfrentarse a otros de rango <em>Principiante</em> o <em>Great</em>, y tiene completamente bloqueado enfrentarse a rangos altos como <em>Experto</em>, <em>Veterano</em>, <em>Ultra</em> o <em>Maestro</em>.</p>
+
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">Categorías y Trofeos</h4>
+          <div class="help-ranked-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 8px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/1-Principiante-1-3.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Principiante</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">Niveles 1-3<br>(3 victorias/nivel)</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/2-Great-1-4.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Great</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">Niveles 1-4<br>(4 victorias/nivel)</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/3-Experto-1-5.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Experto</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">Niveles 1-5<br>(5 victorias/nivel)</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/4-Veterano-1-5.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Veterano</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">Niveles 1-5<br>(5 victorias/nivel)</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/5-Ultra-1-5.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Ultra</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">Niveles 1-5<br>(5 victorias/nivel)</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+              <img src="Assets/Trofeos/6-Maestro.png" style="width: 32px; height: 32px; object-fit: contain; margin-bottom: 4px;">
+              <div style="font-weight: bold; font-size: 0.75rem;">Maestro</div>
+              <div style="font-size: 0.65rem; color: var(--color-text-muted);">División Final<br>(Mide victorias totales)</div>
+            </div>
+          </div>
+
+          <h4 style="color: #ffcb05; margin: 10px 0 5px 0;">Descenso y Penalizaciones</h4>
+          <p>El camino a la cima tiene riesgos. Si sufres derrotas consecutivas (conforme al límite de derrotas de tu rango), perderás progreso:</p>
+          <ul style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 4px;">
+            <li><strong>Pérdida de Nivel:</strong> Descenderás un nivel dentro de tu categoría actual (ej. de Nivel 3 a Nivel 2).</li>
+            <li><strong>Pérdida de Categoría:</strong> Si pierdes en el Nivel 1 de tu categoría, descenderás al nivel máximo de la categoría anterior (ej. de Great 1 a Principiante 3). </li>
+            <li><strong>Protección de Descenso:</strong> La categoría <em>Principiante</em> está totalmente protegida contra descensos de nivel y categoría. Adicionalmente, una vez alcanzado el rango de <em>Maestro</em>, no se puede descender de categoría.</li>
+          </ul>
+        </div>
+
+        <!-- Private Tab -->
+        <div class="help-tab-panel" id="help-panel-private" style="display: none;">
+          <h3 style="color: var(--color-primary); font-family: var(--font-display); font-size: 1rem; margin-bottom: 8px;">Salas Privadas (Desafiar a un Amigo)</h3>
+          <p>Si quieres jugar directamente contra un amigo sin usar la cola pública, puedes usar las Salas Privadas:</p>
+          <ol style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 6px;">
+            <li><strong>Crear Sala:</strong> Presiona "Crear Sala Privada", selecciona el mazo que deseas usar e ingresa una contraseña (opcional). Esto generará un <strong>Código de Sala (Room ID)</strong>.</li>
+            <li><strong>Compartir el Código:</strong> Pásale el Room ID y la contraseña a tu amigo.</li>
+            <li><strong>Unirse a la Sala:</strong> Tu amigo debe presionar "Unirse a Sala", ingresar el Room ID, la contraseña (si tiene) y seleccionar su mazo. ¡El combate iniciará automáticamente!</li>
+          </ol>
+        </div>
+
+        <!-- Rewards Tab -->
+        <div class="help-tab-panel" id="help-panel-rewards" style="display: none;">
+          <h3 style="color: var(--color-primary); font-family: var(--font-display); font-size: 1rem; margin-bottom: 8px;">Sistema de Colección y Recompensas Cosméticas</h3>
+          <p>Gana partidas online en el modo Normal (casual) para desbloquear fantásticos cosméticos y personalizar tu perfil y tus mazos:</p>
+          <ul style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 8px;">
+            <li><strong>Avatares de Perfil:</strong> Un nuevo avatar Pokémon se desbloquea por cada <strong>3 victorias</strong> en Online Normal. ¡Puedes cambiarlos desde tu perfil en el menú!</li>
+            <li><strong>Diseños de Cara de Moneda (Front):</strong> Se desbloquea un nuevo diseño cada <strong>3 victorias</strong> en Online Normal. Se configuran dentro del Editor de Mazos.</li>
+            <li><strong>Reversos de Carta (Sleeves):</strong> Se desbloquea un nuevo reverso cada <strong>3 victorias</strong> en Online Normal. Se aplican por mazo en el Editor de Mazos.</li>
+            <li><strong>Diseños de Caja de Mazo:</strong> Se desbloquea un nuevo diseño de caja de mazo cada <strong>10 victorias</strong> en Online Normal.</li>
+            <li><strong>Diseños de Seca de Moneda (Back):</strong> Se desbloquea un nuevo reverso de moneda cada <strong>10 victorias</strong> en Online Normal.</li>
+          </ul>
+          <p style="margin-top: 10px; background: rgba(59,76,202,0.15); border-left: 3px solid var(--color-primary); padding: 8px; border-radius: 4px; font-size: 0.8rem;"><strong>Nota:</strong> Los mazos iniciales (Starter) son fijos y de solo lectura; para personalizar la moneda y el reverso, debes crear tu propio mazo personalizado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 17: Anuncios y Promociones -->
+  <div id="modal-announcement" class="modal-overlay">
+    <div class="modal-container small text-centered" style="align-items: center; text-align: center;">
+      <button class="modal-close-btn">&times;</button>
+      <h2 id="announcement-title" style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #ffcb05; text-shadow: 0 0 10px rgba(255,203,5,0.3); margin-top: 10px;">¡FELICIDADES!</h2>
+      <div id="announcement-image-container" style="margin: 15px 0;">
+        <img id="announcement-img" src="" alt="Icon" style="max-height: 120px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));">
+      </div>
+      <p id="announcement-message" style="font-size: 1.05rem; line-height: 1.5; font-weight: 600; color: #fff; margin: 10px 0 20px 0;"></p>
+      <div class="modal-actions-centered">
+        <button id="btn-close-announcement" class="menu-btn primary compact" style="padding: 10px 24px; font-weight: bold; min-width: 120px; height: 38px;">Aceptar</button>
       </div>
     </div>
   </div>
