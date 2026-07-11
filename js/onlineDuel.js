@@ -597,7 +597,36 @@ export class OnlineDuel extends Duel {
 
   // Pasar Turno manual
   async endTurn() {
+    const passBtn = document.getElementById('btn-pass-turn');
+    if (passBtn) {
+      passBtn.disabled = true;
+    }
     this.sendGameAction('MANUAL_PASS_TURN', {});
+  }
+
+  updateBoardUI() {
+    super.updateBoardUI();
+
+    // Actualizar fase del juego y contador de turnos en la barra superior
+    const phaseTextEl = document.getElementById('game-phase-text');
+    if (phaseTextEl) {
+      if (this.phase === 'setup') {
+        phaseTextEl.textContent = 'Fase de Preparación';
+      } else if (this.phase === 'must-promote') {
+        phaseTextEl.textContent = 'Tu Promoción obligatoria';
+      } else if (this.phase === 'opponent-must-promote') {
+        phaseTextEl.textContent = 'Promoción del Oponente';
+      } else if (this.phase === 'game-over') {
+        phaseTextEl.textContent = 'Fin de la Partida';
+      } else {
+        phaseTextEl.textContent = 'Combate Principal';
+      }
+    }
+
+    const turnCounterEl = document.getElementById('turn-counter');
+    if (turnCounterEl) {
+      turnCounterEl.textContent = `Turno ${this.turnNumber}`;
+    }
   }
 
   takePrizeManually(index) {
@@ -2415,6 +2444,52 @@ export class OnlineDuel extends Duel {
 
     this.updateBoardUI();
     this.renderActionPanel();
+  }
+
+  async flipCoinVisual(message = "Lanzando moneda...", forcedResult = null, side = 'player') {
+    this.playSound('coin');
+    const coinModal = document.getElementById('modal-coin-flip');
+    const coin = document.getElementById('game-coin');
+    const resultText = document.getElementById('coin-result-text');
+
+    if (!coinModal || !coin) {
+      return forcedResult !== null ? forcedResult : Math.random() < 0.5;
+    }
+
+    coin.className = 'coin';
+    if (resultText) resultText.textContent = message;
+
+    // Si forcedResult se pasa como un booleano (cara/cruz) o número
+    const isHeads = (typeof forcedResult === 'boolean') ? forcedResult : (forcedResult === 1 || Math.random() < 0.5);
+
+    const user = side === 'player' ? this.player : this.opponent;
+    if (user && user.custom) {
+      const hFace = coin.querySelector('.heads');
+      const tFace = coin.querySelector('.tails');
+      if (hFace) hFace.style.setProperty('background-image', `url('/Assets/${user.custom.coinFront}')`, 'important');
+      if (tFace) tFace.style.setProperty('background-image', `url('/Assets/${user.custom.coinBack}')`, 'important');
+    }
+
+    coinModal.classList.add('active');
+
+    await new Promise(r => setTimeout(r, 200));
+
+    if (isHeads) {
+      coin.classList.add('flip-heads-anim');
+    } else {
+      coin.classList.add('flip-tails-anim');
+    }
+
+    await new Promise(r => setTimeout(r, 2000));
+
+    if (resultText) {
+      resultText.textContent = isHeads ? '¡CARA!' : '¡CRUZ!';
+    }
+
+    await new Promise(r => setTimeout(r, 1000));
+    coinModal.classList.remove('active');
+
+    return isHeads;
   }
 }
 

@@ -135,6 +135,11 @@ class ServerGameState {
     const opponent = this.getOpponentState(playerId);
 
     if (actionType && actionType.startsWith('MANUAL_')) {
+      if (actionType === 'MANUAL_PASS_TURN') {
+        if (this.turnOwnerId !== playerId) {
+          return { valid: false, reason: 'No es tu turno.' };
+        }
+      }
       return this.handleManualAction(player, opponent, action);
     }
 
@@ -1124,6 +1129,21 @@ class ServerGameState {
     this.gameOverReason = reason;
   }
 
+  // Busca una carta en cualquier zona (sin removerla)
+  findCardOnly(identifier) {
+    for (const pId in this.players) {
+      const p = this.players[pId];
+      if (p.hand.some(c => c.instanceId === identifier)) return { ownerId: pId, zone: 'hand' };
+      if (p.active && p.active.instanceId === identifier) return { ownerId: pId, zone: 'active' };
+      if (p.activeTrainer && p.activeTrainer.instanceId === identifier) return { ownerId: pId, zone: 'trainer' };
+      if (p.bench.some(c => c && c.instanceId === identifier)) return { ownerId: pId, zone: 'bench' };
+      if (p.prizes.some(c => c.instanceId === identifier)) return { ownerId: pId, zone: 'prizes' };
+      if (p.deck.some(c => c.instanceId === identifier)) return { ownerId: pId, zone: 'deck' };
+      if (p.discard.some(c => c.id === identifier || c.instanceId === identifier)) return { ownerId: pId, zone: 'discard' };
+    }
+    return null;
+  }
+
   // Busca una carta en cualquier zona, la remueve de su posición y la retorna como objeto de estado de carta
   findAndRemoveCard(identifier) {
     for (const pId in this.players) {
@@ -1184,6 +1204,24 @@ class ServerGameState {
   handleManualAction(player, opponent, action) {
     const { actionType } = action;
     const events = [];
+
+    // Validar turnos para modificaciones que afecten al oponente
+    if (action.targetSide === 'opponent' && this.turnOwnerId !== player.playerId) {
+      return { valid: false, reason: 'No puedes modificar el tablero del oponente fuera de tu turno.' };
+    }
+
+    // Para movimientos de cartas, comprobar si la carta pertenece al oponente
+    if (actionType === 'MANUAL_CARD_MOVEMENT') {
+      const { cardInstanceId } = action;
+      const resOnly = this.findCardOnly(cardInstanceId);
+      if (resOnly) {
+        const { ownerId } = resOnly;
+        // Si el jugador no es dueño de la carta y no es su turno, rechazar
+        if (ownerId !== player.playerId && this.turnOwnerId !== player.playerId) {
+          return { valid: false, reason: 'No puedes mover cartas del oponente fuera de tu turno.' };
+        }
+      }
+    }
 
     switch (actionType) {
       case 'MANUAL_DAMAGE_CHANGE': {

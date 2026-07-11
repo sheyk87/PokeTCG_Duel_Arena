@@ -7,13 +7,14 @@ services:
     # Solo es accesible internamente a través de la red del compose.
     networks:
       - poke_network
-      - templates_default
     env_file:
       - .env
     volumes:
       # Volumen persistente para almacenar las posiciones y configuraciones del campo de batalla.
       # Docker poblará este volumen con las imágenes iniciales y el positions.json en el primer arranque.
       - battlefield_data:/app/Assets/Battlefields
+    depends_on:
+      - db-poke
     restart: unless-stopped
 
   frontend:
@@ -22,18 +23,36 @@ services:
       dockerfile: Dockerfile.frontend
     # Solo el frontend expone puertos de conexión al exterior (puerto 80).
     ports:
-      - "80:80"
+      - "8080:80"
     networks:
       - poke_network
     depends_on:
       - backend
     restart: unless-stopped
 
+  db-poke:
+    image: mysql:8.0
+    container_name: db-poke
+    networks:
+      - poke_network
+    volumes:
+      - db_poke_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "R00tMySQL"
+      MYSQL_DATABASE: "pkmn_cards_db"
+      TZ: "America/Argentina/Buenos_Aires"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pR00tMySQL" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
 volumes:
   battlefield_data:
+  db_poke_data:
 
 networks:
   poke_network:
     driver: bridge
-  templates_default:
-    external: true
