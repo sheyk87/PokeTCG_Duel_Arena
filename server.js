@@ -800,6 +800,53 @@ async function tryMatchmaking() {
   }
 }
 
+function canPlayRanked(p1, p2) {
+  // Misma categoría
+  if (p1.category === p2.category) {
+    return true;
+  }
+
+  const cat1 = p1.category;
+  const lvl1 = p1.level;
+  const mw1 = p1.masterWins || 0;
+
+  const cat2 = p2.category;
+  const lvl2 = p2.level;
+  const mw2 = p2.masterWins || 0;
+
+  // Principiante 3 vs Great 1
+  if ((cat1 === 'Principiante' && lvl1 === 3 && cat2 === 'Great' && lvl2 === 1) ||
+      (cat2 === 'Principiante' && lvl2 === 3 && cat1 === 'Great' && lvl1 === 1)) {
+    return true;
+  }
+
+  // Great 4 vs Experto 1
+  if ((cat1 === 'Great' && lvl1 === 4 && cat2 === 'Experto' && lvl2 === 1) ||
+      (cat2 === 'Great' && lvl2 === 4 && cat1 === 'Experto' && lvl1 === 1)) {
+    return true;
+  }
+
+  // Experto 5 vs Veterano 1
+  if ((cat1 === 'Experto' && lvl1 === 5 && cat2 === 'Veterano' && lvl2 === 1) ||
+      (cat2 === 'Experto' && lvl2 === 5 && cat1 === 'Veterano' && lvl1 === 1)) {
+    return true;
+  }
+
+  // Veterano 5 vs Ultra 1
+  if ((cat1 === 'Veterano' && lvl1 === 5 && cat2 === 'Ultra' && lvl2 === 1) ||
+      (cat2 === 'Veterano' && lvl2 === 5 && cat1 === 'Ultra' && lvl1 === 1)) {
+    return true;
+  }
+
+  // Ultra 5 vs Maestro (el jugador en categoria Maestro debe ser maximo Maestro 5)
+  if ((cat1 === 'Ultra' && lvl1 === 5 && cat2 === 'Maestro' && mw2 <= 5) ||
+      (cat2 === 'Ultra' && lvl2 === 5 && cat1 === 'Maestro' && mw1 <= 5)) {
+    return true;
+  }
+
+  return false;
+}
+
 async function tryRankedMatchmaking() {
   if (RANKED_QUEUE.length < 2) return;
 
@@ -809,7 +856,7 @@ async function tryRankedMatchmaking() {
     const p2Idx = RANKED_QUEUE.findIndex((p, idx) => 
       idx !== i && 
       p.user.id !== p1.user.id && 
-      p.category === p1.category
+      canPlayRanked(p1, p)
     );
 
     if (p2Idx !== -1) {
@@ -918,7 +965,9 @@ async function tryRankedMatchmaking() {
           }
         }));
 
-        console.log(`Matched ranked game: ${p1.user.name} vs ${p2.user.name} (${p1.category})`);
+        const p1LvlStr = p1.category === 'Maestro' ? `M:${p1.masterWins || 0}` : `Lvl:${p1.level}`;
+        const p2LvlStr = p2.category === 'Maestro' ? `M:${p2.masterWins || 0}` : `Lvl:${p2.level}`;
+        console.log(`Matched ranked game: ${p1.user.name} (${p1.category} ${p1LvlStr}) vs ${p2.user.name} (${p2.category} ${p2LvlStr})`);
         return;
       } catch (err) {
         console.error('Failed to start ranked match:', err);
@@ -1053,12 +1102,14 @@ wss.on('connection', (ws, request, session) => {
             }
             return db.findUserById(session.id).then(user => {
               const category = user ? user.ranked_category : 'Principiante';
+              const level = user ? user.ranked_level : 1;
+              const masterWins = user ? user.master_ranked_wins : 0;
               
               const existingIdx = RANKED_QUEUE.findIndex(q => q.user.id === session.id);
               if (existingIdx !== -1) {
-                RANKED_QUEUE[existingIdx] = { user: session, deckId, ws, category };
+                RANKED_QUEUE[existingIdx] = { user: session, deckId, ws, category, level, masterWins };
               } else {
-                RANKED_QUEUE.push({ user: session, deckId, ws, category });
+                RANKED_QUEUE.push({ user: session, deckId, ws, category, level, masterWins });
               }
               broadcastRankedQueueCount();
               tryRankedMatchmaking();
