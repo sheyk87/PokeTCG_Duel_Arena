@@ -231,6 +231,16 @@
             </button>
           </div>
 
+          <!-- Admin/Mod Moderation section (hidden by default, shown via JS if admin/moderator) -->
+          <div id="menu-admin-section" style="display: none; margin-top: 15px;">
+            <div class="menu-section-title" style="color: #ff453a; margin-bottom: 8px;">Panel de Moderación</div>
+            <div class="menu-grid-buttons">
+              <button id="btn-goto-moderation" class="menu-btn menu-btn-full-width" style="height: 48px; font-size: 0.9rem; border: 1px solid rgba(255, 59, 48, 0.3); background: rgba(255, 59, 48, 0.05); color: #ff453a; margin: 0; width: 100%;">
+                <span class="btn-icon">🛡️</span> Administrar Usuarios
+              </button>
+            </div>
+          </div>
+
           <button id="btn-logout" class="menu-btn"
             style="background: rgba(255, 62, 62, 0.08); border-color: rgba(255, 62, 62, 0.2); color: #ff8b8b; margin-top: auto; height: 48px; font-size: 0.9rem;">
             <span class="btn-icon">🚪</span> Cerrar Sesión
@@ -1652,6 +1662,258 @@
       </div>
     </section>
 
+    </section>
+
+    <!-- SCREEN 9: Administration & Moderation Panel -->
+    <section id="screen-moderation" class="app-screen">
+      <header class="screen-header">
+        <button class="back-btn btn-back-menu">◀ Volver</button>
+        <h2>Panel de Moderación y Control</h2>
+      </header>
+
+      <div class="screen-layout moderation-layout" style="padding: 24px; display: grid; grid-template-columns: 360px 1fr; gap: 20px; height: calc(100vh - 120px); overflow: hidden; box-sizing: border-box;">
+        
+        <!-- Left: Users List Panel -->
+        <div class="moderation-left-panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px); height: 100%;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--color-border); background: rgba(0, 0, 0, 0.2);">
+            <div style="position: relative; width: 100%;">
+              <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 0.9rem;">🔍</span>
+              <input type="text" id="input-mod-search" placeholder="Buscar por nombre, ID o email..." 
+                style="width: 100%; padding: 8px 12px 8px 36px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--color-border); border-radius: 8px; color: #fff; font-size: 0.85rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" />
+            </div>
+          </div>
+          
+          <div id="mod-users-list" style="overflow-y: auto; flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Populated dynamically: User list items -->
+          </div>
+        </div>
+
+        <!-- Right: User Details & Control Console -->
+        <div class="moderation-right-panel" style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px); height: 100%;">
+          
+          <!-- Empty State -->
+          <div id="mod-empty-state" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--color-text-muted); padding: 50px; text-align: center;">
+            <span style="font-size: 3rem; margin-bottom: 15px;">🛡️</span>
+            <h3>Consola de Control</h3>
+            <p>Selecciona un usuario de la lista de la izquierda para comenzar a moderar, gestionar bloqueos o editar sus parámetros si es una cuenta Mock.</p>
+          </div>
+
+          <!-- User Details Form (Hidden by default) -->
+          <div id="mod-user-control-details" style="display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden;">
+            <!-- User Info Header -->
+            <div style="padding: 16px 24px; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.15); flex-shrink: 0;">
+              <div>
+                <h3 id="mod-detail-username" style="margin: 0; font-family: var(--font-display); font-size: 1.2rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+                  Entrenador
+                </h3>
+                <span id="mod-detail-user-id" style="font-size: 0.75rem; color: var(--color-text-muted);">ID: mock-xxxx</span>
+              </div>
+              <div style="display: flex; gap: 8px;" id="mod-user-badges">
+                <!-- Badges dynamically added (Mock, Banned, Admin, Mod) -->
+              </div>
+            </div>
+
+            <!-- Tab Headers -->
+            <div style="display: flex; background: rgba(0, 0, 0, 0.1); border-bottom: 1px solid var(--color-border); flex-shrink: 0;">
+              <button class="mod-tab-btn active" data-tab="moderation" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid var(--color-primary); color: #fff; cursor: pointer; font-size: 0.85rem; font-weight: 700; outline: none;">🛡️ Acciones de Moderación</button>
+              <button class="mod-tab-btn" data-tab="mock-editor" id="btn-tab-mock-editor" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--color-text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 700; outline: none; display: none;">✏️ Consola de Edición Mock</button>
+              <button class="mod-tab-btn" data-tab="history-inspect" id="btn-tab-mod-history" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--color-text-muted); cursor: pointer; font-size: 0.85rem; font-weight: 700; outline: none;">📜 Historial de Partidas</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div style="flex: 1; overflow-y: auto; padding: 24px;" class="scrollable-list">
+              
+              <!-- Tab 1: Moderation Controls -->
+              <div id="mod-tab-content-moderation" class="mod-tab-pane active" style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 12px;">
+                  <h4 style="margin: 0 0 10px 0; color: #fff; font-family: var(--font-display);">Estado de la Cuenta</h4>
+                  <div id="mod-ban-status-info" style="font-size: 0.85rem; color: var(--color-text-muted);">
+                    Cargando estado...
+                  </div>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
+                  <h4 style="margin: 0; color: #fff; font-family: var(--font-display);">Aplicar Suspensión (Ban)</h4>
+                  
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700;">Duración de la Suspensión</label>
+                    <select id="select-ban-duration" style="padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 8px; color: #fff; outline: none;">
+                      <option value="0">Desbanear (Remover Suspensión)</option>
+                      <option value="1">1 Hora</option>
+                      <option value="12">12 Horas</option>
+                      <option value="24">24 Horas (1 Día)</option>
+                      <option value="168">7 Días (1 Semana)</option>
+                      <option value="720">30 Días (1 Mes)</option>
+                      <option value="-1">Permanente</option>
+                    </select>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700;">Motivo de la Suspensión</label>
+                    <input type="text" id="input-ban-reason" placeholder="Escribe el motivo del ban..." 
+                      style="padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 8px; color: #fff; outline: none; font-size: 0.85rem;" />
+                  </div>
+
+                  <button id="btn-apply-ban" class="menu-btn" style="background: #ff453a; border-color: #ff3b30; color: #fff; font-weight: 700; width: 100%; height: 40px; margin-top: 5px;">
+                    Aplicar Bloqueo de Cuenta
+                  </button>
+                </div>
+
+                <!-- User Role Management (Only Admin) -->
+                <div id="mod-role-management-panel" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
+                  <h4 style="margin: 0; color: #fff; font-family: var(--font-display);">Cambiar Rol de Usuario (Solo Administradores)</h4>
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; font-weight: 700;">Seleccionar Rol</label>
+                    <select id="select-user-role" style="padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 8px; color: #fff; outline: none;">
+                      <option value="user">Usuario Común</option>
+                      <option value="moderator">Moderador</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                  </div>
+                  <button id="btn-update-role" class="menu-btn primary" style="width: 100%; height: 40px; font-weight: 700; margin-top: 5px; background: var(--color-primary); border-color: var(--color-primary); color: #000;">
+                    Actualizar Rol de Usuario
+                  </button>
+                </div>
+
+                <div style="background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.2); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px;">
+                  <h4 style="margin: 0; color: #ff453a; font-family: var(--font-display);">Zona de Peligro (Solo Administradores)</h4>
+                  <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 10px 0;">La eliminación de un usuario es destructiva. Se anonimizarán sus datos de perfil (eliminación lógica) para no corromper el historial de sus oponentes, y se borrarán permanentemente sus mazos y emblemas de progreso.</p>
+                  <button id="btn-delete-user-mod" class="menu-btn" style="background: rgba(255, 59, 48, 0.15); border-color: #ff3b30; color: #ff453a; font-weight: 700; width: 100%; height: 40px;">
+                    Eliminar Cuenta de Usuario
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tab 2: Mock Editor Panel -->
+              <div id="mod-tab-content-mock-editor" class="mod-tab-pane" style="display: none; flex-direction: column; gap: 24px;">
+                
+                <!-- Editable Statistics Form -->
+                <div>
+                  <h4 style="margin: 0 0 12px 0; color: #fff; font-family: var(--font-display); border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">Estadísticas del Usuario</h4>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Nombre en Pantalla</label>
+                      <input type="text" id="mock-edit-name" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Victorias Totales</label>
+                      <input type="number" id="mock-edit-victories" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Partidas Casuales Jugadas</label>
+                      <input type="number" id="mock-edit-casual-played" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Partidas Casuales Ganadas</label>
+                      <input type="number" id="mock-edit-casual-won" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Partidas Ranked Jugadas</label>
+                      <input type="number" id="mock-edit-ranked-played" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Partidas Ranked Ganadas</label>
+                      <input type="number" id="mock-edit-ranked-won" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Categoría Ranked</label>
+                      <select id="mock-edit-ranked-category" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;">
+                        <option value="Principiante">Principiante</option>
+                        <option value="Great">Great</option>
+                        <option value="Experto">Experto</option>
+                        <option value="Veterano">Veterano</option>
+                        <option value="Ultra">Ultra</option>
+                        <option value="Maestro">Maestro</option>
+                      </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Nivel Ranked (o Wins en Maestro)</label>
+                      <input type="number" id="mock-edit-ranked-level" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Racha Consecutiva Victorias Ranked</label>
+                      <input type="number" id="mock-edit-consecutive-wins" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Racha Consecutiva Derrotas Ranked</label>
+                      <input type="number" id="mock-edit-consecutive-losses" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Daño Máximo un Turno</label>
+                      <input type="number" id="mock-edit-max-damage" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                      <label style="font-size: 0.7rem; color: var(--color-text-muted);">Victorias en Categoría Maestro</label>
+                      <input type="number" id="mock-edit-master-ranked-wins" style="padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--color-border); border-radius: 6px; color: #fff;" />
+                    </div>
+                  </div>
+                  <button id="btn-save-mock-stats" class="menu-btn" style="height: 36px; font-size: 0.85rem; font-weight: 700; width: 100%; margin-top: 12px; background: linear-gradient(135deg, var(--color-primary) 0%, #d4a900 100%); border-color: var(--color-primary); color: #000;">
+                    Guardar Estadísticas
+                  </button>
+                </div>
+
+                <!-- Custom Cosmetics Unlock List -->
+                <div>
+                  <h4 style="margin: 0 0 12px 0; color: #fff; font-family: var(--font-display); border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px;">Cosméticos Habilitados (Avatares)</h4>
+                  <p style="font-size: 0.75rem; color: var(--color-text-muted); margin: 0 0 10px 0;">Selecciona qué avatares cosméticos alternativos desbloquear manualmente para este usuario Mock:</p>
+                  <div id="mock-cosmetics-checkboxes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; max-height: 150px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+                    <!-- Populated dynamically with checkboxes -->
+                  </div>
+                  <button id="btn-save-mock-cosmetics" class="menu-btn" style="height: 36px; font-size: 0.85rem; font-weight: 700; width: 100%; margin-top: 12px; background: rgba(255, 255, 255, 0.08); border-color: var(--color-border); color: #fff;">
+                    Actualizar Cosméticos
+                  </button>
+                </div>
+
+                <!-- Emblem Progress and Manual Management -->
+                <div>
+                  <h4 style="margin: 0 0 6px 0; color: #fff; font-family: var(--font-display); border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Gestión de Emblemas</span>
+                    <div style="display: flex; gap: 8px;">
+                      <button id="btn-mock-unlock-all-emblems" style="padding: 2px 8px; font-size: 0.65rem; background: rgba(46,204,113,0.15); border: 1px solid #2ecc71; color: #2ecc71; border-radius: 4px; cursor: pointer;">Habilitar Todos</button>
+                      <button id="btn-mock-lock-all-emblems" style="padding: 2px 8px; font-size: 0.65rem; background: rgba(231,76,60,0.15); border: 1px solid #e74c3c; color: #e74c3c; border-radius: 4px; cursor: pointer;">Bloquear Todos</button>
+                    </div>
+                  </h4>
+                  <p style="font-size: 0.75rem; color: var(--color-text-muted); margin: 0 0 10px 0;">Establece numéricamente el progreso de cada logro del usuario Mock para activar sus emblemas y títulos:</p>
+                  
+                  <div id="mock-emblems-editor-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border);">
+                    <!-- Dynamic list of 48 emblems with input range/number and checkbox -->
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Tab 3: History Inspect Panel -->
+              <div id="mod-tab-content-history-inspect" class="mod-tab-pane" style="display: none; flex-direction: column; gap: 15px;">
+                <h4 style="margin: 0; color: #fff; font-family: var(--font-display);">Historial de Combates de la Cuenta</h4>
+                <div style="max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--color-border); padding: 10px;">
+                  <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem;">
+                    <thead>
+                      <tr style="border-bottom: 1px solid var(--color-border); color: var(--color-text-muted);">
+                        <th style="padding: 8px;">Rival</th>
+                        <th style="padding: 8px;">Tipo</th>
+                        <th style="padding: 8px;">Resultado</th>
+                        <th style="padding: 8px; text-align: right;">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody id="mod-user-history-tbody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                  <div id="mod-user-history-empty" style="display: none; padding: 30px; text-align: center; color: var(--color-text-muted);">
+                    No hay registros de combates para este usuario.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- OVERLAYS & MODALS -->
@@ -2189,8 +2451,8 @@
               </div>
             </div>
           </div>
-          <div class="profile-save-wrapper" style="margin-top: 15px; width: 100%;">
-            <button id="btn-save-profile-settings" class="menu-btn primary" style="width: 100%; height: 38px; font-weight: bold;">Guardar Configuración</button>
+          <div class="profile-save-wrapper" style="margin-top: 8px; width: 100%; padding-bottom: 2px;">
+            <button id="btn-save-profile-settings" class="menu-btn primary" style="width: 100%; height: 38px; font-weight: bold; margin-bottom: 2px;">Guardar Configuración</button>
           </div>
         </div>
         

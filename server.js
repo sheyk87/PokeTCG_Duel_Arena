@@ -123,9 +123,40 @@ const server = http.createServer(async (req, res) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     sessionToken = authHeader.split(' ')[1];
   }
-  const currentUser = SESSIONS.get(sessionToken);
+  let currentUser = SESSIONS.get(sessionToken);
   if (currentUser) {
-    ACTIVE_ENTRENADORES.set(currentUser.id, Date.now());
+    try {
+      const userDb = await db.findUserById(currentUser.id);
+      if (userDb) {
+        if (userDb.is_deleted) {
+          SESSIONS.delete(sessionToken);
+          currentUser = null;
+          return sendJSON(res, 401, { error: 'Deleted', message: 'Esta cuenta ha sido eliminada del sistema.' });
+        }
+        
+        if (userDb.ban_expires_at) {
+          const expiresAt = new Date(userDb.ban_expires_at);
+          if (expiresAt > new Date()) {
+            SESSIONS.delete(sessionToken);
+            currentUser = null;
+            return sendJSON(res, 403, { 
+              error: 'Banned', 
+              reason: userDb.ban_reason || 'Sin motivo especificado.', 
+              expires_at: userDb.ban_expires_at 
+            });
+          }
+        }
+        
+        // Actualizar datos de sesión en memoria
+        Object.assign(currentUser, userDb);
+        ACTIVE_ENTRENADORES.set(currentUser.id, Date.now());
+      } else {
+        SESSIONS.delete(sessionToken);
+        currentUser = null;
+      }
+    } catch (err) {
+      console.error('Failed to validate session in auth middleware:', err);
+    }
   }
 
   // 1. Google Auth API
@@ -549,6 +580,312 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // 5g. User Public Profile API
+  if (req.method === 'GET' && safePath === '/api/user/public-profile') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+      const targetId = parsedUrl.searchParams.get('id');
+      if (!targetId) {
+        return sendJSON(res, 400, { error: 'Missing user ID' });
+      }
+
+      const profile = await db.getUserProfileData(targetId);
+      if (!profile) {
+        return sendJSON(res, 404, { error: 'User not found' });
+      }
+
+      // Obtener el progreso de emblemas del usuario
+      const userDbEmblems = await db.getUserEmblems(targetId);
+      const userEmblemsMap = {};
+      userDbEmblems.forEach(e => {
+        userEmblemsMap[e.emblem_id] = e;
+      });
+
+      const emblemEvaluator = require('./server/emblemEvaluator');
+      const fullEmblemsList = emblemEvaluator.EMBLEMS_CONFIG.map(config => {
+        const dbRecord = userEmblemsMap[config.id];
+        return {
+          emblem_id: config.id,
+          category: config.category,
+          description: config.description,
+          target_value: config.target,
+          image_file: emblemEvaluator.EMBLEM_IMAGES[config.id],
+          progress: dbRecord ? dbRecord.progress : 0,
+          unlocked_at: dbRecord ? dbRecord.unlocked_at : null
+        };
+      });
+
+      return sendJSON(res, 200, { profile, emblems: fullEmblemsList });
+    } catch (err) {
+      console.error('Failed to load user public profile:', err);
+      return sendJSON(res, 500, { error: 'Failed to load profile' });
+    }
+  }
+
+  // 5h. Admin API: List all users for moderation
+  if (req.method === 'GET' && safePath === '/api/admin/users') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin' && currentUser.role !== 'moderator') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+      const q = parsedUrl.searchParams.get('q') || '';
+      const users = await db.getAllUsersForModeration(q);
+      return sendJSON(res, 200, users);
+    } catch (err) {
+      console.error('Failed to load users for moderation:', err);
+      return sendJSON(res, 500, { error: 'Failed to load users' });
+    }
+  }
+
+  // 5i. Admin API: Ban/Unban user
+  if (req.method === 'POST' && safePath === '/api/admin/user/ban') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin' && currentUser.role !== 'moderator') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const body = await getRequestBody(req);
+      const { userId, durationHours, reason } = JSON.parse(body);
+
+      if (!userId) {
+        return sendJSON(res, 400, { error: 'Missing userId' });
+      }
+
+      const targetUser = await db.findUserById(userId);
+      if (!targetUser) {
+        return sendJSON(res, 404, { error: 'Target user not found' });
+      }
+      if (currentUser.role === 'moderator' && (targetUser.role === 'admin' || targetUser.role === 'moderator')) {
+        return sendJSON(res, 403, { error: 'Hierarchical role error. You cannot moderate other moderators or admins.' });
+      }
+
+      let banExpiresAt = null;
+      if (durationHours === -1) {
+        banExpiresAt = '9999-12-31 23:59:59';
+      } else if (durationHours > 0) {
+        const d = new Date();
+        d.setMinutes(d.getMinutes() + Math.round(durationHours * 60));
+        banExpiresAt = d.toISOString().slice(0, 19).replace('T', ' ');
+      }
+
+      await db.updateUserBanStatus(userId, banExpiresAt, reason || null);
+
+      if (banExpiresAt) {
+        for (const [token, sessUser] of SESSIONS.entries()) {
+          if (sessUser.id === userId) {
+            SESSIONS.delete(token);
+          }
+        }
+
+        if (ACTIVE_WS_CONNECTIONS.has(userId)) {
+          const userSockets = ACTIVE_WS_CONNECTIONS.get(userId);
+          userSockets.forEach(socket => {
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send(JSON.stringify({ 
+                type: 'FORCE_DISCONNECT', 
+                payload: { reason: `Has sido suspendido. Expiración: ${banExpiresAt}. Motivo: ${reason || 'Sin motivo especificado.'}` } 
+              }));
+              socket.close();
+            }
+          });
+          ACTIVE_WS_CONNECTIONS.delete(userId);
+        }
+      }
+
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to ban/unban user:', err);
+      return sendJSON(res, 500, { error: 'Failed to update ban status' });
+    }
+  }
+
+  // 5j. Admin API: Delete user (logical)
+  if (req.method === 'DELETE' && safePath === '/api/admin/user/delete') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin') {
+      return sendJSON(res, 403, { error: 'Forbidden. Only administrators can delete users.' });
+    }
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+      const targetId = parsedUrl.searchParams.get('id');
+
+      if (!targetId) {
+        return sendJSON(res, 400, { error: 'Missing user ID' });
+      }
+
+      const targetUser = await db.findUserById(targetId);
+      if (!targetUser) {
+        return sendJSON(res, 404, { error: 'User not found' });
+      }
+      
+      if (targetId === currentUser.id) {
+        return sendJSON(res, 400, { error: 'You cannot delete yourself.' });
+      }
+
+      await db.deleteUserFromSystem(targetId);
+
+      for (const [token, sessUser] of SESSIONS.entries()) {
+        if (sessUser.id === targetId) {
+          SESSIONS.delete(token);
+        }
+      }
+
+      if (ACTIVE_WS_CONNECTIONS.has(targetId)) {
+        const userSockets = ACTIVE_WS_CONNECTIONS.get(targetId);
+        userSockets.forEach(socket => {
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ 
+              type: 'FORCE_DISCONNECT', 
+              payload: { reason: 'Esta cuenta ha sido eliminada por un administrador.' } 
+            }));
+            socket.close();
+          }
+        });
+        ACTIVE_WS_CONNECTIONS.delete(targetId);
+      }
+
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to delete user:', err);
+      return sendJSON(res, 500, { error: 'Failed to delete user' });
+    }
+  }
+
+  // Admin API: Change user role
+  if (req.method === 'POST' && safePath === '/api/admin/user/role') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin') {
+      return sendJSON(res, 403, { error: 'Forbidden. Only administrators can change roles.' });
+    }
+    try {
+      const body = await getRequestBody(req);
+      const { userId, role } = JSON.parse(body);
+
+      if (!userId || !role) {
+        return sendJSON(res, 400, { error: 'Missing parameters' });
+      }
+      if (!['user', 'moderator', 'admin'].includes(role)) {
+        return sendJSON(res, 400, { error: 'Invalid role value' });
+      }
+
+      const targetUser = await db.findUserById(userId);
+      if (!targetUser) {
+        return sendJSON(res, 404, { error: 'User not found' });
+      }
+
+      await db.query("UPDATE users SET role = ? WHERE id = ?", [role, userId]);
+      return sendJSON(res, 200, { success: true, role });
+    } catch (err) {
+      console.error('Failed to change user role:', err);
+      return sendJSON(res, 500, { error: 'Failed to change role' });
+    }
+  }
+
+  // Admin/Mod API: Get user battle history
+  if (req.method === 'GET' && safePath === '/api/admin/user/history') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin' && currentUser.role !== 'moderator') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+      const targetId = parsedUrl.searchParams.get('id');
+      if (!targetId) {
+        return sendJSON(res, 400, { error: 'Missing target user ID' });
+      }
+
+      const history = await db.getUserBattleHistory(targetId);
+      return sendJSON(res, 200, history);
+    } catch (err) {
+      console.error('Failed to get user history for admin:', err);
+      return sendJSON(res, 500, { error: 'Failed to retrieve battle history' });
+    }
+  }
+
+  // 5k. Admin API: Update Mock User Stats
+  if (req.method === 'POST' && safePath === '/api/admin/mock/update-stats') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const body = await getRequestBody(req);
+      const { userId, statsData } = JSON.parse(body);
+
+      if (!userId || !statsData) {
+        return sendJSON(res, 400, { error: 'Missing arguments' });
+      }
+
+      const targetUser = await db.findUserById(userId);
+      if (!targetUser || !targetUser.is_mock) {
+        return sendJSON(res, 400, { error: 'Target user is not a Mock user' });
+      }
+
+      await db.updateMockUserStats(userId, statsData);
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to update mock user stats:', err);
+      return sendJSON(res, 500, { error: 'Failed to update stats' });
+    }
+  }
+
+  // 5l. Admin API: Update Mock User Cosmetics
+  if (req.method === 'POST' && safePath === '/api/admin/mock/update-cosmetics') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const body = await getRequestBody(req);
+      const { userId, cosmetics } = JSON.parse(body);
+
+      if (!userId || !cosmetics) {
+        return sendJSON(res, 400, { error: 'Missing arguments' });
+      }
+
+      const targetUser = await db.findUserById(userId);
+      if (!targetUser || !targetUser.is_mock) {
+        return sendJSON(res, 400, { error: 'Target user is not a Mock user' });
+      }
+
+      await db.updateMockUserCosmetics(userId, JSON.stringify(cosmetics));
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to update mock user cosmetics:', err);
+      return sendJSON(res, 500, { error: 'Failed to update cosmetics' });
+    }
+  }
+
+  // 5m. Admin API: Update Mock User Emblem Progress
+  if (req.method === 'POST' && safePath === '/api/admin/mock/update-emblem') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    if (currentUser.role !== 'admin') {
+      return sendJSON(res, 403, { error: 'Forbidden' });
+    }
+    try {
+      const body = await getRequestBody(req);
+      const { userId, emblemId, progress, isUnlocked } = JSON.parse(body);
+
+      if (!userId || !emblemId) {
+        return sendJSON(res, 400, { error: 'Missing arguments' });
+      }
+
+      const targetUser = await db.findUserById(userId);
+      if (!targetUser || !targetUser.is_mock) {
+        return sendJSON(res, 400, { error: 'Target user is not a Mock user' });
+      }
+
+      await db.updateMockUserEmblemProgress(userId, emblemId, progress, isUnlocked);
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to update mock user emblem progress:', err);
+      return sendJSON(res, 500, { error: 'Failed to update emblem' });
+    }
+  }
+
   // 6. History API
   if (req.method === 'GET' && safePath === '/api/history') {
     if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
@@ -700,6 +1037,7 @@ const server = http.createServer(async (req, res) => {
 // WEBSOCKET SERVER & MATCHMAKING SYSTEM
 // ==============================================================================
 const wss = new WebSocket.Server({ noServer: true });
+const ACTIVE_WS_CONNECTIONS = new Map(); // userId -> Set of ws connections
 
 const QUEUE = []; // Array of { user, deckId, ws }
 const RANKED_QUEUE = []; // Array of { user, deckId, ws, category }
@@ -1188,6 +1526,11 @@ wss.on('connection', (ws, request, session) => {
   console.log(`WS Connection established with ${session.name} (${session.id})`);
   ACTIVE_ENTRENADORES.set(session.id, Date.now());
 
+  if (!ACTIVE_WS_CONNECTIONS.has(session.id)) {
+    ACTIVE_WS_CONNECTIONS.set(session.id, new Set());
+  }
+  ACTIVE_WS_CONNECTIONS.get(session.id).add(ws);
+
   ws.on('message', (messageStr) => {
     ACTIVE_ENTRENADORES.set(session.id, Date.now());
     try {
@@ -1472,6 +1815,13 @@ wss.on('connection', (ws, request, session) => {
   ws.on('close', () => {
     console.log(`WS Connection closed for ${session.name}`);
     ACTIVE_ENTRENADORES.delete(session.id);
+
+    if (ACTIVE_WS_CONNECTIONS.has(session.id)) {
+      ACTIVE_WS_CONNECTIONS.get(session.id).delete(ws);
+      if (ACTIVE_WS_CONNECTIONS.get(session.id).size === 0) {
+        ACTIVE_WS_CONNECTIONS.delete(session.id);
+      }
+    }
 
     // Cleanup private room if creator disconnected
     const prId = ws.currentPrivateRoomId;

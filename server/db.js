@@ -116,7 +116,13 @@ async function initDB() {
       { name: 'max_win_streak_casual', def: "INT DEFAULT 0" },
       { name: 'max_win_streak_ranked', def: "INT DEFAULT 0" },
       { name: 'current_win_streak_casual', def: "INT DEFAULT 0" },
-      { name: 'current_win_streak_ranked', def: "INT DEFAULT 0" }
+      { name: 'current_win_streak_ranked', def: "INT DEFAULT 0" },
+      { name: 'role', def: "VARCHAR(20) DEFAULT 'user'" },
+      { name: 'is_mock', def: "BOOLEAN DEFAULT FALSE" },
+      { name: 'ban_expires_at', def: "DATETIME DEFAULT NULL" },
+      { name: 'ban_reason', def: "VARCHAR(255) DEFAULT NULL" },
+      { name: 'unlocked_cosmetics', def: "TEXT DEFAULT NULL" },
+      { name: 'is_deleted', def: "BOOLEAN DEFAULT FALSE" }
     ];
     for (const col of columnsToAdd) {
       const [cols] = await p.query(`SHOW COLUMNS FROM users LIKE ?`, [col.name]);
@@ -253,9 +259,29 @@ async function findUserByEmail(email) {
 async function registerOrLoginUser(id, email, name) {
   let user = await findUserById(id);
   if (!user) {
+    // Verificar si es el primer usuario en el sistema
+    const userCountRows = await query('SELECT COUNT(*) as count FROM users');
+    const isFirstUser = userCountRows[0].count === 0;
+    const role = isFirstUser ? 'admin' : 'user';
+    const isMock = id.startsWith('mock-') ? 1 : 0;
+
     // Register new user
-    await query('INSERT INTO users (id, email, name, victories, avatar) VALUES (?, ?, ?, 0, ?)', [id, email, name, 'Icons/pikachu-.webp']);
-    user = { id, email, name, victories: 0, avatar: 'Icons/pikachu-.webp' };
+    await query('INSERT INTO users (id, email, name, victories, avatar, role, is_mock) VALUES (?, ?, ?, 0, ?, ?, ?)', 
+      [id, email, name, 'Icons/pikachu-.webp', role, isMock]);
+    
+    user = { 
+      id, 
+      email, 
+      name, 
+      victories: 0, 
+      avatar: 'Icons/pikachu-.webp',
+      role,
+      is_mock: isMock,
+      ban_expires_at: null,
+      ban_reason: null,
+      unlocked_cosmetics: null,
+      is_deleted: 0
+    };
     
     // Seed starter decks
     for (let i = 0; i < STARTER_DECKS.length; i++) {
@@ -691,14 +717,23 @@ async function reset() {
         casual_won = 0,
         ranked_played = 0,
         ranked_won = 0,
-        max_damage = 0
+        max_damage = 0,
+        role = 'user',
+        is_mock = 0,
+        ban_expires_at = NULL,
+        ban_reason = NULL,
+        unlocked_cosmetics = NULL,
+        is_deleted = 0
   `);
 
   console.log('Obteniendo lista de usuarios registrados...');
-  const users = await query('SELECT id, name FROM users');
+  const users = await query('SELECT id, name FROM users ORDER BY id ASC');
   console.log(`Se encontraron ${users.length} usuarios en el sistema.`);
 
   if (users.length > 0) {
+    console.log(`Promoviendo al primer usuario (ID: ${users[0].id}) a Administrador...`);
+    await query("UPDATE users SET role = 'admin' WHERE id = ?", [users[0].id]);
+
     console.log('Sembrando mazos iniciales (STARTER_DECKS) para los usuarios existentes...');
     let seededDecksCount = 0;
     for (const user of users) {
@@ -714,6 +749,112 @@ async function reset() {
     }
     console.log(`Se han re-creado con éxito ${seededDecksCount} mazos iniciales.`);
   }
+}
+
+async function updateUserBanStatus(userId, banExpiresAt, banReason) {
+  await query('UPDATE users SET ban_expires_at = ?, ban_reason = ? WHERE id = ?', [banExpiresAt, banReason, userId]);
+}
+
+async function deleteUserFromSystem(userId) {
+  // Borrar físicamente mazos y emblemas de usuario
+  await query('DELETE FROM decks WHERE user_id = ?', [userId]);
+  await query('DELETE FROM user_emblems WHERE user_id = ?', [userId]);
+  
+  // Marcar eliminación lógica (anonimización)
+  await query(`
+    UPDATE users 
+    SET is_deleted = TRUE, 
+        name = '[Usuario Eliminado]', 
+        email = '[Eliminado]', 
+        victories = 0, 
+        ranked_category = 'Principiante',
+        ranked_level = 1,
+        consecutive_wins = 0, 
+        consecutive_losses = 0, 
+        master_ranked_wins = 0, 
+        avatar = 'Icons/pikachu-.webp', 
+        title = 'Novato', 
+        featured_emblem_1 = NULL, 
+        featured_emblem_2 = NULL, 
+        featured_emblem_3 = NULL,
+        casual_played = 0,
+        casual_won = 0,
+        ranked_played = 0,
+        ranked_won = 0,
+        max_damage = 0
+    WHERE id = ?
+  `, [userId]);
+}
+
+async function updateMockUserStats(userId, statsData) {
+  const {
+    name,
+    victories,
+    ranked_category,
+    ranked_level,
+    consecutive_wins,
+    consecutive_losses,
+    master_ranked_wins,
+    casual_played,
+    casual_won,
+    ranked_played,
+    ranked_won,
+    max_damage
+  } = statsData;
+
+  await query(`
+    UPDATE users
+    SET name = ?,
+        victories = ?,
+        ranked_category = ?,
+        ranked_level = ?,
+        consecutive_wins = ?,
+        consecutive_losses = ?,
+        master_ranked_wins = ?,
+        casual_played = ?,
+        casual_won = ?,
+        ranked_played = ?,
+        ranked_won = ?,
+        max_damage = ?
+    WHERE id = ? AND is_mock = TRUE
+  `, [
+    name,
+    victories,
+    ranked_category,
+    ranked_level,
+    consecutive_wins,
+    consecutive_losses,
+    master_ranked_wins,
+    casual_played,
+    casual_won,
+    ranked_played,
+    ranked_won,
+    max_damage,
+    userId
+  ]);
+}
+
+async function updateMockUserCosmetics(userId, cosmeticsJson) {
+  await query('UPDATE users SET unlocked_cosmetics = ? WHERE id = ? AND is_mock = TRUE', [cosmeticsJson, userId]);
+}
+
+async function updateMockUserEmblemProgress(userId, emblemId, progress, isUnlocked) {
+  const user = await findUserById(userId);
+  if (user && user.is_mock) {
+    await updateEmblemProgress(userId, emblemId, progress, isUnlocked);
+  }
+}
+
+async function getAllUsersForModeration(searchQuery) {
+  let sql = 'SELECT id, email, name, role, is_mock, ban_expires_at, ban_reason, is_deleted FROM users';
+  let params = [];
+  if (searchQuery && searchQuery.trim() !== '') {
+    sql += ' WHERE name LIKE ? OR id LIKE ? OR email LIKE ?';
+    const wild = `%${searchQuery.trim()}%`;
+    params = [wild, wild, wild];
+  }
+  sql += ' ORDER BY is_deleted ASC, role DESC, name ASC';
+  return await query(sql, params);
 }
 
 module.exports = {
@@ -740,5 +881,11 @@ module.exports = {
   getUserEmblems,
   updateEmblemProgress,
   setup,
-  reset
+  reset,
+  updateUserBanStatus,
+  deleteUserFromSystem,
+  updateMockUserStats,
+  updateMockUserCosmetics,
+  updateMockUserEmblemProgress,
+  getAllUsersForModeration
 };

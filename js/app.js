@@ -119,11 +119,13 @@ class AppController {
       queueRanked: document.getElementById('screen-queue-ranked'),
       leaderboard: document.getElementById('screen-leaderboard'),
       history: document.getElementById('screen-history'),
-      privateWaiting: document.getElementById('screen-private-waiting')
+      privateWaiting: document.getElementById('screen-private-waiting'),
+      moderation: document.getElementById('screen-moderation')
     };
   }
 
   async start() {
+    this.setupFetchInterceptor();
     console.log('[AppController] Starting application...');
     // 1. Initialize DB
     console.log('[AppController] Step 1: Initializing DB...');
@@ -313,6 +315,9 @@ class AppController {
       }
     });
     document.getElementById('btn-goto-battlefields')?.addEventListener('click', () => this.navigateTo('battlefields'));
+    document.getElementById('btn-goto-moderation')?.addEventListener('click', () => {
+      this.showModerationScreen();
+    });
 
     // Duel Vs I.A. flow
     document.getElementById('btn-play-ia')?.addEventListener('click', () => {
@@ -735,6 +740,16 @@ class AppController {
       profileWidget.style.display = 'block';
     }
 
+    // Show admin section if moderator/admin
+    const adminSection = document.getElementById('menu-admin-section');
+    if (adminSection) {
+      if (this.currentUser && (this.currentUser.role === 'admin' || this.currentUser.role === 'moderator')) {
+        adminSection.style.display = 'block';
+      } else {
+        adminSection.style.display = 'none';
+      }
+    }
+
     // Refresh decks in builder
     this.deckBuilder.loadSavedDecks();
 
@@ -776,7 +791,16 @@ class AppController {
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
 
-        const isLocked = index > 0 && normalVictories < index * 3;
+        let unlockedList = [];
+        if (this.currentUser && this.currentUser.unlocked_cosmetics) {
+          try {
+            const parsed = typeof this.currentUser.unlocked_cosmetics === 'string' 
+              ? JSON.parse(this.currentUser.unlocked_cosmetics) 
+              : this.currentUser.unlocked_cosmetics;
+            unlockedList = parsed.avatars || parsed || [];
+          } catch (e) {}
+        }
+        const isLocked = index > 0 && normalVictories < index * 3 && !unlockedList.includes('Icons/' + iconName);
         
         if (isLocked) {
           option.classList.add('locked');
@@ -1812,7 +1836,12 @@ class AppController {
           hour: '2-digit', minute: '2-digit'
         });
 
-        let opponentDetailsHtml = `<strong>${battle.opponent_name}</strong>`;
+        let opponentDetailsHtml = '';
+        if (battle.opponent_id) {
+          opponentDetailsHtml = `<strong class="opponent-profile-link" style="color: var(--color-primary); cursor: pointer; text-decoration: underline;" data-opponent-id="${battle.opponent_id}">${battle.opponent_name}</strong>`;
+        } else {
+          opponentDetailsHtml = `<strong>${battle.opponent_name}</strong>`;
+        }
         if (battle.is_ranked) {
           const oppLvlText = battle.opponent_category === 'Maestro' ? '' : ` (Nivel ${battle.opponent_level})`;
           opponentDetailsHtml += `<div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">${battle.opponent_category}${oppLvlText}</div>`;
@@ -1826,6 +1855,772 @@ class AppController {
         `;
         tbody.appendChild(row);
       });
+
+      tbody.querySelectorAll('.opponent-profile-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const oppId = e.currentTarget.getAttribute('data-opponent-id');
+          this.showPublicProfile(oppId);
+        });
+      });
+    }
+  }
+
+  setupFetchInterceptor() {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 403) {
+        const clone = response.clone();
+        try {
+          const body = await clone.json();
+          if (body && body.error === 'Banned') {
+            this.showBanBlocker(body.reason, body.expires_at);
+          }
+        } catch (e) {}
+      }
+      return response;
+    };
+  }
+
+  showBanBlocker(reason, expiresAt) {
+    localStorage.removeItem('pkmn_session_token');
+    document.getElementById('ban-blocker-screen')?.remove();
+
+    const formattedDate = expiresAt 
+      ? new Date(expiresAt).toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' }) 
+      : 'Permanente';
+
+    const blocker = document.createElement('div');
+    blocker.id = 'ban-blocker-screen';
+    blocker.className = 'ban-blocker-overlay';
+    blocker.innerHTML = `
+      <div class="ban-blocker-card">
+        <h2 class="ban-blocker-title">🚫 Cuenta Suspendida</h2>
+        <p style="font-size: 1rem; margin-bottom: 20px; color: #fff;">Tu cuenta ha sido suspendida de PokeTCG Duel Arena por violar las normas del sistema.</p>
+        <div style="background: rgba(0,0,0,0.4); border: 1.5px solid #ff453a; border-radius: 8px; padding: 15px; text-align: left; margin-bottom: 20px;">
+          <div style="margin-bottom: 8px; font-size:0.9rem;"><strong>Expiración:</strong> <span style="color: #ff9f0a; font-weight: bold;">${formattedDate}</span></div>
+          <div style="font-size:0.9rem;"><strong>Motivo:</strong> <span style="color: #ff453a; font-weight: bold;">${reason || 'Sin motivo especificado.'}</span></div>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--color-text-muted);">Si consideras que esto es un error, por favor ponte en contacto con un administrador.</p>
+      </div>
+    `;
+    document.body.appendChild(blocker);
+  }
+
+  showModerationScreen() {
+    this.navigateTo('moderation');
+    
+    // Bind search input
+    const searchInput = document.getElementById('input-mod-search');
+    if (searchInput) {
+      // Remover listeners anteriores reemplazando el nodo
+      const newSearch = searchInput.cloneNode(true);
+      searchInput.parentNode.replaceChild(newSearch, searchInput);
+      
+      newSearch.value = '';
+      newSearch.addEventListener('input', () => {
+        this.loadModerationUsers(newSearch.value);
+      });
+    }
+
+    // Limpiar panel de detalles
+    document.getElementById('mod-user-control-details').style.display = 'none';
+    document.getElementById('mod-empty-state').style.display = 'flex';
+
+    this.loadModerationUsers('');
+  }
+
+  async loadModerationUsers(query = '') {
+    const listContainer = document.getElementById('mod-users-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '<div style="text-align:center; color:var(--color-text-muted); padding:20px;">Cargando usuarios...</div>';
+
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch(`/api/admin/users?q=${encodeURIComponent(query)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load users');
+      const users = await res.json();
+
+      listContainer.innerHTML = '';
+      if (users.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; color:var(--color-text-muted); padding:20px;">No se encontraron usuarios.</div>';
+        return;
+      }
+
+      users.forEach(user => {
+        const item = document.createElement('div');
+        item.className = 'mod-user-item';
+        
+        let badgesHtml = '';
+        if (user.is_deleted) {
+          badgesHtml += '<span class="mod-badge deleted">Eliminado</span> ';
+        } else {
+          if (user.role === 'admin') badgesHtml += '<span class="mod-badge admin">Admin</span> ';
+          else if (user.role === 'moderator') badgesHtml += '<span class="mod-badge moderator">Mod</span> ';
+          else badgesHtml += '<span class="mod-badge user">User</span> ';
+
+          if (user.is_mock) badgesHtml += '<span class="mod-badge mock">Mock</span> ';
+          
+          if (user.ban_expires_at) {
+            const expires = new Date(user.ban_expires_at);
+            if (expires > new Date()) {
+              badgesHtml += '<span class="mod-badge banned">Banned</span>';
+            }
+          }
+        }
+
+        item.innerHTML = `
+          <div>
+            <strong style="color:#fff; font-size:0.9rem;">${user.name}</strong>
+            <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:2px;">${user.email || user.id}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+            ${badgesHtml}
+          </div>
+        `;
+
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.mod-user-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
+          this.selectModerationUser(user);
+        });
+
+        listContainer.appendChild(item);
+      });
+    } catch (e) {
+      console.error(e);
+      listContainer.innerHTML = '<div style="text-align:center; color:#ff453a; padding:20px;">Error al cargar la lista.</div>';
+    }
+  }
+
+  async selectModerationUser(user) {
+    this.selectedModUser = user;
+
+    // Mostrar panel y ocultar empty state
+    document.getElementById('mod-empty-state').style.display = 'none';
+    document.getElementById('mod-user-control-details').style.display = 'flex';
+
+    // Rellenar información de cabecera
+    document.getElementById('mod-detail-username').textContent = user.name;
+    document.getElementById('mod-detail-user-id').textContent = `ID: ${user.id}`;
+
+    // Badges
+    const badgeContainer = document.getElementById('mod-user-badges');
+    badgeContainer.innerHTML = '';
+    
+    if (user.is_deleted) {
+      badgeContainer.innerHTML += '<span class="mod-badge deleted">Eliminado</span>';
+    } else {
+      if (user.role === 'admin') badgeContainer.innerHTML += '<span class="mod-badge admin">Admin</span>';
+      else if (user.role === 'moderator') badgeContainer.innerHTML += '<span class="mod-badge moderator">Mod</span>';
+      else badgeContainer.innerHTML += '<span class="mod-badge user">User</span>';
+
+      if (user.is_mock) badgeContainer.innerHTML += '<span class="mod-badge mock">Mock</span>';
+      if (user.ban_expires_at && new Date(user.ban_expires_at) > new Date()) {
+        badgeContainer.innerHTML += '<span class="mod-badge banned">Banned</span>';
+      }
+    }
+
+    // Configurar pestañas
+    const tabMockBtn = document.getElementById('btn-tab-mock-editor');
+    if (user.is_mock && !user.is_deleted) {
+      tabMockBtn.style.display = 'block';
+    } else {
+      tabMockBtn.style.display = 'none';
+    }
+
+    // Vincular click de tabs
+    document.querySelectorAll('.mod-tab-btn').forEach(btn => {
+      // Re-bind click
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', (e) => {
+        const targetTab = e.currentTarget.getAttribute('data-tab');
+        document.querySelectorAll('.mod-tab-btn').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.mod-tab-pane').forEach(p => p.style.display = 'none');
+        
+        newBtn.classList.add('active');
+        const content = document.getElementById(`mod-tab-content-${targetTab}`);
+        if (content) {
+          content.style.display = 'flex';
+          content.classList.add('active');
+          if (targetTab === 'history-inspect') {
+            this.loadUserHistoryForModerator(user.id);
+          }
+        }
+      });
+    });
+
+    // Activar pestaña de Moderación por defecto
+    const firstTab = document.querySelector('.mod-tab-btn[data-tab="moderation"]');
+    if (firstTab) firstTab.click();
+
+    // Rellenar Pestaña Moderación
+    this.updateModerationTabInfo(user);
+
+    // Si es Mock, precargar la pestaña Mock Editor
+    if (user.is_mock && !user.is_deleted) {
+      this.loadMockEditorTabInfo(user);
+    }
+  }
+
+  updateModerationTabInfo(user) {
+    const infoContainer = document.getElementById('mod-ban-status-info');
+    if (!infoContainer) return;
+
+    if (user.is_deleted) {
+      infoContainer.innerHTML = '<span style="color:#95a5a6; font-weight:bold;">CUENTA ELIMINADA</span>';
+      document.getElementById('btn-apply-ban').disabled = true;
+      document.getElementById('btn-delete-user-mod').disabled = true;
+      return;
+    }
+
+    document.getElementById('btn-apply-ban').disabled = false;
+    document.getElementById('btn-delete-user-mod').disabled = false;
+
+    let isCurrentlyBanned = false;
+    if (user.ban_expires_at) {
+      const expires = new Date(user.ban_expires_at);
+      if (expires > new Date()) {
+        isCurrentlyBanned = true;
+        const formattedDate = expires.toLocaleString();
+        infoContainer.innerHTML = `
+          <div style="color:#ff453a; font-weight:bold; margin-bottom: 5px;">SUSPENDIDO (BAN ACTIVO)</div>
+          <div><strong>Expiración:</strong> ${formattedDate}</div>
+          <div style="margin-top:4px;"><strong>Motivo:</strong> ${user.ban_reason || 'Sin motivo especificado.'}</div>
+        `;
+      }
+    }
+
+    if (!isCurrentlyBanned) {
+      infoContainer.innerHTML = '<span style="color:#2ecc71; font-weight:bold;">ACTIVO / SIN RESTRICCIONES</span>';
+    }
+
+    // Configurar listener para Aplicar Ban
+    const banBtn = document.getElementById('btn-apply-ban');
+    const newBanBtn = banBtn.cloneNode(true);
+    banBtn.parentNode.replaceChild(newBanBtn, banBtn);
+
+    newBanBtn.addEventListener('click', async () => {
+      const duration = parseInt(document.getElementById('select-ban-duration').value);
+      const reason = document.getElementById('input-ban-reason').value;
+
+      try {
+        const token = localStorage.getItem('pkmn_session_token');
+        const res = await fetch('/api/admin/user/ban', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ userId: user.id, durationHours: duration, reason })
+        });
+        if (res.ok) {
+          await window.customAlert('Moderación', 'Estado de suspensión actualizado con éxito.');
+          // Recargar lista y seleccionar de nuevo
+          await this.loadModerationUsers(document.getElementById('input-mod-search')?.value || '');
+          // Obtener datos frescos del usuario
+          const uDb = await fetch(`/api/user/public-profile?id=${user.id}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+          if (uDb && uDb.profile) {
+            this.selectModerationUser(uDb.profile);
+          }
+        } else {
+          const err = await res.json();
+          window.customAlert('Error', err.error || 'No se pudo aplicar el baneo.');
+        }
+      } catch (err) {
+        console.error(err);
+        window.customAlert('Error', 'Error de red al aplicar la suspensión.');
+      }
+    });
+
+    // Configurar Zona de Peligro: Delete
+    const delBtn = document.getElementById('btn-delete-user-mod');
+    const newDelBtn = delBtn.cloneNode(true);
+    delBtn.parentNode.replaceChild(newDelBtn, delBtn);
+
+    // Solo admin puede borrar
+    if (this.currentUser && this.currentUser.role !== 'admin') {
+      newDelBtn.disabled = true;
+      newDelBtn.style.opacity = 0.5;
+      newDelBtn.title = 'Requiere privilegios de Administrador.';
+    } else {
+      newDelBtn.disabled = false;
+      newDelBtn.style.opacity = 1;
+      newDelBtn.addEventListener('click', async () => {
+        const confirm = window.confirm(`¿Estás completamente seguro de que deseas eliminar la cuenta de: ${user.name}?\nEsta acción es destructiva y limpiará sus mazos e historial.`);
+        if (!confirm) return;
+
+        try {
+          const token = localStorage.getItem('pkmn_session_token');
+          const res = await fetch(`/api/admin/user/delete?id=${user.id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            await window.customAlert('Administración', 'Usuario eliminado lógicamente con éxito.');
+            this.showModerationScreen();
+          } else {
+            const err = await res.json();
+            window.customAlert('Error', err.error || 'No se pudo eliminar al usuario.');
+          }
+        } catch (err) {
+          console.error(err);
+          window.customAlert('Error', 'Error de red al intentar eliminar la cuenta.');
+        }
+      });
+    }
+
+    // Configurar control de Rol de Usuario (Solo Admin)
+    const selectRole = document.getElementById('select-user-role');
+    const updateRoleBtn = document.getElementById('btn-update-role');
+    const rolePanel = document.getElementById('mod-role-management-panel');
+
+    if (selectRole && updateRoleBtn) {
+      selectRole.value = user.role || 'user';
+
+      if (this.currentUser && this.currentUser.role === 'admin') {
+        selectRole.disabled = false;
+        updateRoleBtn.disabled = false;
+        if (rolePanel) rolePanel.style.opacity = 1;
+
+        const newUpdateRoleBtn = updateRoleBtn.cloneNode(true);
+        updateRoleBtn.parentNode.replaceChild(newUpdateRoleBtn, updateRoleBtn);
+
+        newUpdateRoleBtn.addEventListener('click', async () => {
+          const selectedRole = selectRole.value;
+          try {
+            const token = localStorage.getItem('pkmn_session_token');
+            const res = await fetch('/api/admin/user/role', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ userId: user.id, role: selectedRole })
+            });
+
+            if (res.ok) {
+              await window.customAlert('Administración', `Rol de usuario actualizado a "${selectedRole}".`);
+              // Recargar lista y seleccionar de nuevo
+              await this.loadModerationUsers(document.getElementById('input-mod-search')?.value || '');
+              const uDb = await fetch(`/api/user/public-profile?id=${user.id}`, { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json());
+              if (uDb && uDb.profile) {
+                this.selectModerationUser(uDb.profile);
+              }
+            } else {
+              const err = await res.json();
+              window.customAlert('Error', err.error || 'No se pudo actualizar el rol.');
+            }
+          } catch (err) {
+            console.error(err);
+            window.customAlert('Error', 'Error de red al actualizar el rol.');
+          }
+        });
+      } else {
+        selectRole.disabled = true;
+        updateRoleBtn.disabled = true;
+        if (rolePanel) rolePanel.style.opacity = 0.5;
+        updateRoleBtn.title = 'Requiere privilegios de Administrador.';
+      }
+    }
+  }
+
+  async loadMockEditorTabInfo(user) {
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch(`/api/user/public-profile?id=${user.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load mock details');
+      const { profile, emblems } = await res.json();
+
+      // 1. Estadísticas
+      document.getElementById('mock-edit-name').value = profile.name;
+      document.getElementById('mock-edit-victories').value = profile.victories || 0;
+      document.getElementById('mock-edit-casual-played').value = profile.casual_played || 0;
+      document.getElementById('mock-edit-casual-won').value = profile.casual_won || 0;
+      document.getElementById('mock-edit-ranked-played').value = profile.ranked_played || 0;
+      document.getElementById('mock-edit-ranked-won').value = profile.ranked_won || 0;
+      document.getElementById('mock-edit-ranked-category').value = profile.ranked_category || 'Principiante';
+      document.getElementById('mock-edit-ranked-level').value = profile.ranked_level || 1;
+      document.getElementById('mock-edit-consecutive-wins').value = profile.consecutive_wins || 0;
+      document.getElementById('mock-edit-consecutive-losses').value = profile.consecutive_losses || 0;
+      document.getElementById('mock-edit-max-damage').value = profile.max_damage || 0;
+      document.getElementById('mock-edit-master-ranked-wins').value = profile.master_ranked_wins || 0;
+
+      // Configurar guardado de estadísticas
+      const saveStatsBtn = document.getElementById('btn-save-mock-stats');
+      const newSaveStatsBtn = saveStatsBtn.cloneNode(true);
+      saveStatsBtn.parentNode.replaceChild(newSaveStatsBtn, saveStatsBtn);
+
+      newSaveStatsBtn.addEventListener('click', async () => {
+        const statsData = {
+          name: document.getElementById('mock-edit-name').value,
+          victories: parseInt(document.getElementById('mock-edit-victories').value) || 0,
+          casual_played: parseInt(document.getElementById('mock-edit-casual-played').value) || 0,
+          casual_won: parseInt(document.getElementById('mock-edit-casual-won').value) || 0,
+          ranked_played: parseInt(document.getElementById('mock-edit-ranked-played').value) || 0,
+          ranked_won: parseInt(document.getElementById('mock-edit-ranked-won').value) || 0,
+          ranked_category: document.getElementById('mock-edit-ranked-category').value,
+          ranked_level: parseInt(document.getElementById('mock-edit-ranked-level').value) || 1,
+          consecutive_wins: parseInt(document.getElementById('mock-edit-consecutive-wins').value) || 0,
+          consecutive_losses: parseInt(document.getElementById('mock-edit-consecutive-losses').value) || 0,
+          max_damage: parseInt(document.getElementById('mock-edit-max-damage').value) || 0,
+          master_ranked_wins: parseInt(document.getElementById('mock-edit-master-ranked-wins').value) || 0
+        };
+
+        try {
+          const sRes = await fetch('/api/admin/mock/update-stats', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ userId: user.id, statsData })
+          });
+          if (sRes.ok) {
+            await window.customAlert('Mock Editor', 'Estadísticas actualizadas con éxito.');
+            this.loadModerationUsers(document.getElementById('input-mod-search')?.value || '');
+          } else {
+            const err = await sRes.json();
+            window.customAlert('Error', err.error || 'Fallo al guardar estadísticas.');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      // 2. Cosméticos
+      const iconsRes = await fetch('/api/profile/icons', { headers: { 'Authorization': `Bearer ${token}` } });
+      const icons = await iconsRes.json();
+
+      let unlockedCosmetics = [];
+      if (profile.unlocked_cosmetics) {
+        try {
+          const parsed = typeof profile.unlocked_cosmetics === 'string'
+            ? JSON.parse(profile.unlocked_cosmetics)
+            : profile.unlocked_cosmetics;
+          unlockedCosmetics = parsed.avatars || parsed || [];
+        } catch (e) {}
+      }
+
+      const checkGrid = document.getElementById('mock-cosmetics-checkboxes-grid');
+      checkGrid.innerHTML = '';
+      
+      icons.sort().forEach(icon => {
+        const iconPath = 'Icons/' + icon;
+        const checked = unlockedCosmetics.includes(iconPath) ? 'checked' : '';
+        const wrapper = document.createElement('label');
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '6px';
+        wrapper.style.color = '#fff';
+        wrapper.style.fontSize = '0.75rem';
+        wrapper.style.cursor = 'pointer';
+        wrapper.innerHTML = `
+          <input type="checkbox" class="cosmetic-chk" value="${iconPath}" ${checked}>
+          <img src="Assets/${iconPath}" style="width:24px; height:24px; object-fit:contain;">
+          <span>${icon.replace('.webp', '')}</span>
+        `;
+        checkGrid.appendChild(wrapper);
+      });
+
+      // Configurar guardado de cosméticos
+      const saveCosmBtn = document.getElementById('btn-save-mock-cosmetics');
+      const newSaveCosmBtn = saveCosmBtn.cloneNode(true);
+      saveCosmBtn.parentNode.replaceChild(newSaveCosmBtn, saveCosmBtn);
+
+      newSaveCosmBtn.addEventListener('click', async () => {
+        const checkedBoxes = checkGrid.querySelectorAll('.cosmetic-chk:checked');
+        const list = Array.from(checkedBoxes).map(chk => chk.value);
+
+        try {
+          const cRes = await fetch('/api/admin/mock/update-cosmetics', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ userId: user.id, cosmetics: list })
+          });
+          if (cRes.ok) {
+            await window.customAlert('Mock Editor', 'Cosméticos del perfil actualizados.');
+            // Actualizar local
+            if (this.currentUser && this.currentUser.id === user.id) {
+              this.currentUser.unlocked_cosmetics = list;
+            }
+          } else {
+            const err = await cRes.json();
+            window.customAlert('Error', err.error || 'Fallo al guardar cosméticos.');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      // 3. Emblemas
+      const emblemListContainer = document.getElementById('mock-emblems-editor-list');
+      emblemListContainer.innerHTML = '';
+
+      emblems.forEach(emblem => {
+        const card = document.createElement('div');
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.justifyContent = 'space-between';
+        card.style.background = 'rgba(255,255,255,0.01)';
+        card.style.border = '1px solid rgba(255,255,255,0.03)';
+        card.style.padding = '8px';
+        card.style.borderRadius = '6px';
+        card.style.gap = '15px';
+
+        const isUnl = emblem.unlocked_at !== null;
+        
+        card.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+            <img src="Assets/emblems/Jugador/${emblem.image_file}" style="width:24px; height:24px; object-fit:contain; ${isUnl ? '' : 'filter:grayscale(1); opacity:0.5;'}">
+            <div style="min-width:0; flex:1;">
+              <div style="font-size:0.75rem; font-weight:bold; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${emblem.emblem_id}</div>
+              <div style="font-size:0.6rem; color:var(--color-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${emblem.description}</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:0.65rem; color:var(--color-text-muted);">Prog:</span>
+              <input type="number" class="emblem-prog-val" value="${emblem.progress}" data-emblem="${emblem.emblem_id}" data-target="${emblem.target_value}" style="width:50px; padding:4px; font-size:0.7rem; background:rgba(0,0,0,0.4); border:1px solid var(--color-border); border-radius:4px; color:#fff; text-align:center;">
+              <span style="font-size:0.65rem; color:var(--color-text-muted);">/ ${emblem.target_value}</span>
+            </div>
+            <label style="display:flex; align-items:center; gap:3px; cursor:pointer; font-size:0.65rem; color:#fff;">
+              <input type="checkbox" class="emblem-unlocked-chk" data-emblem="${emblem.emblem_id}" ${isUnl ? 'checked' : ''}> Habilitar
+            </label>
+            <button class="btn-save-single-emblem" data-emblem="${emblem.emblem_id}" style="padding:4px 8px; font-size:0.65rem; background:var(--color-primary); color:#000; font-weight:bold; border:none; border-radius:4px; cursor:pointer;">Guardar</button>
+          </div>
+        `;
+
+        // Guardar emblema individual
+        card.querySelector('.btn-save-single-emblem').addEventListener('click', async (e) => {
+          const embId = e.currentTarget.getAttribute('data-emblem');
+          const progInput = card.querySelector('.emblem-prog-val');
+          const unlChk = card.querySelector('.emblem-unlocked-chk');
+
+          const progressVal = parseInt(progInput.value) || 0;
+          const isUnlockedVal = unlChk.checked ? 1 : 0;
+
+          try {
+            const eRes = await fetch('/api/admin/mock/update-emblem', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ userId: user.id, emblemId: embId, progress: progressVal, isUnlocked: isUnlockedVal })
+            });
+            if (eRes.ok) {
+              await window.customAlert('Mock Editor', `Emblema "${embId}" actualizado.`);
+              // Recargar este panel
+              this.loadMockEditorTabInfo(user);
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        });
+
+        emblemListContainer.appendChild(card);
+      });
+
+      // Configurar botón "Habilitar Todos" y "Bloquear Todos"
+      const unlockAllBtn = document.getElementById('btn-mock-unlock-all-emblems');
+      const newUnlockAll = unlockAllBtn.cloneNode(true);
+      unlockAllBtn.parentNode.replaceChild(newUnlockAll, unlockAllBtn);
+      
+      newUnlockAll.addEventListener('click', async () => {
+        const confirm = window.confirm('¿Habilitar los 48 emblemas como logrados al 100% de manera masiva?');
+        if (!confirm) return;
+
+        try {
+          for (const emblem of emblems) {
+            await fetch('/api/admin/mock/update-emblem', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ userId: user.id, emblemId: emblem.emblem_id, progress: emblem.target_value, isUnlocked: 1 })
+            });
+          }
+          await window.customAlert('Mock Editor', 'Todos los emblemas se han desbloqueado con éxito.');
+          this.loadMockEditorTabInfo(user);
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      const lockAllBtn = document.getElementById('btn-mock-lock-all-emblems');
+      const newLockAll = lockAllBtn.cloneNode(true);
+      lockAllBtn.parentNode.replaceChild(newLockAll, lockAllBtn);
+      
+      newLockAll.addEventListener('click', async () => {
+        const confirm = window.confirm('¿Restablecer los 48 emblemas a 0 progreso y estado bloqueado de manera masiva?');
+        if (!confirm) return;
+
+        try {
+          for (const emblem of emblems) {
+            await fetch('/api/admin/mock/update-emblem', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ userId: user.id, emblemId: emblem.emblem_id, progress: 0, isUnlocked: 0 })
+            });
+          }
+          await window.customAlert('Mock Editor', 'Todos los emblemas se han bloqueado con éxito.');
+          this.loadMockEditorTabInfo(user);
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async loadUserHistoryForModerator(userId) {
+    const tbody = document.getElementById('mod-user-history-tbody');
+    const emptyMsg = document.getElementById('mod-user-history-empty');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--color-text-muted);">Cargando combates...</td></tr>';
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch(`/api/admin/user/history?id=${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load user history');
+      const history = await res.json();
+
+      tbody.innerHTML = '';
+      if (history.length === 0) {
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        return;
+      }
+
+      history.forEach(battle => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+        
+        const outcomeClass = battle.result === 'won' ? 'won' : 'lost';
+        const outcomeText = battle.result === 'won' ? 'GANADO' : 'PERDIDO';
+        const battleType = battle.is_ranked ? '🏆 Ranked' : '⚔️ Casual';
+        
+        const date = new Date(battle.created_at).toLocaleString('es-ES', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+
+        row.innerHTML = `
+          <td style="padding: 10px; color:#fff;"><strong>${battle.opponent_name}</strong></td>
+          <td style="padding: 10px; color:var(--color-text-muted);">${battleType}</td>
+          <td style="padding: 10px;"><span class="history-outcome ${outcomeClass}" style="font-size:0.7rem; padding:2px 6px; border-radius:4px;">${outcomeText}</span></td>
+          <td style="padding: 10px; text-align: right; color: var(--color-text-muted);">${date}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (e) {
+      console.error(e);
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:#ff453a;">Error al cargar el historial.</td></tr>';
+    }
+  }
+
+  async showPublicProfile(opponentId) {
+    if (!opponentId) return;
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch(`/api/user/public-profile?id=${opponentId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch public profile');
+      const { profile, emblems } = await res.json();
+
+      document.getElementById('profile-large-avatar').src = 'Assets/' + (profile.avatar || 'Icons/pikachu-.webp');
+      document.getElementById('profile-username-tag').textContent = profile.name;
+      
+      const titleSelect = document.getElementById('profile-title-select');
+      if (titleSelect) {
+        titleSelect.innerHTML = `<option value="${profile.title}">${profile.title}</option>`;
+        titleSelect.disabled = true;
+      }
+
+      const editOverlay = document.querySelector('.avatar-edit-overlay-large');
+      if (editOverlay) editOverlay.style.display = 'none';
+      
+      const saveBtn = document.getElementById('btn-save-profile-settings');
+      if (saveBtn) saveBtn.style.display = 'none';
+
+      document.querySelectorAll('.featured-emblem-slot').forEach(slot => {
+        slot.style.pointerEvents = 'none';
+      });
+
+      const slots = document.querySelectorAll('.featured-emblem-slot');
+      const featured = [profile.featured_emblem_1, profile.featured_emblem_2, profile.featured_emblem_3];
+      slots.forEach((slot, idx) => {
+        const emblemId = featured[idx];
+        const img = slot.querySelector('.slot-emblem-img');
+        const emptyIcon = slot.querySelector('.slot-empty-icon');
+        if (emblemId) {
+          const emblemObj = emblems.find(e => e.emblem_id === emblemId);
+          if (emblemObj && emblemObj.image_file) {
+            img.src = `Assets/emblems/Jugador/${emblemObj.image_file}`;
+            img.style.display = 'block';
+            emptyIcon.style.display = 'none';
+            slot.classList.add('equipped');
+          } else {
+            img.style.display = 'none';
+            emptyIcon.style.display = 'block';
+            slot.classList.remove('equipped');
+          }
+        } else {
+          img.style.display = 'none';
+          emptyIcon.style.display = 'block';
+          slot.classList.remove('equipped');
+        }
+      });
+
+      document.getElementById('profile-stat-casual-played').textContent = profile.casual_played || 0;
+      const casualWR = profile.casual_played ? Math.round((profile.casual_won / profile.casual_played) * 100) : 0;
+      document.getElementById('profile-stat-casual-wr').innerHTML = `${casualWR}% WR<br><span style="font-size:0.65rem;color:var(--color-text-muted);">VICTORIAS: ${profile.casual_won || 0}</span>`;
+      
+      document.getElementById('profile-stat-ranked-played').textContent = profile.ranked_played || 0;
+      const rankedWR = profile.ranked_played ? Math.round((profile.ranked_won / profile.ranked_played) * 100) : 0;
+      document.getElementById('profile-stat-ranked-wr').innerHTML = `${rankedWR}% WR<br><span style="font-size:0.65rem;color:var(--color-text-muted);">VICTORIAS: ${profile.ranked_won || 0}</span>`;
+      
+      document.getElementById('profile-stat-max-damage').textContent = profile.max_damage || 0;
+      
+      const maxStreak = Math.max(profile.max_win_streak_casual || 0, profile.max_win_streak_ranked || 0);
+      document.getElementById('profile-stat-max-streak').textContent = maxStreak;
+
+      this.currentEmblemsList = emblems;
+      this.filterEmblemsGallery('all');
+
+      const closeBtn = document.getElementById('btn-close-detailed-profile');
+      const originalCloseCallback = closeBtn.onclick;
+      closeBtn.onclick = () => {
+        if (editOverlay) editOverlay.style.display = 'flex';
+        if (titleSelect) titleSelect.disabled = false;
+        if (saveBtn) saveBtn.style.display = 'block';
+        document.querySelectorAll('.featured-emblem-slot').forEach(slot => {
+          slot.style.pointerEvents = 'auto';
+        });
+        
+        closeBtn.onclick = originalCloseCallback;
+        document.getElementById('modal-detailed-profile').classList.remove('active');
+        this.hideEmblemGlobalTooltip();
+      };
+
+      document.getElementById('modal-detailed-profile').classList.add('active');
+    } catch (e) {
+      console.error(e);
+      window.customAlert('Error', 'No se pudo cargar el perfil del jugador.');
     }
   }
 

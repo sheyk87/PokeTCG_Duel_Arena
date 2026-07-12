@@ -4672,3 +4672,131 @@ button {
 #modal-emblem-picker {
   z-index: 1100 !important;
 }
+
+/* Moderation Screen Styling */
+.moderation-layout {
+  animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.mod-user-item {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mod-user-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(2px);
+}
+
+.mod-user-item.active {
+  background: rgba(59, 76, 202, 0.15);
+  border-color: var(--color-secondary);
+}
+
+.mod-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.mod-badge.admin {
+  background: rgba(255, 69, 58, 0.15);
+  border: 1px solid #ff453a;
+  color: #ff453a;
+}
+
+.mod-badge.moderator {
+  background: rgba(255, 159, 10, 0.15);
+  border: 1px solid #ff9f0a;
+  color: #ff9f0a;
+}
+
+.mod-badge.user {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
+}
+
+.mod-badge.mock {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid #2ecc71;
+  color: #2ecc71;
+}
+
+.mod-badge.banned {
+  background: rgba(231, 76, 60, 0.2);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+}
+
+.mod-badge.deleted {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #95a5a6;
+  color: #95a5a6;
+}
+
+/* Mod Tab Buttons styling */
+.mod-tab-btn {
+  transition: all 0.2s ease;
+}
+
+.mod-tab-btn:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,0.02) !important;
+}
+
+.mod-tab-btn.active {
+  color: #fff !important;
+  border-bottom-color: var(--color-primary) !important;
+}
+
+/* Ban Overlay Bloqueante */
+.ban-blocker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 11, 18, 0.98);
+  backdrop-filter: blur(15px);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+}
+
+.ban-blocker-card {
+  max-width: 500px;
+  width: 90%;
+  background: linear-gradient(135deg, rgba(20, 22, 37, 0.9) 0%, rgba(10, 11, 18, 0.95) 100%);
+  border: 1.5px solid #ff453a;
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(255, 69, 58, 0.2);
+  animation: scaleIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.ban-blocker-title {
+  color: #ff453a;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}

@@ -76,6 +76,11 @@ export class OnlineDuel extends Duel {
           this.leaveQueue();
         }
 
+        else if (type === 'FORCE_DISCONNECT') {
+          await window.customAlert('Desconexión de Seguridad', payload.reason || 'Has sido desconectado por el servidor.');
+          window.location.reload();
+        }
+
         // Salas privadas
         else if (type === 'PRIVATE_ROOM_CREATED') {
           this.currentPrivateRoomId = payload.roomId;

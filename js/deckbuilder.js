@@ -1364,7 +1364,17 @@ export class DeckBuilder {
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
 
-        const isLocked = index > 0 && normalVictories < index * 3;
+        let unlockedList = [];
+        const currUser = window.appController?.currentUser;
+        if (currUser && currUser.unlocked_cosmetics) {
+          try {
+            const parsed = typeof currUser.unlocked_cosmetics === 'string'
+              ? JSON.parse(currUser.unlocked_cosmetics)
+              : currUser.unlocked_cosmetics;
+            unlockedList = parsed.coins || parsed || [];
+          } catch (e) {}
+        }
+        const isLocked = index > 0 && normalVictories < index * 3 && !unlockedList.includes(coin.path);
         
         if (isLocked) {
           option.classList.add('locked');
@@ -1517,7 +1527,17 @@ export class DeckBuilder {
         option.style.background = 'rgba(255,255,255,0.05)';
         option.style.transition = 'all 0.2s';
         
-        const isLocked = index > 0 && normalVictories < index * 3;
+        let unlockedList = [];
+        const currUser = window.appController?.currentUser;
+        if (currUser && currUser.unlocked_cosmetics) {
+          try {
+            const parsed = typeof currUser.unlocked_cosmetics === 'string'
+              ? JSON.parse(currUser.unlocked_cosmetics)
+              : currUser.unlocked_cosmetics;
+            unlockedList = parsed.sleeves || parsed || [];
+          } catch (e) {}
+        }
+        const isLocked = index > 0 && normalVictories < index * 3 && !unlockedList.includes(sleeve.path);
         
         if (isLocked) {
           option.classList.add('locked');
