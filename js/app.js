@@ -224,6 +224,7 @@ class AppController {
     // 3. Bind navigation events
     console.log('[AppController] Step 3: Binding navigation events...');
     this.bindNavigation();
+    this.bindProfileEvents();
 
     // 4. Setup Auth Forms
     console.log('[AppController] Step 4: Setting up Auth Forms...');
@@ -566,6 +567,7 @@ class AppController {
     });
 
     document.getElementById('btn-change-avatar')?.addEventListener('click', () => {
+      this.avatarSelectorSource = 'menu';
       this.openAvatarSelector();
     });
 
@@ -792,6 +794,14 @@ class AppController {
             return;
           }
           
+          if (this.avatarSelectorSource === 'profile') {
+            this.tempSelectedAvatar = 'Icons/' + iconName;
+            const profileAvatarImg = document.getElementById('profile-large-avatar');
+            if (profileAvatarImg) profileAvatarImg.src = 'Assets/Icons/' + iconName;
+            document.getElementById('modal-avatar-selector').classList.remove('active');
+            return;
+          }
+          
           try {
             const updateRes = await fetch('/api/user/update-avatar', {
               method: 'POST',
@@ -913,6 +923,381 @@ class AppController {
       }
     } catch (err) {
       console.warn('Failed to update ranked profile UI:', err);
+    }
+  }
+
+  bindProfileEvents() {
+    document.getElementById('btn-edit-profile')?.addEventListener('click', () => {
+      this.showDetailedProfileModal();
+    });
+
+    document.getElementById('btn-close-detailed-profile')?.addEventListener('click', () => {
+      this.hideEmblemGlobalTooltip();
+      document.getElementById('modal-detailed-profile').classList.remove('active');
+    });
+
+    document.getElementById('btn-close-emblem-picker')?.addEventListener('click', () => {
+      document.getElementById('modal-emblem-picker').classList.remove('active');
+    });
+
+    document.getElementById('profile-avatar-edit-btn')?.addEventListener('click', () => {
+      this.openAvatarSelectorForProfile();
+    });
+
+    document.getElementById('btn-save-profile-settings')?.addEventListener('click', () => {
+      this.saveProfileChanges();
+    });
+
+    document.querySelectorAll('.featured-emblem-slot').forEach(slot => {
+      slot.addEventListener('click', (e) => {
+        const targetSlot = e.currentTarget.getAttribute('data-slot');
+        this.openEmblemPickerForSlot(parseInt(targetSlot));
+      });
+    });
+
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        const filterValue = e.currentTarget.getAttribute('data-filter');
+        this.filterEmblemsGallery(filterValue);
+      });
+    });
+
+    document.getElementById('btn-unequip-emblem')?.addEventListener('click', () => {
+      if (this.currentActiveSlotForPicker !== undefined) {
+        this.unequipFeaturedSlot(this.currentActiveSlotForPicker);
+        document.getElementById('modal-emblem-picker').classList.remove('active');
+      }
+    });
+  }
+
+  openAvatarSelectorForProfile() {
+    this.avatarSelectorSource = 'profile';
+    this.openAvatarSelector();
+  }
+
+  async showDetailedProfileModal() {
+    if (!this.currentUser) return;
+    
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      
+      // 1. Obtener la información del perfil del servidor
+      const resProfile = await fetch('/api/user/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!resProfile.ok) throw new Error('No se pudo obtener el perfil de usuario');
+      const profile = await resProfile.json();
+      
+      // Actualizar el estado actual con los datos frescos
+      this.currentUser = profile;
+
+      // 2. Obtener la lista de emblemas
+      const resEmblems = await fetch('/api/user/emblems', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!resEmblems.ok) throw new Error('No se pudieron obtener los emblemas del usuario');
+      const emblems = await resEmblems.json();
+      this.currentEmblemsList = emblems;
+
+      // 3. Inicializar los valores en el DOM del modal
+      document.getElementById('profile-large-avatar').src = 'Assets/' + (profile.avatar || 'Icons/pikachu-.webp');
+      this.tempSelectedAvatar = profile.avatar || 'Icons/pikachu-.webp';
+      
+      document.getElementById('profile-username-tag').textContent = `${profile.name} #${profile.id.substring(0, 4).toUpperCase()}`;
+      
+      // Inicializar el selector de títulos en base a los emblemas desbloqueados
+      const titleSelect = document.getElementById('profile-title-select');
+      titleSelect.innerHTML = '<option value="Novato">Novato</option>';
+      
+      const unlockedTitles = emblems.filter(e => e.unlocked_at !== null).map(e => e.emblem_id);
+      unlockedTitles.forEach(title => {
+        const opt = document.createElement('option');
+        opt.value = title;
+        opt.textContent = title;
+        titleSelect.appendChild(opt);
+      });
+      
+      // Si el título seleccionado ya no es válido, por defecto es Novato
+      titleSelect.value = profile.title && (profile.title === 'Novato' || unlockedTitles.includes(profile.title)) ? profile.title : 'Novato';
+
+      // 4. Inicializar slots de emblemas destacados
+      this.tempFeaturedEmblems = [
+        profile.featured_emblem_1,
+        profile.featured_emblem_2,
+        profile.featured_emblem_3
+      ];
+      this.updateFeaturedEmblemsSlotsUI();
+
+      // 5. Poblar las estadísticas
+      document.getElementById('profile-stat-casual-played').textContent = profile.casual_played || 0;
+      document.getElementById('profile-stat-casual-won').textContent = profile.casual_won || 0;
+      
+      const casualWR = profile.casual_played > 0 ? ((profile.casual_won / profile.casual_played) * 100).toFixed(1) : '0.0';
+      document.getElementById('profile-stat-casual-wr').textContent = `${casualWR}% WR`;
+
+      document.getElementById('profile-stat-ranked-played').textContent = profile.ranked_played || 0;
+      document.getElementById('profile-stat-ranked-won').textContent = profile.ranked_won || 0;
+      
+      const rankedWR = profile.ranked_played > 0 ? ((profile.ranked_won / profile.ranked_played) * 100).toFixed(1) : '0.0';
+      document.getElementById('profile-stat-ranked-wr').textContent = `${rankedWR}% WR`;
+
+      document.getElementById('profile-stat-max-damage').textContent = profile.max_damage || 0;
+      
+      const maxStreak = Math.max(profile.max_win_streak_casual || 0, profile.max_win_streak_ranked || 0);
+      document.getElementById('profile-stat-max-streak').textContent = maxStreak;
+
+      document.getElementById('profile-stat-fav-deck').textContent = profile.most_used_deck || 'Ninguno';
+
+      // 6. Poblar y filtrar la galería de emblemas
+      const unlockedCount = emblems.filter(e => e.unlocked_at !== null).length;
+      document.getElementById('unlocked-emblems-counter').textContent = unlockedCount;
+      
+      // Guardar filtro activo
+      const activeFilterBtn = document.querySelector('.filter-tab.active');
+      const activeFilter = activeFilterBtn ? activeFilterBtn.getAttribute('data-filter') : 'all';
+      this.filterEmblemsGallery(activeFilter);
+
+      // Mostrar el modal
+      document.getElementById('modal-detailed-profile').classList.add('active');
+    } catch (err) {
+      console.error(err);
+      window.customAlert('Error', 'No se pudo abrir el perfil: ' + err.message);
+    }
+  }
+
+  updateFeaturedEmblemsSlotsUI() {
+    for (let i = 1; i <= 3; i++) {
+      const slotEl = document.querySelector(`.featured-emblem-slot[data-slot="${i}"]`);
+      const plusIcon = slotEl.querySelector('.slot-empty-icon');
+      const imgEl = slotEl.querySelector('.slot-emblem-img');
+      const emblemId = this.tempFeaturedEmblems[i - 1];
+
+      if (emblemId) {
+        // Encontrar la configuración del emblema para obtener el archivo de imagen
+        const dbEmblems = this.currentEmblemsList || [];
+        const emblemObj = dbEmblems.find(e => e.emblem_id === emblemId);
+        if (emblemObj && emblemObj.image_file) {
+          imgEl.src = `Assets/emblems/Jugador/${emblemObj.image_file}`;
+          imgEl.style.display = 'block';
+          plusIcon.style.display = 'none';
+          slotEl.classList.add('equipped');
+          slotEl.title = `Destacado: ${emblemId}. Clic para cambiar.`;
+        } else {
+          imgEl.style.display = 'none';
+          plusIcon.style.display = 'block';
+          slotEl.classList.remove('equipped');
+          slotEl.title = 'Clic para destacar emblema';
+        }
+      } else {
+        imgEl.style.display = 'none';
+        plusIcon.style.display = 'block';
+        slotEl.classList.remove('equipped');
+        slotEl.title = 'Clic para destacar emblema';
+      }
+    }
+  }
+
+  openEmblemPickerForSlot(slotNum) {
+    this.currentActiveSlotForPicker = slotNum;
+    const pickerGrid = document.getElementById('picker-emblems-grid');
+    if (!pickerGrid) return;
+    
+    pickerGrid.innerHTML = '';
+    
+    // Obtener los emblemas que el usuario ya haya desbloqueado
+    const unlockedEmblems = (this.currentEmblemsList || []).filter(e => e.unlocked_at !== null);
+
+    if (unlockedEmblems.length === 0) {
+      pickerGrid.innerHTML = '<div style="grid-column: 1 / span 5; text-align: center; color: var(--color-text-muted); padding: 15px; font-size: 0.85rem;">No has desbloqueado ningún emblema aún. ¡Sigue jugando para conseguirlos!</div>';
+    } else {
+      unlockedEmblems.forEach(emblem => {
+        const card = document.createElement('div');
+        card.className = 'picker-emblem-card';
+        card.title = `${emblem.emblem_id}: ${emblem.description}`;
+        card.innerHTML = `<img src="Assets/emblems/Jugador/${emblem.image_file}" alt="${emblem.emblem_id}">`;
+        card.addEventListener('click', () => {
+          this.equipEmblemToSlot(emblem.emblem_id, slotNum);
+          document.getElementById('modal-emblem-picker').classList.remove('active');
+        });
+        pickerGrid.appendChild(card);
+      });
+    }
+
+    // Mostrar el modal picker
+    document.getElementById('modal-emblem-picker').classList.add('active');
+  }
+
+  equipEmblemToSlot(emblemId, slotNum) {
+    // Evitar que el mismo emblema sea equipado en múltiples ranuras
+    const index = this.tempFeaturedEmblems.indexOf(emblemId);
+    if (index !== -1) {
+      // Si ya estaba en otro slot, lo removemos de allí
+      this.tempFeaturedEmblems[index] = null;
+    }
+
+    this.tempFeaturedEmblems[slotNum - 1] = emblemId;
+    this.updateFeaturedEmblemsSlotsUI();
+  }
+
+  unequipFeaturedSlot(slotNum) {
+    this.tempFeaturedEmblems[slotNum - 1] = null;
+    this.updateFeaturedEmblemsSlotsUI();
+  }
+
+  filterEmblemsGallery(filter) {
+    const grid = document.getElementById('profile-emblems-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const emblems = this.currentEmblemsList || [];
+
+    // Mapear los emblemas en un formato con la bandera de desbloqueo, ordenados (obtenidos primero)
+    const processedEmblems = emblems.map(e => ({
+      ...e,
+      isUnlocked: e.unlocked_at !== null
+    }));
+
+    // Ordenar: Obtenidos primero (true antes que false)
+    processedEmblems.sort((a, b) => {
+      if (a.isUnlocked && !b.isUnlocked) return -1;
+      if (!a.isUnlocked && b.isUnlocked) return 1;
+      return a.emblem_id.localeCompare(b.emblem_id);
+    });
+
+    // Filtrar según la categoría seleccionada
+    const filtered = processedEmblems.filter(e => {
+      if (filter === 'all') return true;
+      if (filter === 'unlocked') return e.isUnlocked;
+      return e.category === filter;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div style="grid-column: 1 / span 5; text-align: center; color: var(--color-text-muted); padding: 30px; font-size: 0.9rem;">Ningún emblema coincide con el filtro seleccionado.</div>';
+      return;
+    }
+
+    filtered.forEach(emblem => {
+      const item = document.createElement('div');
+      item.className = `emblem-card-item ${emblem.isUnlocked ? 'unlocked' : 'locked'}`;
+      item.innerHTML = `<img class="emblem-card-img" src="Assets/emblems/Jugador/${emblem.image_file}" alt="${emblem.emblem_id}">`;
+
+      item.addEventListener('mouseenter', () => {
+        this.showEmblemGlobalTooltip(item, emblem);
+      });
+      item.addEventListener('mouseleave', () => {
+        this.hideEmblemGlobalTooltip();
+      });
+
+      grid.appendChild(item);
+    });
+  }
+
+  showEmblemGlobalTooltip(item, emblem) {
+    const tooltip = document.getElementById('emblem-global-tooltip');
+    if (!tooltip) return;
+
+    const statusText = emblem.isUnlocked ? 'LOGRADO' : 'BLOQUEADO';
+    const statusClass = emblem.isUnlocked ? 'unlocked' : 'locked';
+    const pct = Math.min(100, Math.floor((emblem.progress / emblem.target_value) * 100));
+
+    tooltip.innerHTML = `
+      <div class="emblem-tooltip-title">
+        <span>${emblem.emblem_id}</span>
+        <span class="emblem-tooltip-status ${statusClass}">${statusText}</span>
+      </div>
+      <div class="emblem-tooltip-desc">${emblem.description}</div>
+      <div class="emblem-tooltip-progress-container">
+        <div class="emblem-tooltip-progress-bar" style="width: ${pct}%;"></div>
+      </div>
+      <div class="emblem-tooltip-progress-text">Progreso: ${emblem.progress} / ${emblem.target_value}</div>
+    `;
+
+    tooltip.style.display = 'block';
+
+    const rect = item.getBoundingClientRect();
+    const container = document.querySelector('.profile-modal-container');
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+
+    const left = rect.left - containerRect.left + (rect.width / 2);
+    const top = rect.top - containerRect.top;
+
+    const tooltipWidth = 215;
+    const modalWidth = containerRect.width;
+    let leftOffset = left;
+    if (left - (tooltipWidth / 2) < 15) {
+      leftOffset = (tooltipWidth / 2) + 15;
+    } else if (left + (tooltipWidth / 2) > modalWidth - 15) {
+      leftOffset = modalWidth - (tooltipWidth / 2) - 15;
+    }
+
+    tooltip.style.left = `${leftOffset}px`;
+
+    // Si está muy arriba (primera o segunda fila), posicionar tooltip por debajo
+    if (top < 140) {
+      tooltip.style.top = `${rect.bottom - containerRect.top + 8}px`;
+      tooltip.style.transform = 'translateX(-50%) translateY(0)';
+    } else {
+      tooltip.style.top = `${top - 8}px`;
+      tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+    }
+  }
+
+  hideEmblemGlobalTooltip() {
+    const tooltip = document.getElementById('emblem-global-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'none';
+    }
+  }
+
+  async saveProfileChanges() {
+    const titleSelect = document.getElementById('profile-title-select');
+    const selectedTitle = titleSelect ? titleSelect.value : 'Novato';
+
+    const requestBody = {
+      avatar: this.tempSelectedAvatar,
+      title: selectedTitle,
+      featured_emblem_1: this.tempFeaturedEmblems[0] || null,
+      featured_emblem_2: this.tempFeaturedEmblems[1] || null,
+      featured_emblem_3: this.tempFeaturedEmblems[2] || null
+    };
+
+    try {
+      const token = localStorage.getItem('pkmn_session_token');
+      const res = await fetch('/api/user/profile/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (res.ok) {
+        // Actualizar datos locales
+        this.currentUser.avatar = requestBody.avatar;
+        this.currentUser.title = requestBody.title;
+        this.currentUser.featured_emblem_1 = requestBody.featured_emblem_1;
+        this.currentUser.featured_emblem_2 = requestBody.featured_emblem_2;
+        this.currentUser.featured_emblem_3 = requestBody.featured_emblem_3;
+
+        // Actualizar UI del menú lateral
+        const menuAvatar = document.getElementById('menu-user-avatar');
+        if (menuAvatar) menuAvatar.src = 'Assets/' + requestBody.avatar;
+
+        // Cerrar el modal
+        document.getElementById('modal-detailed-profile').classList.remove('active');
+        
+        await window.customAlert('Éxito', '¡Tu perfil ha sido actualizado correctamente!');
+      } else {
+        const errorData = await res.json();
+        window.customAlert('Error', 'No se pudo guardar la configuración: ' + (errorData.error || 'error desconocido'));
+      }
+    } catch (err) {
+      console.error(err);
+      window.customAlert('Error', 'Error de red al guardar el perfil: ' + err.message);
     }
   }
 

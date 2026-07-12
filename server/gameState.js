@@ -19,6 +19,82 @@ class ServerGameState {
       [p1Id]: this.initPlayerState(p1Id, p1Name, p1Deck),
       [p2Id]: this.initPlayerState(p2Id, p2Name, p2Deck)
     };
+
+    this.matchStats = {
+      [p1Id]: {
+        maxDamageDealt: 0,
+        kosThisTurn: 0,
+        maxKosInTurn: 0,
+        benchKos: 0,
+        healedDamage: 0,
+        statusEffectsApplied: 0,
+        energiesAttachedOrMovedThisTurn: 0,
+        maxEnergiesAttachedOrMovedInTurn: 0,
+        retreatsThisTurn: 0,
+        maxRetreatsInTurn: 0,
+        cardsDrawnOrSearchedThisTurn: 0,
+        maxCardsDrawnOrSearchedInTurn: 0,
+        coinHeadsStreak: 0,
+        maxCoinHeadsStreak: 0,
+        coinTailsStreak: 0,
+        maxCoinTailsStreak: 0,
+        evolutionsToStage2: 0,
+        lastAttackerCardId: null,
+        hadEpicComeback: false,
+        survivedAt10Hp: false
+      },
+      [p2Id]: {
+        maxDamageDealt: 0,
+        kosThisTurn: 0,
+        maxKosInTurn: 0,
+        benchKos: 0,
+        healedDamage: 0,
+        statusEffectsApplied: 0,
+        energiesAttachedOrMovedThisTurn: 0,
+        maxEnergiesAttachedOrMovedInTurn: 0,
+        retreatsThisTurn: 0,
+        maxRetreatsInTurn: 0,
+        cardsDrawnOrSearchedThisTurn: 0,
+        maxCardsDrawnOrSearchedInTurn: 0,
+        coinHeadsStreak: 0,
+        maxCoinHeadsStreak: 0,
+        coinTailsStreak: 0,
+        maxCoinTailsStreak: 0,
+        evolutionsToStage2: 0,
+        lastAttackerCardId: null,
+        hadEpicComeback: false,
+        survivedAt10Hp: false
+      }
+    };
+  }
+
+  getPlayerTotalDamage(player) {
+    let total = 0;
+    if (player.active) total += player.active.damage || 0;
+    player.bench.forEach(b => {
+      if (b) total += b.damage || 0;
+    });
+    return total;
+  }
+
+  recordFlips(playerId, flips) {
+    const pStats = this.matchStats[playerId];
+    if (!pStats) return;
+    flips.forEach(isHeads => {
+      if (isHeads) {
+        pStats.coinHeadsStreak++;
+        pStats.coinTailsStreak = 0;
+        if (pStats.coinHeadsStreak > pStats.maxCoinHeadsStreak) {
+          pStats.maxCoinHeadsStreak = pStats.coinHeadsStreak;
+        }
+      } else {
+        pStats.coinTailsStreak++;
+        pStats.coinHeadsStreak = 0;
+        if (pStats.coinTailsStreak > pStats.maxCoinTailsStreak) {
+          pStats.maxCoinTailsStreak = pStats.coinTailsStreak;
+        }
+      }
+    });
   }
 
   initPlayerState(playerId, name, shuffledDeck) {
@@ -123,7 +199,6 @@ class ServerGameState {
     return true;
   }
 
-  // Procesa y valida la acción recibida del cliente
   processAction(playerId, action) {
     console.log('[ServerGameState] processAction:', playerId, action);
     if (this.phase === 'game-over') {
@@ -170,32 +245,98 @@ class ServerGameState {
       }
     }
 
+    // Capturar estados antes de resolver
+    const playerDmgBefore = this.getPlayerTotalDamage(player);
+    const playerDeckBefore = player.deck.length;
+
+    let res;
     switch (actionType) {
       case 'MULLIGAN':
-        return this.handleMulligan(player, action);
+        res = this.handleMulligan(player, action);
+        break;
       case 'PLACE_ACTIVE':
-        return this.handlePlaceActive(player, action);
+        res = this.handlePlaceActive(player, action);
+        break;
       case 'PLACE_BENCH':
-        return this.handlePlaceBench(player, action);
+        res = this.handlePlaceBench(player, action);
+        break;
       case 'ATTACH_ENERGY':
-        return this.handleAttachEnergy(player, action);
+        res = this.handleAttachEnergy(player, action);
+        break;
       case 'EVOLVE':
-        return this.handleEvolve(player, action);
+        res = this.handleEvolve(player, action);
+        break;
       case 'PLAY_TRAINER':
-        return this.handlePlayTrainer(player, opponent, action);
+        res = this.handlePlayTrainer(player, opponent, action);
+        break;
       case 'ATTACK':
-        return this.handleAttack(player, opponent, action);
+        res = this.handleAttack(player, opponent, action);
+        break;
       case 'RETREAT':
-        return this.handleRetreat(player, action);
+        res = this.handleRetreat(player, action);
+        break;
       case 'PROMOTE_BENCH':
-        return this.handlePromoteBench(player, action);
+        res = this.handlePromoteBench(player, action);
+        break;
       case 'PASS_TURN':
-        return this.handlePassTurn(player, opponent);
+        res = this.handlePassTurn(player, opponent);
+        break;
       case 'SURRENDER':
-        return this.handleSurrender(player);
+        res = this.handleSurrender(player);
+        break;
       default:
-        return { valid: false, reason: `Tipo de acción no reconocido: ${actionType}` };
+        res = { valid: false, reason: `Tipo de acción no reconocido: ${actionType}` };
     }
+
+    // Si la acción fue válida, computar cambios estadísticos
+    if (res && res.valid) {
+      // 1. Curación
+      const playerDmgAfter = this.getPlayerTotalDamage(player);
+      if (playerDmgAfter < playerDmgBefore) {
+        const healed = playerDmgBefore - playerDmgAfter;
+        this.matchStats[playerId].healedDamage += healed;
+      }
+
+      // 2. Robo y búsqueda de cartas
+      const cardsDrawn = playerDeckBefore - player.deck.length;
+      if (cardsDrawn > 0) {
+        this.matchStats[playerId].cardsDrawnOrSearchedThisTurn += cardsDrawn;
+        if (this.matchStats[playerId].cardsDrawnOrSearchedThisTurn > this.matchStats[playerId].maxCardsDrawnOrSearchedInTurn) {
+          this.matchStats[playerId].maxCardsDrawnOrSearchedInTurn = this.matchStats[playerId].cardsDrawnOrSearchedThisTurn;
+        }
+      }
+
+      // 3. Energía unida (ATTACH_ENERGY)
+      if (actionType === 'ATTACH_ENERGY') {
+        this.matchStats[playerId].energiesAttachedOrMovedThisTurn += 1;
+        if (this.matchStats[playerId].energiesAttachedOrMovedThisTurn > this.matchStats[playerId].maxEnergiesAttachedOrMovedInTurn) {
+          this.matchStats[playerId].maxEnergiesAttachedOrMovedInTurn = this.matchStats[playerId].energiesAttachedOrMovedThisTurn;
+        }
+      }
+
+      // 4. Retiro (RETREAT)
+      if (actionType === 'RETREAT') {
+        this.matchStats[playerId].retreatsThisTurn += 1;
+        if (this.matchStats[playerId].retreatsThisTurn > this.matchStats[playerId].maxRetreatsInTurn) {
+          this.matchStats[playerId].maxRetreatsInTurn = this.matchStats[playerId].retreatsThisTurn;
+        }
+      }
+
+      // 5. Evolución a Fase 2 (EVOLVE)
+      if (actionType === 'EVOLVE') {
+        let evolvedPkmn = null;
+        if (action.targetZone === 'active') {
+          evolvedPkmn = player.active;
+        } else if (action.targetZone === 'bench') {
+          evolvedPkmn = player.bench[action.targetIndex];
+        }
+        if (evolvedPkmn && evolvedPkmn.card && evolvedPkmn.card.subtypes && evolvedPkmn.card.subtypes.includes('Stage 2')) {
+          this.matchStats[playerId].evolutionsToStage2 += 1;
+        }
+      }
+    }
+
+    return res;
   }
 
   // Mulligan
@@ -545,10 +686,12 @@ class ServerGameState {
     }
 
     const events = [];
+    this.matchStats[playerId].lastAttackerCardId = player.active.card.id;
 
     // Chequeo de confusión
     if (player.active.specialCondition === 'confused') {
       const isHeads = Math.random() < 0.5;
+      this.recordFlips(playerId, [isHeads]);
       events.push({
         type: 'CONFUSION_CHECK',
         playerId: player.playerId,
@@ -571,6 +714,7 @@ class ServerGameState {
     // Chequeo de precisión (Sand-Attack / Smokescreen)
     if (player.active.attackFailureCheck) {
       const isHeads = Math.random() < 0.5;
+      this.recordFlips(playerId, [isHeads]);
       events.push({
         type: 'ACCURACY_CHECK',
         playerId: player.playerId,
@@ -721,7 +865,15 @@ class ServerGameState {
         });
       } else {
         opponent.active.specialCondition = statusApplied;
+        this.matchStats[playerId].statusEffectsApplied += 1;
       }
+    }
+
+    if (coinFlips.length > 0) {
+      this.recordFlips(playerId, coinFlips);
+    }
+    if (statusCoinFlipNeeded && statusCoinFlipResult !== null) {
+      this.recordFlips(playerId, [statusCoinFlipResult]);
     }
 
     events.push({
@@ -945,6 +1097,22 @@ class ServerGameState {
     }
 
     // 2. Cambiar turno
+    const defenderPlayer = this.players[this.turnOwnerId === this.p1Id ? this.p2Id : this.p1Id];
+    if (defenderPlayer && defenderPlayer.active) {
+      const hp = parseInt(defenderPlayer.active.card.hp) || 0;
+      if (hp - defenderPlayer.active.damage <= 10 && defenderPlayer.active.damage > 0) {
+        this.matchStats[defenderPlayer.playerId].survivedAt10Hp = true;
+      }
+    }
+
+    const prevTurnOwner = this.turnOwnerId;
+    if (this.matchStats[prevTurnOwner]) {
+      this.matchStats[prevTurnOwner].retreatsThisTurn = 0;
+      this.matchStats[prevTurnOwner].energiesAttachedOrMovedThisTurn = 0;
+      this.matchStats[prevTurnOwner].cardsDrawnOrSearchedThisTurn = 0;
+      this.matchStats[prevTurnOwner].kosThisTurn = 0;
+    }
+
     this.turnOwnerId = this.turnOwnerId === this.p1Id ? this.p2Id : this.p1Id;
     this.turnNumber++;
 
@@ -1009,6 +1177,18 @@ class ServerGameState {
           index
         });
 
+        // Registrar estadísticas de KO
+        const oppStats = this.matchStats[opponent.playerId];
+        if (oppStats) {
+          oppStats.kosThisTurn += 1;
+          if (oppStats.kosThisTurn > oppStats.maxKosInTurn) {
+            oppStats.maxKosInTurn = oppStats.kosThisTurn;
+          }
+          if (zone === 'bench') {
+            oppStats.benchKos += 1;
+          }
+        }
+
         // Mover a descarte
         player.discard.push(pkmn.card);
         pkmn.attachedEnergy.forEach(e => player.discard.push(e));
@@ -1029,6 +1209,17 @@ class ServerGameState {
     for (let i = 0; i < 5; i++) {
       if (p1.bench[i]) handleKO(p1, p2, p1.bench[i], 'bench', i);
       if (p2.bench[i]) handleKO(p2, p1, p2.bench[i], 'bench', i);
+    }
+
+    // Rastrear estado para Remontada Épica
+    const p1PrizesLeft = p1.prizes.length;
+    const p2PrizesLeft = p2.prizes.length;
+    if (p1PrizesLeft === 6 && p2PrizesLeft === 1) {
+      this.matchStats[this.p2Id].hadEpicComeback = false;
+      this.matchStats[this.p1Id].hadEpicComeback = true;
+    } else if (p2PrizesLeft === 6 && p1PrizesLeft === 1) {
+      this.matchStats[this.p1Id].hadEpicComeback = false;
+      this.matchStats[this.p2Id].hadEpicComeback = true;
     }
 
     // Verificar condiciones de victoria

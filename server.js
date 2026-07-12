@@ -486,6 +486,68 @@ const server = http.createServer(async (req, res) => {
       return sendJSON(res, 500, { error: 'Failed to load ranked stats' });
     }
   }
+  // 5d. User Profile API
+  if (req.method === 'GET' && safePath === '/api/user/profile') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const profile = await db.getUserProfileData(currentUser.id);
+      return sendJSON(res, 200, profile);
+    } catch (err) {
+      console.error('Failed to load user profile:', err);
+      return sendJSON(res, 500, { error: 'Failed to load profile' });
+    }
+  }
+
+  // 5e. Update Profile API
+  if (req.method === 'POST' && safePath === '/api/user/profile/update') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const body = await getRequestBody(req);
+      const data = JSON.parse(body);
+      await db.updateUserProfile(currentUser.id, data);
+      
+      // Sincronizar el avatar en la sesión actual
+      if (data.avatar) {
+        currentUser.avatar = data.avatar;
+      }
+      return sendJSON(res, 200, { success: true });
+    } catch (err) {
+      console.error('Failed to update user profile:', err);
+      return sendJSON(res, 500, { error: 'Failed to update profile' });
+    }
+  }
+
+  // 5f. User Emblems API
+  if (req.method === 'GET' && safePath === '/api/user/emblems') {
+    if (!currentUser) return sendJSON(res, 401, { error: 'Unauthorized' });
+    try {
+      const userDbEmblems = await db.getUserEmblems(currentUser.id);
+      const userEmblemsMap = {};
+      userDbEmblems.forEach(e => {
+        userEmblemsMap[e.emblem_id] = e;
+      });
+
+      const emblemEvaluator = require('./server/emblemEvaluator');
+      
+      const fullEmblemsList = emblemEvaluator.EMBLEMS_CONFIG.map(config => {
+        const dbRecord = userEmblemsMap[config.id];
+        return {
+          emblem_id: config.id,
+          category: config.category,
+          description: config.description,
+          target_value: config.target,
+          image_file: emblemEvaluator.EMBLEM_IMAGES[config.id],
+          progress: dbRecord ? dbRecord.progress : 0,
+          unlocked_at: dbRecord ? dbRecord.unlocked_at : null
+        };
+      });
+
+      return sendJSON(res, 200, fullEmblemsList);
+    } catch (err) {
+      console.error('Failed to load user emblems:', err);
+      return sendJSON(res, 500, { error: 'Failed to load emblems' });
+    }
+  }
 
   // 6. History API
   if (req.method === 'GET' && safePath === '/api/history') {
@@ -995,6 +1057,20 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
 
   let p1RankedData = null;
   let p2RankedData = null;
+  const emblemEvaluator = require('./server/emblemEvaluator');
+
+  let p1DeckName = 'Ninguno';
+  let p2DeckName = 'Ninguno';
+  try {
+    const [deck1Rows, deck2Rows] = await Promise.all([
+      p1.deckId ? db.query('SELECT name FROM decks WHERE id = ?', [p1.deckId]) : Promise.resolve([]),
+      p2.deckId ? db.query('SELECT name FROM decks WHERE id = ?', [p2.deckId]) : Promise.resolve([])
+    ]);
+    if (deck1Rows && deck1Rows[0]) p1DeckName = deck1Rows[0].name;
+    if (deck2Rows && deck2Rows[0]) p2DeckName = deck2Rows[0].name;
+  } catch (err) {
+    console.error('Failed to get deck names for history:', err);
+  }
 
   if (match.isRanked) {
     try {
@@ -1007,12 +1083,14 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
         db.recordBattle(
           p1.user.id, p2.user.name, p1Result, duration, true,
           u1Data ? u1Data.ranked_category : 'Principiante', u1Data ? u1Data.ranked_level : 1,
-          p2.user.id, u2Data ? u2Data.ranked_category : 'Principiante', u2Data ? u2Data.ranked_level : 1
+          p2.user.id, u2Data ? u2Data.ranked_category : 'Principiante', u2Data ? u2Data.ranked_level : 1,
+          p1DeckName, !!match.isPrivate
         ),
         db.recordBattle(
           p2.user.id, p1.user.name, p2Result, duration, true,
           u2Data ? u2Data.ranked_category : 'Principiante', u2Data ? u2Data.ranked_level : 1,
-          p1.user.id, u1Data ? u1Data.ranked_category : 'Principiante', u1Data ? u1Data.ranked_level : 1
+          p1.user.id, u1Data ? u1Data.ranked_category : 'Principiante', u1Data ? u1Data.ranked_level : 1,
+          p2DeckName, !!match.isPrivate
         )
       ]);
 
@@ -1026,14 +1104,57 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
     } catch (err) {
       console.error('Failed to process ranked stats at match end:', err);
     }
-  } else if (!match.isPrivate) {
+  } else {
     try {
       await Promise.all([
-        db.recordBattle(p1.user.id, p2.user.name, p1Result, duration),
-        db.recordBattle(p2.user.id, p1.user.name, p2Result, duration)
+        db.recordBattle(p1.user.id, p2.user.name, p1Result, duration, false, null, null, p2.user.id, null, null, p1DeckName, !!match.isPrivate),
+        db.recordBattle(p2.user.id, p1.user.name, p2Result, duration, false, null, null, p1.user.id, null, null, p2DeckName, !!match.isPrivate)
       ]);
     } catch (err) {
       console.error('Failed to record battle in database:', err);
+    }
+  }
+
+  // Evaluar emblemas para ambos jugadores
+  if (match.gameState) {
+    const p1Stats = match.gameState.matchStats[p1.user.id];
+    const p2Stats = match.gameState.matchStats[p2.user.id];
+    
+    const p1State = match.gameState.players[p1.user.id];
+    const p2State = match.gameState.players[p2.user.id];
+
+    if (p1Stats && p1State) {
+      const opponentPrizesLeft = p2State ? p2State.prizes.length : 6;
+      const playerDeckSize = p1State.deck.length;
+      await emblemEvaluator.evaluateUserEmblems(
+        p1.user.id,
+        p1Stats,
+        p1State,
+        p1Result,
+        opponentPrizesLeft,
+        match.gameState.turnNumber,
+        match.gameState.gameOverReason || reason,
+        playerDeckSize,
+        !!match.isRanked,
+        !!match.isPrivate
+      );
+    }
+    
+    if (p2Stats && p2State) {
+      const opponentPrizesLeft = p1State ? p1State.prizes.length : 6;
+      const playerDeckSize = p2State.deck.length;
+      await emblemEvaluator.evaluateUserEmblems(
+        p2.user.id,
+        p2Stats,
+        p2State,
+        p2Result,
+        opponentPrizesLeft,
+        match.gameState.turnNumber,
+        match.gameState.gameOverReason || reason,
+        playerDeckSize,
+        !!match.isRanked,
+        !!match.isPrivate
+      );
     }
   }
 

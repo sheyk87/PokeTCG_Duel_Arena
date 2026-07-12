@@ -103,7 +103,20 @@ async function initDB() {
       { name: 'consecutive_wins', def: 'INT DEFAULT 0' },
       { name: 'consecutive_losses', def: 'INT DEFAULT 0' },
       { name: 'master_ranked_wins', def: 'INT DEFAULT 0' },
-      { name: 'avatar', def: "VARCHAR(255) DEFAULT 'Icons/pikachu-.webp'" }
+      { name: 'avatar', def: "VARCHAR(255) DEFAULT 'Icons/pikachu-.webp'" },
+      { name: 'featured_emblem_1', def: "VARCHAR(50) DEFAULT NULL" },
+      { name: 'featured_emblem_2', def: "VARCHAR(50) DEFAULT NULL" },
+      { name: 'featured_emblem_3', def: "VARCHAR(50) DEFAULT NULL" },
+      { name: 'title', def: "VARCHAR(255) DEFAULT 'Novato'" },
+      { name: 'casual_played', def: "INT DEFAULT 0" },
+      { name: 'casual_won', def: "INT DEFAULT 0" },
+      { name: 'ranked_played', def: "INT DEFAULT 0" },
+      { name: 'ranked_won', def: "INT DEFAULT 0" },
+      { name: 'max_damage', def: "INT DEFAULT 0" },
+      { name: 'max_win_streak_casual', def: "INT DEFAULT 0" },
+      { name: 'max_win_streak_ranked', def: "INT DEFAULT 0" },
+      { name: 'current_win_streak_casual', def: "INT DEFAULT 0" },
+      { name: 'current_win_streak_ranked', def: "INT DEFAULT 0" }
     ];
     for (const col of columnsToAdd) {
       const [cols] = await p.query(`SHOW COLUMNS FROM users LIKE ?`, [col.name]);
@@ -181,7 +194,9 @@ async function initDB() {
       { name: 'user_level', def: 'INT DEFAULT NULL' },
       { name: 'opponent_id', def: 'VARCHAR(255) DEFAULT NULL' },
       { name: 'opponent_category', def: 'VARCHAR(50) DEFAULT NULL' },
-      { name: 'opponent_level', def: 'INT DEFAULT NULL' }
+      { name: 'opponent_level', def: 'INT DEFAULT NULL' },
+      { name: 'deck_name', def: 'VARCHAR(255) DEFAULT NULL' },
+      { name: 'is_private', def: 'BOOLEAN DEFAULT FALSE' }
     ];
     for (const col of columnsToAdd) {
       const [cols] = await p.query(`SHOW COLUMNS FROM battles LIKE ?`, [col.name]);
@@ -193,6 +208,18 @@ async function initDB() {
   } catch (err) {
     console.error('Error migrating battles table:', err);
   }
+
+  // 4. Create User Emblems Table
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS user_emblems (
+      user_id VARCHAR(255) NOT NULL,
+      emblem_id VARCHAR(255) NOT NULL,
+      progress INT DEFAULT 0,
+      unlocked_at TIMESTAMP NULL DEFAULT NULL,
+      PRIMARY KEY (user_id, emblem_id),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
 
   console.log('MySQL Database and Tables initialized successfully.');
 }
@@ -274,17 +301,19 @@ async function deleteUserDeck(deckId, userId) {
   await query('DELETE FROM decks WHERE id = ? AND user_id = ? AND is_starter = FALSE', [deckId, userId]);
 }
 
-async function recordBattle(userId, opponentName, result, duration, isRanked = false, userCategory = null, userLevel = null, opponentId = null, opponentCategory = null, opponentLevel = null) {
+async function recordBattle(userId, opponentName, result, duration, isRanked = false, userCategory = null, userLevel = null, opponentId = null, opponentCategory = null, opponentLevel = null, deckName = null, isPrivate = false) {
   await query(`
     INSERT INTO battles (
       user_id, opponent_name, result, duration, 
       is_ranked, user_category, user_level, 
-      opponent_id, opponent_category, opponent_level
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      opponent_id, opponent_category, opponent_level,
+      deck_name, is_private
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     userId, opponentName, result, duration, 
     isRanked ? 1 : 0, userCategory, userLevel, 
-    opponentId, opponentCategory, opponentLevel
+    opponentId, opponentCategory, opponentLevel,
+    deckName, isPrivate ? 1 : 0
   ]);
   if (result === 'won') {
     await query('UPDATE users SET victories = victories + 1 WHERE id = ?', [userId]);
@@ -497,6 +526,196 @@ async function getRankedStatsSummary() {
   return summary;
 }
 
+async function migrateExistingUserStats(userId) {
+  const battles = await query('SELECT * FROM battles WHERE user_id = ? ORDER BY created_at ASC', [userId]);
+  
+  let casualPlayed = 0;
+  let casualWon = 0;
+  let rankedPlayed = 0;
+  let rankedWon = 0;
+  let maxWinStreakCasual = 0;
+  let maxWinStreakRanked = 0;
+  let currentStreakCasual = 0;
+  let currentStreakRanked = 0;
+
+  battles.forEach(b => {
+    const isRanked = b.is_ranked === 1 || b.is_ranked === true || b.is_ranked === '1';
+    if (isRanked) {
+      rankedPlayed++;
+      if (b.result === 'won') {
+        rankedWon++;
+        currentStreakRanked++;
+        if (currentStreakRanked > maxWinStreakRanked) {
+          maxWinStreakRanked = currentStreakRanked;
+        }
+      } else {
+        currentStreakRanked = 0;
+      }
+    } else {
+      casualPlayed++;
+      if (b.result === 'won') {
+        casualWon++;
+        currentStreakCasual++;
+        if (currentStreakCasual > maxWinStreakCasual) {
+          maxWinStreakCasual = currentStreakCasual;
+        }
+      } else {
+        currentStreakCasual = 0;
+      }
+    }
+  });
+
+  await query(`
+    UPDATE users 
+    SET casual_played = ?, casual_won = ?, ranked_played = ?, ranked_won = ?,
+        max_win_streak_casual = ?, max_win_streak_ranked = ?,
+        current_win_streak_casual = ?, current_win_streak_ranked = ?
+    WHERE id = ?
+  `, [
+    casualPlayed, casualWon, rankedPlayed, rankedWon,
+    maxWinStreakCasual, maxWinStreakRanked,
+    currentStreakCasual, currentStreakRanked,
+    userId
+  ]);
+}
+
+async function getUserProfileData(userId) {
+  const uRows = await query('SELECT * FROM users WHERE id = ?', [userId]);
+  if (!uRows[0]) return null;
+  
+  let user = uRows[0];
+  
+  if (user.casual_played === 0 && user.ranked_played === 0) {
+    const bCount = await query('SELECT COUNT(*) as count FROM battles WHERE user_id = ?', [userId]);
+    if (bCount[0] && bCount[0].count > 0) {
+      await migrateExistingUserStats(userId);
+      const updatedRows = await query('SELECT * FROM users WHERE id = ?', [userId]);
+      user = updatedRows[0] || user;
+    }
+  }
+
+  const deckRows = await query(`
+    SELECT deck_name, COUNT(*) as count 
+    FROM battles 
+    WHERE user_id = ? AND deck_name IS NOT NULL AND deck_name != ''
+    GROUP BY deck_name 
+    ORDER BY count DESC 
+    LIMIT 1
+  `, [userId]);
+  
+  user.most_used_deck = deckRows[0] ? deckRows[0].deck_name : 'Ninguno';
+  return user;
+}
+
+async function updateUserProfile(userId, data) {
+  const { avatar, title, featured_emblem_1, featured_emblem_2, featured_emblem_3 } = data;
+  await query(`
+    UPDATE users 
+    SET avatar = COALESCE(?, avatar),
+        title = COALESCE(?, title),
+        featured_emblem_1 = ?,
+        featured_emblem_2 = ?,
+        featured_emblem_3 = ?
+    WHERE id = ?
+  `, [avatar, title, featured_emblem_1, featured_emblem_2, featured_emblem_3, userId]);
+}
+
+async function getUserEmblems(userId) {
+  return await query('SELECT * FROM user_emblems WHERE user_id = ?', [userId]);
+}
+
+async function updateEmblemProgress(userId, emblemId, progress, isUnlocked) {
+  const rows = await query('SELECT * FROM user_emblems WHERE user_id = ? AND emblem_id = ?', [userId, emblemId]);
+  
+  const unlockedAt = isUnlocked ? new Date() : null;
+
+  if (rows.length === 0) {
+    await query(`
+      INSERT INTO user_emblems (user_id, emblem_id, progress, unlocked_at)
+      VALUES (?, ?, ?, ?)
+    `, [userId, emblemId, progress, unlockedAt]);
+  } else {
+    const existing = rows[0];
+    const newUnlockedAt = existing.unlocked_at ? existing.unlocked_at : unlockedAt;
+    await query(`
+      UPDATE user_emblems
+      SET progress = ?, unlocked_at = ?
+      WHERE user_id = ? AND emblem_id = ?
+    `, [progress, newUnlockedAt, userId, emblemId]);
+  }
+}
+
+async function setup() {
+  const mysql = require('mysql2/promise');
+  console.log(`Conectando al servidor MySQL en ${config.host} para reiniciar la base de datos...`);
+  const tempConn = await mysql.createConnection({
+    host: config.host,
+    user: config.user,
+    password: config.password
+  });
+  console.log(`Eliminando base de datos si existe: \`${config.database}\`...`);
+  await tempConn.query(`DROP DATABASE IF EXISTS \`${config.database}\``);
+  await tempConn.end();
+  
+  console.log('Creando la base de datos y las tablas de nuevo...');
+  await initDB();
+}
+
+async function reset() {
+  await initDB();
+
+  console.log('Eliminando el historial de combates (battles)...');
+  await query('DELETE FROM battles');
+
+  console.log('Eliminando todos los decks (mazos) de la base de datos...');
+  await query('DELETE FROM decks');
+
+  console.log('Eliminando el progreso de los emblemas (user_emblems)...');
+  await query('DELETE FROM user_emblems');
+
+  console.log('Restableciendo victorias, estadísticas de perfil y competitivas de todos los usuarios...');
+  await query(`
+    UPDATE users 
+    SET victories = 0, 
+        avatar = 'Icons/pikachu-.webp', 
+        ranked_category = 'Principiante', 
+        ranked_level = 1, 
+        consecutive_wins = 0, 
+        consecutive_losses = 0, 
+        master_ranked_wins = 0,
+        title = 'Novato',
+        featured_emblem_1 = NULL,
+        featured_emblem_2 = NULL,
+        featured_emblem_3 = NULL,
+        casual_played = 0,
+        casual_won = 0,
+        ranked_played = 0,
+        ranked_won = 0,
+        max_damage = 0
+  `);
+
+  console.log('Obteniendo lista de usuarios registrados...');
+  const users = await query('SELECT id, name FROM users');
+  console.log(`Se encontraron ${users.length} usuarios en el sistema.`);
+
+  if (users.length > 0) {
+    console.log('Sembrando mazos iniciales (STARTER_DECKS) para los usuarios existentes...');
+    let seededDecksCount = 0;
+    for (const user of users) {
+      for (let i = 0; i < STARTER_DECKS.length; i++) {
+        const deck = STARTER_DECKS[i];
+        const deckId = `starter-${user.id}-${i + 1}`;
+        await query(
+          'INSERT INTO decks (id, user_id, name, cards, is_starter, box_image, coin_front, coin_back, card_back) VALUES (?, ?, ?, ?, TRUE, ?, ?, ?, ?)',
+          [deckId, user.id, deck.name, JSON.stringify(deck.cards), 'Decks/pokeball.png', 'Coins/show(62).png', 'Coins/coin-back.png', 'pokemon_card_backside.png']
+        );
+        seededDecksCount++;
+      }
+    }
+    console.log(`Se han re-creado con éxito ${seededDecksCount} mazos iniciales.`);
+  }
+}
+
 module.exports = {
   config,
   STARTER_DECKS,
@@ -514,5 +733,12 @@ module.exports = {
   getUserLeaderboardPosition,
   updateRankedStats,
   getRankedLeaderboard,
-  getRankedStatsSummary
+  getRankedStatsSummary,
+  migrateExistingUserStats,
+  getUserProfileData,
+  updateUserProfile,
+  getUserEmblems,
+  updateEmblemProgress,
+  setup,
+  reset
 };

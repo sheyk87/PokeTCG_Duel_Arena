@@ -4176,3 +4176,499 @@ button {
 #modal-confirm {
   z-index: 10000;
 }
+
+/* ==========================================================================
+   DETAILED USER PROFILE & EMBLEMS SYSTEM (PREMIUM AESTHETICS)
+   ========================================================================== */
+.profile-modal-container {
+  max-width: 950px;
+  width: 95vw;
+  background: linear-gradient(135deg, rgba(15, 17, 28, 0.95) 0%, rgba(26, 29, 50, 0.97) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 24px !important;
+  border-radius: 16px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header profile styling */
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px;
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar-container-large {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  border: 3px solid var(--color-primary);
+  box-shadow: 0 0 15px rgba(59, 76, 202, 0.3);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.profile-avatar-container-large:hover {
+  transform: scale(1.05);
+  border-color: #ffcb05;
+}
+
+.profile-avatar-container-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.avatar-edit-overlay-large {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.profile-avatar-container-large:hover .avatar-edit-overlay-large {
+  opacity: 1;
+}
+
+.profile-user-details {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-display-name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.profile-title-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-title-selector-wrapper label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.profile-title-dropdown {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.profile-title-dropdown:focus {
+  border-color: var(--color-primary);
+}
+
+/* Featured Emblems slots styling */
+.profile-featured-emblems-box {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 18px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 260px;
+}
+
+.featured-emblems-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.featured-emblems-slots {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.featured-emblem-slot {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.featured-emblem-slot:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.featured-emblem-slot.equipped {
+  border-style: solid;
+  border-color: var(--color-secondary);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 10px rgba(59, 76, 202, 0.2);
+}
+
+.slot-empty-icon {
+  font-size: 1.2rem;
+  color: var(--color-text-muted);
+}
+
+.slot-emblem-img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+}
+
+/* Profile Body Layout styling */
+.profile-body-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  height: 480px;
+}
+
+@media (max-width: 850px) {
+  .profile-body-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+/* Left panel: Stats */
+.profile-stats-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.panel-section-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: #fff;
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  font-weight: 700;
+}
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.profile-stat-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.profile-stat-card.full-width {
+  grid-column: 1 / span 2;
+}
+
+.profile-stat-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.profile-stat-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profile-stat-val {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-stat-lbl {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Right panel: Emblems Gallery */
+.profile-emblems-panel {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.emblems-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.emblems-filter-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-tab {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-tab:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.filter-tab.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #d4a900 100%);
+  border-color: var(--color-primary);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255, 203, 5, 0.3);
+}
+
+.emblems-scroll-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 10px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 5px;
+}
+
+.emblem-card-item {
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: default;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.emblem-card-item.unlocked {
+  border-color: rgba(255, 203, 5, 0.2);
+  background: radial-gradient(circle, rgba(255, 203, 5, 0.05) 0%, rgba(0,0,0,0.4) 100%);
+}
+
+.emblem-card-item.unlocked:hover {
+  transform: scale(1.06);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px rgba(255, 203, 5, 0.25);
+  background: radial-gradient(circle, rgba(255, 203, 5, 0.12) 0%, rgba(0,0,0,0.5) 100%);
+}
+
+.emblem-card-item.locked {
+  filter: grayscale(100%) opacity(0.35);
+}
+
+.emblem-card-item.locked:hover {
+  filter: grayscale(100%) opacity(0.6);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.emblem-card-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+/* Custom Emblem Tooltip styling */
+.emblem-tooltip {
+  background: rgba(10, 12, 22, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 215px;
+  color: #fff;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.emblem-tooltip-title {
+  font-weight: 800;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emblem-tooltip-status {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.emblem-tooltip-status.unlocked {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+}
+
+.emblem-tooltip-status.locked {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-muted);
+}
+
+.emblem-tooltip-desc {
+  margin-bottom: 6px;
+  color: #ddd;
+}
+
+.emblem-tooltip-progress-container {
+  background: rgba(255, 255, 255, 0.1);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  margin-top: 4px;
+}
+
+.emblem-tooltip-progress-bar {
+  background: linear-gradient(90deg, #ffcb05 0%, #ff8800 100%);
+  height: 100%;
+  border-radius: 3px;
+}
+
+.emblem-tooltip-progress-text {
+  text-align: right;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-top: 3px;
+}
+
+/* Emblem Picker Modal Layout styling */
+.emblem-picker-container {
+  max-width: 500px;
+}
+
+.picker-emblems-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 10px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.picker-emblem-card {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1.5px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 6px;
+}
+
+.picker-emblem-card:hover {
+  background: rgba(59, 76, 202, 0.15);
+  border-color: var(--color-secondary);
+  transform: translateY(-2px);
+}
+
+.picker-emblem-card img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+/* Modals z-index hierarchy */
+#modal-detailed-profile {
+  z-index: 1000;
+}
+#modal-avatar-selector,
+#modal-emblem-picker {
+  z-index: 1100 !important;
+}
