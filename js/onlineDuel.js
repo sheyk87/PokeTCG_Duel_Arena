@@ -606,7 +606,7 @@ export class OnlineDuel extends Duel {
 
     const passBtn = document.getElementById('btn-pass-turn');
     if (passBtn) {
-      passBtn.disabled = false; // Siempre habilitado
+      passBtn.disabled = (this.turnOwner !== 'player' || this.phase !== 'active');
     }
 
     this.updateBoardUI();
@@ -623,6 +623,11 @@ export class OnlineDuel extends Duel {
 
   updateBoardUI() {
     super.updateBoardUI();
+
+    const passBtn = document.getElementById('btn-pass-turn');
+    if (passBtn) {
+      passBtn.disabled = (this.turnOwner !== 'player' || this.phase !== 'active');
+    }
 
     // Actualizar fase del juego y contador de turnos en la barra superior
     const phaseTextEl = document.getElementById('game-phase-text');
@@ -1521,15 +1526,32 @@ export class OnlineDuel extends Duel {
 
         if (type === 'STATE_UPDATE') {
           const { events, stateSnapshot } = payload;
-          for (const event of events) {
-            await this.handleStateUpdateEvent(event);
+          if (Array.isArray(events)) {
+            for (const event of events) {
+              try {
+                await this.handleStateUpdateEvent(event);
+              } catch (evErr) {
+                console.error('Error handling state update event:', event, evErr);
+              }
+            }
           }
           if (stateSnapshot) {
-            this.syncStateWithSnapshot(stateSnapshot);
+            try {
+              this.syncStateWithSnapshot(stateSnapshot);
+            } catch (snapErr) {
+              console.error('Error syncing state with snapshot:', snapErr);
+            }
           }
         } else if (type === 'ACTION_REJECTED') {
-          const { reason } = payload;
+          const { reason, stateSnapshot } = payload;
           this.showWarning(`Acción rechazada por el servidor: ${reason}`);
+          if (stateSnapshot) {
+            try {
+              this.syncStateWithSnapshot(stateSnapshot);
+            } catch (snapErr) {
+              console.error('Error syncing state with snapshot on action rejection:', snapErr);
+            }
+          }
           this.updateBoardUI();
         }
       }

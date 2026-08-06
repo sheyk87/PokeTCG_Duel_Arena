@@ -1525,6 +1525,13 @@ async function resolveMatchEnd(matchId, winnerId, reason, duration) {
 wss.on('connection', (ws, request, session) => {
   console.log(`WS Connection established with ${session.name} (${session.id})`);
   ACTIVE_ENTRENADORES.set(session.id, Date.now());
+  ws.isAlive = true;
+  ws.messageCount = 0;
+  ws.lastRateReset = Date.now();
+
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
 
   if (!ACTIVE_WS_CONNECTIONS.has(session.id)) {
     ACTIVE_WS_CONNECTIONS.set(session.id, new Set());
@@ -1533,12 +1540,26 @@ wss.on('connection', (ws, request, session) => {
 
   ws.on('message', (messageStr) => {
     ACTIVE_ENTRENADORES.set(session.id, Date.now());
+
+    // Rate limiting: máx 25 mensajes por segundo por conexión
+    const now = Date.now();
+    if (now - ws.lastRateReset > 1000) {
+      ws.messageCount = 0;
+      ws.lastRateReset = now;
+    }
+    ws.messageCount++;
+    if (ws.messageCount > 25) {
+      return;
+    }
+
     try {
       const msg = JSON.parse(messageStr);
+      if (!msg || typeof msg !== 'object') return;
       const { type, payload } = msg;
+      const safePayload = (payload && typeof payload === 'object') ? payload : {};
 
       if (type === 'JOIN_QUEUE') {
-        const { deckId } = payload;
+        const { deckId } = safePayload;
         // Verify deck belongs to user
         db.query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, session.id])
           .then(rows => {
@@ -1558,7 +1579,7 @@ wss.on('connection', (ws, request, session) => {
       }
 
       else if (type === 'JOIN_RANKED_QUEUE') {
-        const { deckId } = payload;
+        const { deckId } = safePayload;
         db.query('SELECT id FROM decks WHERE id = ? AND user_id = ?', [deckId, session.id])
           .then(rows => {
             if (rows.length === 0) {
@@ -1602,13 +1623,13 @@ wss.on('connection', (ws, request, session) => {
         if (matchId) {
           const match = MATCHES.get(matchId);
           if (match) {
-            const { text } = payload;
+            const { text } = safePayload;
             const chatMsg = JSON.stringify({
               type: 'CHAT_MESSAGE',
               payload: {
                 senderId: session.id,
                 senderName: session.name,
-                text: text
+                text: String(text || '').slice(0, 300)
               }
             });
             if (match.player1.ws.readyState === WebSocket.OPEN) match.player1.ws.send(chatMsg);
@@ -1622,11 +1643,15 @@ wss.on('connection', (ws, request, session) => {
         if (matchId) {
           const match = MATCHES.get(matchId);
           if (match && match.gameState) {
-            const result = match.gameState.processAction(session.id, payload);
+            const result = match.gameState.processAction(session.id, safePayload);
             if (!result.valid) {
               ws.send(JSON.stringify({
                 type: 'ACTION_REJECTED',
-                payload: { reason: result.reason, action: payload }
+                payload: {
+                  reason: result.reason,
+                  action: safePayload,
+                  stateSnapshot: match.gameState.getSnapshot()
+                }
               }));
             } else {
               // Send STATE_UPDATE to both players
@@ -1651,8 +1676,6 @@ wss.on('connection', (ws, request, session) => {
       }
 
       else if (type === 'GAME_OVER') {
-        // Ignored or handled via explicit SURRENDER action.
-        // For backwards compatibility / fallback if a client sends direct forfeit:
         const matchId = ws.currentMatchId;
         if (matchId) {
           const match = MATCHES.get(matchId);
@@ -1857,6 +1880,50 @@ wss.on('connection', (ws, request, session) => {
     }
   });
 });
+
+// Periodic Heartbeat (Ping/Pong) & AFK Turn Timeout Check
+const wsHeartbeatInterval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) {
+      console.log('Terminating dead WS connection');
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping();
+  });
+
+  // AFK check for active matches
+  const now = Date.now();
+  MATCHES.forEach((match, matchId) => {
+    if (match.gameState && match.gameState.phase !== 'game-over') {
+      const turnOwnerId = match.gameState.turnOwnerId;
+      const turnOwnerWs = match.player1.user.id === turnOwnerId ? match.player1.ws : match.player2.ws;
+      
+      // Si el dueño del turno no está activo o la partida lleva más de 140s sin acciones
+      const lastAction = match.gameState.lastActionTime || match.startTime;
+      if (now - lastAction > 140000) {
+        console.log(`AFK turn timeout in match ${matchId} for player ${turnOwnerId}. Forcing turn pass.`);
+        const result = match.gameState.processAction(turnOwnerId, { actionType: 'MANUAL_PASS_TURN' });
+        if (result && result.valid) {
+          const updateMsg = JSON.stringify({
+            type: 'STATE_UPDATE',
+            payload: {
+              events: result.events,
+              stateSnapshot: match.gameState.getSnapshot()
+            }
+          });
+          if (match.player1.ws.readyState === WebSocket.OPEN) match.player1.ws.send(updateMsg);
+          if (match.player2.ws.readyState === WebSocket.OPEN) match.player2.ws.send(updateMsg);
+        } else {
+          // Si no se pudo pasar turno, otorgar la victoria al rival por abandono AFK
+          const winnerId = turnOwnerId === match.player1.user.id ? match.player2.user.id : match.player1.user.id;
+          const duration = Math.round((now - match.startTime) / 1000);
+          resolveMatchEnd(matchId, winnerId, 'Inactividad (AFK Timeout).', duration);
+        }
+      }
+    }
+  });
+}, 15000);
 
 // Upgrade HTTP Server to handle WebSockets on '/ws'
 server.on('upgrade', (request, socket, head) => {

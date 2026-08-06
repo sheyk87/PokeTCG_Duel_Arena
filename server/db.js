@@ -10,28 +10,36 @@ const config = {
 
 let pool;
 
-async function getPool() {
+async function getPool(retries = 15, delayMs = 3000) {
   if (pool) return pool;
 
-  // First connect without database to ensure it exists
-  const connection = await mysql.createConnection({
-    host: config.host,
-    user: config.user,
-    password: config.password
-  });
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      // First connect without database to ensure it exists
+      const connection = await mysql.createConnection({
+        host: config.host,
+        user: config.user,
+        password: config.password
+      });
 
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
-  await connection.end();
+      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${config.database}\``);
+      await connection.end();
 
-  // Create connection pool with database
-  pool = mysql.createPool({
-    ...config,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  });
+      // Create connection pool with database
+      pool = mysql.createPool({
+        ...config,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+      });
 
-  return pool;
+      return pool;
+    } catch (err) {
+      console.warn(`[Database] Intentando conectar a la base de datos (${attempt}/${retries})... Error: ${err.message}`);
+      if (attempt === retries) throw err;
+      await new Promise(res => setTimeout(res, delayMs));
+    }
+  }
 }
 
 // Starter decks definition

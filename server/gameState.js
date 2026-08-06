@@ -209,10 +209,18 @@ class ServerGameState {
     const player = this.getPlayerState(playerId);
     const opponent = this.getOpponentState(playerId);
 
+    // Permitir rendirse de forma universal en cualquier fase (setup, active, must-promote)
+    if (actionType === 'SURRENDER') {
+      return this.handleSurrender(player);
+    }
+
     if (actionType && actionType.startsWith('MANUAL_')) {
       if (actionType === 'MANUAL_PASS_TURN') {
         if (this.turnOwnerId !== playerId) {
           return { valid: false, reason: 'No es tu turno.' };
+        }
+        if (this.phase !== 'active') {
+          return { valid: false, reason: 'No puedes pasar turno durante la fase de preparación o promoción.' };
         }
       }
       return this.handleManualAction(player, opponent, action);
@@ -220,8 +228,8 @@ class ServerGameState {
 
     // Validar fase de setup obligatorio
     if (this.phase === 'setup') {
-      if (actionType !== 'PLACE_ACTIVE' && actionType !== 'PLACE_BENCH' && actionType !== 'MULLIGAN' && actionType !== 'SURRENDER') {
-        return { valid: false, reason: 'Solo se permiten acciones de configuración (PLACE_ACTIVE, PLACE_BENCH, MULLIGAN, SURRENDER) durante la fase de preparación. Acción recibida: ' + actionType };
+      if (actionType !== 'PLACE_ACTIVE' && actionType !== 'PLACE_BENCH' && actionType !== 'MULLIGAN') {
+        return { valid: false, reason: 'Solo se permiten acciones de configuración (PLACE_ACTIVE, PLACE_BENCH, MULLIGAN) durante la fase de preparación. Acción recibida: ' + actionType };
       }
     }
 
@@ -239,9 +247,7 @@ class ServerGameState {
     // Para acciones normales del turno, debe ser el turno del jugador
     if (this.phase === 'active') {
       if (this.turnOwnerId !== playerId) {
-        if (actionType !== 'SURRENDER') {
-          return { valid: false, reason: 'No es tu turno.' };
-        }
+        return { valid: false, reason: 'No es tu turno.' };
       }
     }
 
@@ -1470,6 +1476,10 @@ class ServerGameState {
               this.phase = 'active';
             } else if (this.phase === 'must-promote-p2' && targetState.playerId === this.p2Id) {
               this.phase = 'active';
+            }
+            if (this.pendingTurnEnd && this.phase === 'active') {
+              this.pendingTurnEnd = false;
+              this.endTurn(events);
             }
           } else if (targetZone === 'trainer') {
             const oldTrainer = targetState.activeTrainer;

@@ -14,7 +14,8 @@ services:
       # Docker poblará este volumen con las imágenes iniciales y el positions.json en el primer arranque.
       - battlefield_data:/app/Assets/Battlefields
     depends_on:
-      - db-poke
+      db-poke:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
