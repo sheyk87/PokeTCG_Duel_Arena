@@ -13,6 +13,8 @@ class ServerGameState {
     this.winnerId = null;
     this.gameOverReason = '';
     this.startTime = Date.now();
+    this.turnStartTime = Date.now();
+    this.lastActionTime = Date.now();
     this.pendingTurnEnd = false;
 
     this.players = {
@@ -205,6 +207,7 @@ class ServerGameState {
       return { valid: false, reason: 'La partida ya ha finalizado.' };
     }
 
+    this.lastActionTime = Date.now();
     const { actionType } = action;
     const player = this.getPlayerState(playerId);
     const opponent = this.getOpponentState(playerId);
@@ -425,6 +428,8 @@ class ServerGameState {
     const opponent = this.getOpponentState(player.playerId);
     if (player.active && opponent.active) {
       this.phase = 'active';
+      this.turnStartTime = Date.now();
+      this.lastActionTime = Date.now();
       events.push({
         type: 'SETUP_COMPLETE',
         turnOwnerId: this.turnOwnerId
@@ -1121,6 +1126,8 @@ class ServerGameState {
 
     this.turnOwnerId = this.turnOwnerId === this.p1Id ? this.p2Id : this.p1Id;
     this.turnNumber++;
+    this.turnStartTime = Date.now();
+    this.lastActionTime = Date.now();
 
     // Resetear restricciones del turno para el nuevo jugador
     const nextPlayer = this.players[this.turnOwnerId];

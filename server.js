@@ -1899,9 +1899,9 @@ const wsHeartbeatInterval = setInterval(() => {
       const turnOwnerId = match.gameState.turnOwnerId;
       const turnOwnerWs = match.player1.user.id === turnOwnerId ? match.player1.ws : match.player2.ws;
       
-      // Si el dueño del turno no está activo o la partida lleva más de 140s sin acciones
-      const lastAction = match.gameState.lastActionTime || match.startTime;
-      if (now - lastAction > 140000) {
+      // Si el turno actual en fase activa lleva más de 130s (2 min + 10s de margen de red)
+      const turnStart = match.gameState.turnStartTime || match.startTime;
+      if (match.gameState.phase === 'active' && now - turnStart > 130000) {
         console.log(`AFK turn timeout in match ${matchId} for player ${turnOwnerId}. Forcing turn pass.`);
         const result = match.gameState.processAction(turnOwnerId, { actionType: 'MANUAL_PASS_TURN' });
         if (result && result.valid) {
